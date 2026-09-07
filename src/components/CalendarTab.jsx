@@ -108,15 +108,15 @@ export default function CalendarTab({ transactions, onOpenQuickAdd }) {
             </div>
           </div>
           <div style={{ borderLeft: '1px solid var(--border-subtle)', borderRight: '1px solid var(--border-subtle)' }}>
-            <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginBottom: '2px' }}>총 지출</div>
+            <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginBottom: '2px' }}>총 소비</div>
             <div style={{ fontSize: '12px', fontWeight: 700, color: '#F87171' }}>
               -{(monthTotalExpense / 10000).toFixed(1)}만
             </div>
           </div>
           <div>
-            <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginBottom: '2px' }}>무지출 성공</div>
+            <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginBottom: '2px' }}>절약몬 소환 (무지출)</div>
             <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--gold)' }}>
-              ⭐ {noSpendDaysCount}일째
+              🛡️ {noSpendDaysCount}일째
             </div>
           </div>
         </div>
@@ -270,9 +270,9 @@ export default function CalendarTab({ transactions, onOpenQuickAdd }) {
             fontSize: '12px'
           }}>
             <Sparkles size={22} color="var(--gold)" style={{ margin: '0 auto 6px auto' }} />
-            <div>이 날은 지출이 없는 무지출 데이입니다!</div>
-            <div style={{ fontSize: '11px', marginTop: '2px', color: 'var(--text-muted)' }}>
-              불필요한 소비를 막아 예산 체력을 지켜냈어요 🛡️
+            <div>이 날은 소비가 없는 무지출 데이입니다!</div>
+            <div style={{ fontSize: '11px', marginTop: '2px', color: '#34D399', fontWeight: 600 }}>
+              수호 몬스터 [절약몬]이 출현하여 예산 체력을 지켜냈어요 🛡️
             </div>
           </div>
         ) : (

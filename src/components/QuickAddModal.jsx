@@ -83,7 +83,7 @@ export default function QuickAddModal({ isOpen, onClose, onSave, defaultDate }) 
         {/* 모달 상단 헤더 */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px' }}>
           <h3 style={{ fontSize: '16px', fontWeight: 800, color: 'var(--text-main)' }}>
-            직접 내역 기록하기
+            ⚡ 소비 & 수입 직접 기록
           </h3>
           <button 
             onClick={onClose}
@@ -93,7 +93,7 @@ export default function QuickAddModal({ isOpen, onClose, onSave, defaultDate }) 
           </button>
         </div>
 
-        {/* 1. 수입 / 지출 / 이체 3단 탭 */}
+        {/* 1. 수입 / 소비 / 저축 3단 탭 */}
         <div style={{
           display: 'flex',
           gap: '4px',
@@ -117,7 +117,7 @@ export default function QuickAddModal({ isOpen, onClose, onSave, defaultDate }) 
               color: type === 'expense' ? '#fff' : 'var(--text-muted)'
             }}
           >
-            지출 (-)
+            소비 (-)
           </button>
           <button
             type="button"
@@ -151,7 +151,7 @@ export default function QuickAddModal({ isOpen, onClose, onSave, defaultDate }) 
               color: type === 'transfer' ? '#fff' : 'var(--text-muted)'
             }}
           >
-            저축/이체 (⇄)
+            성장/저축 (⇄)
           </button>
         </div>
 
@@ -257,7 +257,7 @@ export default function QuickAddModal({ isOpen, onClose, onSave, defaultDate }) 
           {/* 카테고리 선택 알약 칩 */}
           <div>
             <label style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>
-              카테고리
+              소비 속성 (카테고리)
             </label>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
               {categories.map((cat) => (
@@ -312,7 +312,7 @@ export default function QuickAddModal({ isOpen, onClose, onSave, defaultDate }) 
             className="btn-primary"
             style={{ marginTop: '8px', padding: '14px', fontSize: '14px' }}
           >
-            기록 완료 ✨
+            기록 완료 (+10 EXP 획득 ⚡)
           </button>
         </form>
       </div>

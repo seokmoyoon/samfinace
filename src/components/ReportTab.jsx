@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
-import { Lightbulb, CheckCircle, CreditCard, PieChart } from 'lucide-react';
-import { INITIAL_ACCOUNTS } from '../data/mockData';
+import { Lightbulb, CheckCircle, CreditCard, PieChart, Flame, ShieldAlert, Sparkles } from 'lucide-react';
+import { INITIAL_ACCOUNTS, INITIAL_SOBIMONS } from '../data/mockData';
 
 export default function ReportTab({ transactions, budget }) {
   const [reportType, setReportType] = useState('category'); // 'category' | 'account'
 
-  // 지출만 필터링
+  // 소비(수입 제외)만 필터링
   const expenseList = transactions.filter(t => t.type !== 'income');
   const totalSpent = expenseList.reduce((acc, cur) => acc + cur.amount, 0);
 
-  // 1. 카테고리별 합산
+  // 1. 소비 속성(카테고리)별 합산
   const categoryTotals = {};
   expenseList.forEach((tx) => {
     categoryTotals[tx.category] = (categoryTotals[tx.category] || 0) + tx.amount;
@@ -25,7 +25,19 @@ export default function ReportTab({ transactions, budget }) {
 
   const topCategory = sortedCategories[0];
 
-  // 2. 결제수단 / 카드별 지출 합산 (편한가계부 핵심 스타일)
+  // 지출 1위 속성에 매핑되는 소비몬 찾기
+  const getMonsterForCategory = (cat) => {
+    if (!cat) return null;
+    if (cat.includes('카페')) return INITIAL_SOBIMONS.find(m => m.id === 'mon_cafe');
+    if (cat.includes('식비') || cat.includes('외식')) return INITIAL_SOBIMONS.find(m => m.id === 'mon_delivery');
+    if (cat.includes('쇼핑') || cat.includes('마트')) return INITIAL_SOBIMONS.find(m => m.id === 'mon_shop');
+    if (cat.includes('교통')) return INITIAL_SOBIMONS.find(m => m.id === 'mon_traffic');
+    return INITIAL_SOBIMONS[0];
+  };
+
+  const strongestMonster = topCategory ? getMonsterForCategory(topCategory.category) : null;
+
+  // 2. 결제수단 / 카드별 소비 합산
   const accountTotals = {};
   expenseList.forEach((tx) => {
     const accName = tx.cardCompany || '기타';
@@ -40,7 +52,7 @@ export default function ReportTab({ transactions, budget }) {
     }))
     .sort((a, b) => b.amount - a.amount);
 
-  // 카테고리별 색상
+  // 속성별 색상
   const CAT_COLORS = {
     '식비/외식': '#EF4444',
     '쇼핑/마트': '#F59E0B',
@@ -53,46 +65,71 @@ export default function ReportTab({ transactions, budget }) {
   return (
     <div className="report-screen">
       {/* 헤더 */}
-      <div style={{ marginBottom: '18px' }}>
-        <h3 style={{ fontSize: '18px', fontWeight: 800, marginBottom: '4px' }}>📊 쉬운 지출 흐름 분석</h3>
+      <div style={{ marginBottom: '16px' }}>
+        <h3 style={{ fontSize: '18px', fontWeight: 800, marginBottom: '4px' }}>📊 월간 탐험 소비 분석</h3>
         <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-          카테고리별 지출과 카드/통장별 결제 비중을 한눈에 파악합니다.
+          내 소비 속성을 게임 통계로 분석하고 가장 강력한 소비몬을 추적합니다.
         </p>
       </div>
 
-      {/* 1. 지출 요약 카드 */}
-      <div style={{
-        background: 'var(--bg-surface)',
-        border: '1px solid var(--border-subtle)',
-        borderRadius: 'var(--radius-lg)',
-        padding: '18px',
-        marginBottom: '16px'
-      }}>
-        <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px' }}>이번 달 누적 생활비</div>
-        <div style={{ fontSize: '28px', fontWeight: 800, color: 'var(--text-main)', letterSpacing: '-0.5px' }}>
-          {totalSpent.toLocaleString()} <span style={{ fontSize: '16px', fontWeight: 600 }}>원</span>
-        </div>
-        <div style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          gap: '6px', 
-          marginTop: '10px', 
-          fontSize: '12px',
-          color: 'var(--success)'
+      {/* 1. 이번 달 가장 강력한 소비몬 (보스 몬스터 HUD) */}
+      {strongestMonster && (
+        <div style={{
+          background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.12), rgba(139, 92, 246, 0.08))',
+          border: '1px solid rgba(239, 68, 68, 0.3)',
+          borderRadius: 'var(--radius-lg)',
+          padding: '16px',
+          marginBottom: '16px',
+          boxShadow: '0 4px 16px rgba(239, 68, 68, 0.15)'
         }}>
-          <CheckCircle size={14} />
-          <span>예산 대비 <strong>{Math.max(0, budget.monthlyBudget - totalSpent).toLocaleString()}원</strong> 절약 방어 중!</span>
-        </div>
-      </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+            <span style={{ fontSize: '11px', fontWeight: 800, color: '#F87171', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <Flame size={14} /> 이번 달 가장 강력한 소비몬 (지출 1위)
+            </span>
+            <span style={{ fontSize: '10px', background: 'rgba(239, 68, 68, 0.2)', color: '#FCA5A5', padding: '2px 8px', borderRadius: '4px', fontWeight: 700 }}>
+              보스 경보
+            </span>
+          </div>
 
-      {/* 2. 서브 탭: 카테고리별 vs 카드/결제수단별 */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+            <div style={{
+              width: '54px',
+              height: '54px',
+              borderRadius: '14px',
+              background: 'rgba(239, 68, 68, 0.2)',
+              border: '1px solid rgba(239, 68, 68, 0.4)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '28px',
+              flexShrink: 0
+            }}>
+              {strongestMonster.badge}
+            </div>
+            <div>
+              <div style={{ fontSize: '16px', fontWeight: 800, color: '#fff' }}>
+                {strongestMonster.name} <span style={{ fontSize: '12px', color: '#FCA5A5' }}>Lv.{strongestMonster.level}</span>
+              </div>
+              <div style={{ fontSize: '12px', color: '#E2E8F0', marginTop: '2px' }}>
+                이번 달 누적 <strong style={{ color: '#F87171' }}>{topCategory.amount.toLocaleString()}원</strong> ({topCategory.percent}% 차지)
+              </div>
+              <div style={{ fontSize: '11px', color: '#DDD6FE', fontStyle: 'italic', marginTop: '4px' }}>
+                {strongestMonster.quote}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 2. 서브 탭: 소비 속성별 vs 카드/결제수단별 */}
       <div style={{
         display: 'flex',
         gap: '4px',
         background: 'rgba(255, 255, 255, 0.05)',
         padding: '4px',
         borderRadius: 'var(--radius-md)',
-        marginBottom: '16px'
+        marginBottom: '16px',
+        border: '1px solid var(--border-subtle)'
       }}>
         <button
           onClick={() => setReportType('category')}
@@ -112,7 +149,7 @@ export default function ReportTab({ transactions, budget }) {
             gap: '6px'
           }}
         >
-          <PieChart size={14} /> 카테고리별 분석
+          <PieChart size={14} /> 소비 속성별 분석
         </button>
 
         <button
@@ -133,29 +170,11 @@ export default function ReportTab({ transactions, budget }) {
             gap: '6px'
           }}
         >
-          <CreditCard size={14} /> 카드/결제수단별 분석
+          <CreditCard size={14} /> 결제수단별 분석
         </button>
       </div>
 
-      {/* 스마트 어드바이저 팁 */}
-      {topCategory && reportType === 'category' && (
-        <div style={{
-          background: 'rgba(239, 68, 68, 0.08)',
-          border: '1px solid rgba(239, 68, 68, 0.25)',
-          borderRadius: 'var(--radius-md)',
-          padding: '14px',
-          marginBottom: '16px'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#F87171', fontSize: '13px', fontWeight: 700, marginBottom: '4px' }}>
-            <Lightbulb size={16} /> 어디서 돈이 제일 많이 나갔을까?
-          </div>
-          <p style={{ fontSize: '12px', color: 'var(--text-main)', lineHeight: '1.5' }}>
-            이번 달은 <strong style={{ color: '#F87171' }}>[{topCategory.category}]</strong>에 지출의 <strong style={{ color: '#F87171' }}>{topCategory.percent}%</strong> ({topCategory.amount.toLocaleString()}원)가 사용되었어요.
-          </p>
-        </div>
-      )}
-
-      {/* 카테고리별 랭킹 바 */}
+      {/* 속성별 순위 바 */}
       {reportType === 'category' && (
         <div style={{
           background: 'var(--bg-surface)',
@@ -163,8 +182,8 @@ export default function ReportTab({ transactions, budget }) {
           borderRadius: 'var(--radius-lg)',
           padding: '18px'
         }}>
-          <h4 style={{ fontSize: '14px', fontWeight: 700, marginBottom: '14px' }}>
-            소비 카테고리 순위
+          <h4 style={{ fontSize: '13px', fontWeight: 800, marginBottom: '14px', color: 'var(--text-main)' }}>
+            소비 속성 분포
           </h4>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
@@ -206,8 +225,8 @@ export default function ReportTab({ transactions, budget }) {
           borderRadius: 'var(--radius-lg)',
           padding: '18px'
         }}>
-          <h4 style={{ fontSize: '14px', fontWeight: 700, marginBottom: '14px' }}>
-            카드 및 결제수단별 지출 금액
+          <h4 style={{ fontSize: '13px', fontWeight: 800, marginBottom: '14px', color: 'var(--text-main)' }}>
+            카드 및 보유 계좌별 소비 금액
           </h4>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>

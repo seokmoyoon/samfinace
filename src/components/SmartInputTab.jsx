@@ -50,7 +50,7 @@ export default function SmartInputTab({
       onAddTransaction(parsedPreview);
       setInputText('');
       setParsedPreview(null);
-      alert(`[${parsedPreview.merchant}] ${parsedPreview.amount.toLocaleString()}원이 가계부에 등록되었습니다! (${parsedPreview.channel})`);
+      alert(`[${parsedPreview.merchant}] ${parsedPreview.amount.toLocaleString()}원 소비 기록 완료!\n👾 소비몬 출현 감지! (+10 EXP 획득)`);
     }
   };
 
