@@ -5,10 +5,6 @@ import {
   Target,
   BookOpen,
   User,
-  Smartphone, 
-  Monitor, 
-  Wifi, 
-  BatteryMedium,
   Zap
 } from 'lucide-react';
 
@@ -32,7 +28,6 @@ import { parseCardSMS } from './utils/smsParser';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('home'); // 'home' | 'spending' | 'missions' | 'dex' | 'my'
-  const [isFullWidth, setIsFullWidth] = useState(false);
 
   // 앱 데이터 상태
   const [user, setUser] = useState(INITIAL_USER);
@@ -62,7 +57,7 @@ export default function App() {
 
     setUser((prev) => {
       const nextExp = prev.exp + amount;
-      const nextCoins = (prev.coins || 450) + coinBonus;
+      const nextCoins = (prev.coins || 3250) + coinBonus;
 
       if (nextExp >= prev.maxExp) {
         const nextLevel = prev.level + 1;
@@ -89,8 +84,8 @@ export default function App() {
   const handleAddTransaction = (newTx) => {
     setTransactions((prev) => [newTx, ...prev]);
 
-    // 소비 기록 완료 시 +10 EXP & +3 COIN 피드백 (Section 7)
-    grantExp(10, '👾 소비몬 출현 감지!', 3);
+    // 소비 기록 완료 시 +10 EXP & +5 COIN 피드백
+    grantExp(10, '👾 소비몬 출현 감지!', 5);
 
     // 소비인 경우 퀘스트 진행도 체크
     if (newTx.type !== 'income') {
@@ -192,60 +187,8 @@ export default function App() {
           </div>
         </div>
       )}
-
-      {/* 뷰 모드 토글 */}
-      <div className="device-toolbar">
-        <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600 }}>화면 뷰:</span>
-        <button 
-          className={!isFullWidth ? 'active' : ''} 
-          onClick={() => setIsFullWidth(false)}
-        >
-          <Smartphone size={15} /> 모바일 폰 뷰
-        </button>
-        <button 
-          className={isFullWidth ? 'active' : ''} 
-          onClick={() => setIsFullWidth(true)}
-        >
-          <Monitor size={15} /> 와이드 뷰
-        </button>
-      </div>
-
-      {/* 스마트폰 목업 프레임 */}
-      <div className={`mobile-frame ${isFullWidth ? 'full-width' : ''}`}>
-        
-        {/* 상단 상태바 */}
-        <div className="phone-status-bar">
-          <span>09:41</span>
-          <div className="phone-island">
-            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              ● 5G SOBIMON
-            </span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <Wifi size={13} />
-            <BatteryMedium size={14} />
-          </div>
-        </div>
-
-        {/* 상단 SOBIMON 로고 바 */}
-        <div style={{
-          padding: '10px 18px 8px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          background: '#FFFFFF',
-          borderBottom: '1px solid var(--border-subtle)'
-        }}>
-          <div className="sobimon-header-logo">
-            <div className="sobimon-logo-badge">👾</div>
-            <span>SOBIMON</span>
-            <span className="sobimon-logo-tag">소비몬</span>
-          </div>
-          <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 700 }}>
-            9월 시즌 탐험 중
-          </div>
-        </div>
-
+      {/* MVP 모바일 서비스 컨테이너 */}
+      <div className="mobile-frame">
         {/* 상단 푸시 알림 배너 */}
         {activePushNotification && (
           <div className="push-simulation-banner" style={{
