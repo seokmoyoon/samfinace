@@ -37,7 +37,8 @@ export const INITIAL_SOBIMONS = [
     quote: '"출근길 한 잔쯤은 포션이잖아...?"',
     condition: '이번 달 카페 5회 이상 방문 시 출현',
     color: '#8B5CF6',
-    threat: '보스급 소비몬'
+    threat: '보스급 소비몬',
+    evolutions: ['카페몬', '카페중독몬', '카페대왕몬']
   },
   {
     id: 'mon_delivery',
@@ -50,7 +51,8 @@ export const INITIAL_SOBIMONS = [
     quote: '"배달팁 3,000원은 행복의 가치야!"',
     condition: '주 2회 이상 외식/배달 시 출현',
     color: '#EF4444',
-    threat: '경계 대상'
+    threat: '경계 대상',
+    evolutions: ['배달몬', '새벽야식몬', '배달지배몬']
   },
   {
     id: 'mon_shop',
@@ -63,7 +65,8 @@ export const INITIAL_SOBIMONS = [
     quote: '"1+1인데 지금 안 사면 손해 아냐?"',
     condition: '쇼핑/마트 소비 5만원 이상 시 출현',
     color: '#F59E0B',
-    threat: '주의 단계'
+    threat: '주의 단계',
+    evolutions: ['쇼핑몬', '장바구니폭주몬', '지름신대마왕']
   },
   {
     id: 'mon_traffic',
@@ -76,7 +79,8 @@ export const INITIAL_SOBIMONS = [
     quote: '"10분 더 자고 택시 타면 그만!"',
     condition: '택시/차량 이용 2회 이상 시 출현',
     color: '#3B82F6',
-    threat: '주의 단계'
+    threat: '주의 단계',
+    evolutions: ['교통몬', '총알택시몬', '순간이동몬']
   },
   {
     id: 'mon_saver',
@@ -89,7 +93,8 @@ export const INITIAL_SOBIMONS = [
     quote: '"오늘은 0원으로 방어 완료! 단 1원도 샐 수 없다."',
     condition: '무지출 데이 달성 시 소환',
     color: '#10B981',
-    threat: '아군 수호신'
+    threat: '아군 수호신',
+    evolutions: ['절약몬', '철벽방어몬', '황금수호신']
   },
   {
     id: 'mon_gold',
@@ -102,7 +107,22 @@ export const INITIAL_SOBIMONS = [
     quote: '"티끌 모아 만든 황금산이 눈앞에!"',
     condition: '이번 달 목표 저축 80% 달성 시 소환',
     color: '#FBBF24',
-    threat: '아군 수호신'
+    threat: '아군 수호신',
+    evolutions: ['저축몬', '알뜰몬', '자산성장몬']
+  },
+  {
+    id: 'mon_sub',
+    name: '구독몬',
+    element: '구독/정기결제',
+    badge: '📺',
+    level: 1,
+    discovered: true,
+    description: '매달 조용히 계좌에서 빠져나가는 넷플릭스, 유튜브 프리미엄의 망령.',
+    quote: '"한 달에 만 원이면 커피 두 잔 값인데 뭐!"',
+    condition: '정기 구독 3건 이상 등록 시 출현',
+    color: '#0EA5E9',
+    threat: '주의 단계',
+    evolutions: ['구독몬', '다중구독몬', 'OTT대왕몬']
   },
   {
     id: 'mon_impulse',
@@ -115,7 +135,8 @@ export const INITIAL_SOBIMONS = [
     quote: '???',
     condition: '단일 품목 20만원 이상 충동소비 시 출현 (현재 미발견)',
     color: '#EC4899',
-    threat: '미발견 실루엣'
+    threat: '미발견 실루엣',
+    evolutions: ['충동몬', '지름신몬', '파산몬']
   },
   {
     id: 'mon_night',
@@ -128,7 +149,8 @@ export const INITIAL_SOBIMONS = [
     quote: '???',
     condition: '밤 11시 이후 편의점/술자리 소비 시 출현 (현재 미발견)',
     color: '#6366F1',
-    threat: '미발견 실루엣'
+    threat: '미발견 실루엣',
+    evolutions: ['야식몬', '치맥폭식몬', '심야대왕몬']
   }
 ];
 

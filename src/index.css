@@ -1,47 +1,58 @@
 /* ==========================================================================
-   SaveQuest Design System (Vanilla CSS + CSS Variables)
-   유지보수와 관리가 가장 쉬운 구조로 설계되었습니다.
-   색상, 간격, 폰트 크기 등을 아래 :root 변수에서 한 번에 수정할 수 있습니다.
+   SOBIMON Design System (Bright Pastel Game-Fintech Theme)
+   소비몬(SOBIMON) 전용 밝고 친근한 파스텔 게임형 금융 디자인 시스템
    ========================================================================== */
 
 :root {
-  /* 테마 컬러 */
-  --bg-app: #0B0E17;          /* 깊이감 있는 프리미엄 다크 네이비 */
-  --bg-surface: #141A28;      /* 카드 및 컴포넌트 배경 */
-  --bg-surface-elevated: #1D263B; /* 호버 및 강조 카드 */
-  --bg-glass: rgba(20, 26, 40, 0.75);
-  
-  /* 포인트 컬러 (돈 & 퀘스트) */
-  --primary: #4F46E5;         /* 신뢰감 있는 인디고 */
-  --primary-light: #6366F1;
-  --success: #10B981;         /* 절약, 보너스, 수입 (에메랄드 그린) */
-  --warning: #F59E0B;         /* 주의, 권장 지출 임계치 (앰버) */
-  --danger: #EF4444;          /* 초과 지출, 체력 감소 (코랄 레드) */
-  --accent: #8B5CF6;          /* 레벨업, 퀘스트 보상 (바이올렛) */
-  --gold: #FBBF24;            /* 코인, 보물상자 */
+  /* 배경 컬러 (화이트 & 파스텔) */
+  --bg-app: #F8FAFC;              /* 메인 앱 배경 */
+  --bg-surface: #FFFFFF;          /* 둥근 카드 및 패널 배경 */
+  --bg-surface-elevated: #F1F5F9; /* 호버 및 서브 카드 */
+  --bg-surface-soft: #F8FAFC;
+  --bg-glass: rgba(255, 255, 255, 0.9);
 
-  /* 텍스트 컬러 */
-  --text-main: #F9FAFB;
-  --text-muted: #9CA3AF;
-  --text-dim: #6B7280;
+  /* 브랜드 포인트 컬러 (소비몬 블루 & 골드 엑센트) */
+  --primary: #2563EB;             /* SOBIMON Blue */
+  --primary-light: #3B82F6;
+  --primary-pastel: #EFF6FF;      /* 파스텔 블루 */
+  
+  --accent: #8B5CF6;              /* 바이올렛 */
+  --accent-pastel: #F5F3FF;
+  
+  --gold: #F59E0B;                /* 골드 코인 */
+  --gold-pastel: #FEF3C7;
+  
+  --success: #10B981;             /* 절약몬, 수입, 완료 (에메랄드) */
+  --success-pastel: #ECFDF5;
+  
+  --warning: #F59E0B;             /* 주의, 권장 소비 (앰버) */
+  --warning-pastel: #FFFBEB;
+  
+  --danger: #EF4444;              /* 초과 소비, 경고 (코랄 레드) */
+  --danger-pastel: #FEF2F2;
+
+  /* 텍스트 컬러 (다크 네이비 & 슬레이트 그레이) */
+  --text-main: #0F172A;           /* 선명하고 또렷한 텍스트 */
+  --text-muted: #475569;          /* 가독성 높은 설명 텍스트 */
+  --text-dim: #94A3B8;            /* 옅은 라벨 텍스트 */
 
   /* 테두리 & 디바이더 */
-  --border-subtle: rgba(255, 255, 255, 0.08);
-  --border-focus: rgba(99, 102, 241, 0.4);
+  --border-subtle: #E2E8F0;
+  --border-focus: #3B82F6;
 
   /* 곡률 (Radius) */
-  --radius-sm: 8px;
-  --radius-md: 14px;
-  --radius-lg: 20px;
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 22px;
   --radius-full: 9999px;
 
-  /* 그림자 (Shadows) */
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
-  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.35);
-  --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.25);
-  --shadow-gold: 0 0 20px rgba(251, 191, 36, 0.3);
+  /* 부드러운 그림자 (Soft Shadows) */
+  --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 6px 20px rgba(15, 23, 42, 0.06);
+  --shadow-glow: 0 8px 24px rgba(59, 130, 246, 0.15);
+  --shadow-gold: 0 8px 24px rgba(245, 158, 11, 0.2);
 
-  /* 전환 효과 (Transitions) */
+  /* 전환 효과 */
   --transition-fast: 0.15s ease;
   --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -56,7 +67,7 @@
 
 body {
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background-color: #05070B;
+  background-color: #E2E8F0;
   color: var(--text-main);
   line-height: 1.5;
   user-select: none;
@@ -64,8 +75,7 @@ body {
 }
 
 /* ==========================================================================
-   전체 컨테이너 & 모바일 프레임 시뮬레이터
-   PC 브라우저에서도 스마트폰 앱처럼 시각적으로 체험할 수 있도록 합니다.
+   전체 컨테이너 & 스마트폰 프레임 시뮬레이터
    ========================================================================== */
 
 .app-wrapper {
@@ -75,7 +85,7 @@ body {
   align-items: center;
   justify-content: flex-start;
   padding: 16px 12px;
-  background: radial-gradient(circle at 50% 10%, #1A2138 0%, #05070B 80%);
+  background: linear-gradient(135deg, #EEF4FF 0%, #FAF5FF 50%, #F0FDF4 100%);
 }
 
 .device-toolbar {
@@ -83,11 +93,12 @@ body {
   align-items: center;
   gap: 12px;
   margin-bottom: 16px;
-  background: rgba(255, 255, 255, 0.05);
-  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.85);
+  padding: 6px 14px;
   border-radius: var(--radius-full);
   border: 1px solid var(--border-subtle);
-  backdrop-filter: blur(12px);
+  box-shadow: var(--shadow-sm);
+  backdrop-filter: blur(10px);
 }
 
 .device-toolbar button {
@@ -97,7 +108,7 @@ body {
   cursor: pointer;
   padding: 6px 12px;
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
   border-radius: var(--radius-full);
   transition: var(--transition-fast);
   display: flex;
@@ -108,16 +119,17 @@ body {
 .device-toolbar button.active {
   background: var(--primary);
   color: #fff;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
 }
 
 /* 모바일 폰 프레임 */
 .mobile-frame {
   width: 100%;
   max-width: 420px;
-  height: 860px;
+  height: 870px;
   background-color: var(--bg-app);
   border-radius: 44px;
-  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7), 0 0 0 10px #1E2330, 0 0 0 12px #2D3446;
+  box-shadow: 0 20px 50px -10px rgba(30, 41, 59, 0.12), 0 0 0 8px #FFFFFF, 0 0 0 10px #CBD5E1;
   position: relative;
   overflow: hidden;
   display: flex;
@@ -127,12 +139,11 @@ body {
 
 .mobile-frame.full-width {
   max-width: 720px;
-  height: 90vh;
+  height: 92vh;
   border-radius: 24px;
-  box-shadow: var(--shadow-md);
 }
 
-/* 폰 상단 노치 / 다이내믹 아일랜드 & 상태바 */
+/* 폰 상단 상태바 */
 .phone-status-bar {
   height: 44px;
   display: flex;
@@ -140,16 +151,18 @@ body {
   justify-content: space-between;
   padding: 0 24px;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-muted);
   flex-shrink: 0;
   z-index: 100;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(8px);
 }
 
 .phone-island {
   width: 110px;
   height: 24px;
-  background: #000;
+  background: #0F172A;
   border-radius: 16px;
   position: absolute;
   top: 10px;
@@ -159,14 +172,15 @@ body {
   align-items: center;
   justify-content: center;
   font-size: 10px;
-  color: var(--text-dim);
+  color: #E2E8F0;
+  font-weight: 600;
 }
 
-/* 스크린 본체 (스크롤 영역) */
+/* 스크린 본체 */
 .screen-content {
   flex: 1;
   overflow-y: auto;
-  padding: 16px 20px 88px 20px;
+  padding: 14px 18px 88px 18px;
   position: relative;
   scrollbar-width: none;
 }
@@ -174,21 +188,59 @@ body {
   display: none;
 }
 
-/* 하단 내비게이션 바 */
+/* 상단 SOBIMON 로고 바 */
+.sobimon-header-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 900;
+  font-size: 17px;
+  letter-spacing: -0.5px;
+  color: var(--text-main);
+}
+
+.sobimon-logo-badge {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.35);
+}
+
+.sobimon-logo-tag {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--primary-pastel);
+  color: var(--primary);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+/* ==========================================================================
+   하단 내비게이션 바 (5대 탭)
+   ========================================================================== */
+
 .bottom-nav {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
   height: 72px;
-  background: rgba(14, 18, 28, 0.92);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(16px);
   border-top: 1px solid var(--border-subtle);
   display: flex;
   align-items: center;
   justify-content: space-around;
-  padding: 0 12px 10px 12px;
+  padding: 0 10px 10px 10px;
   z-index: 90;
+  box-shadow: 0 -4px 16px rgba(15, 23, 42, 0.03);
 }
 
 .nav-item {
@@ -197,251 +249,345 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
   color: var(--text-dim);
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
-  padding: 6px 12px;
+  padding: 6px 10px;
   border-radius: var(--radius-sm);
   transition: var(--transition-fast);
 }
 
+.nav-item:hover {
+  color: var(--text-muted);
+}
+
 .nav-item.active {
-  color: var(--primary-light);
+  color: var(--primary);
 }
 
 .nav-item.active .nav-icon-wrap {
-  background: rgba(99, 102, 241, 0.15);
-  color: var(--primary-light);
+  background: var(--primary-pastel);
+  color: var(--primary);
+  transform: translateY(-2px);
 }
 
 .nav-icon-wrap {
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 10px;
   transition: var(--transition-fast);
 }
 
 /* ==========================================================================
-   컴포넌트 스타일 (카드, 게이지, 퀘스트, 차트)
+   캐릭터 아바타 & 말풍선 인터랙션
    ========================================================================== */
 
-/* 상단 프로필 및 레벨 뱃지 */
-.user-level-badge {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 16px;
-}
-
-.user-tag {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.level-icon-box {
-  width: 38px;
-  height: 38px;
-  border-radius: var(--radius-md);
-  background: linear-gradient(135deg, #6366F1, #8B5CF6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
-  box-shadow: var(--shadow-glow);
-}
-
-.user-title {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--text-main);
-}
-
-.user-rank {
-  font-size: 11px;
-  color: var(--accent);
-  font-weight: 600;
-}
-
-.exp-pill {
-  background: rgba(139, 92, 246, 0.15);
-  color: #C4B5FD;
-  border: 1px solid rgba(139, 92, 246, 0.3);
-  padding: 4px 10px;
-  border-radius: var(--radius-full);
-  font-size: 11px;
-  font-weight: 600;
-}
-
-/* HP(예산 체력) 대형 카드 */
-.hp-card {
-  background: linear-gradient(160deg, #171E2E 0%, #111624 100%);
-  border: 1px solid var(--border-subtle);
+.character-hero-area {
+  background: linear-gradient(135deg, #EFF6FF 0%, #FAF5FF 100%);
+  border: 1px solid #DBEAFE;
   border-radius: var(--radius-lg);
-  padding: 20px;
-  margin-bottom: 18px;
-  position: relative;
-  overflow: hidden;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 16px;
   box-shadow: var(--shadow-sm);
 }
 
-.hp-card-header {
+.character-hero-avatar {
+  width: 58px;
+  height: 58px;
+  border-radius: 18px;
+  background: #FFFFFF;
+  border: 2px solid #BFDBFE;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+  animation: floatAvatar 3s ease-in-out infinite;
+}
+
+@keyframes floatAvatar {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+.character-speech-bubble {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 14px;
+  padding: 10px 14px;
+  position: relative;
+  flex: 1;
+  box-shadow: var(--shadow-sm);
+}
+
+.character-speech-bubble::after {
+  content: '';
+  position: absolute;
+  left: -6px;
+  top: 50%;
+  transform: translateY(-50%) rotate(45deg);
+  width: 10px;
+  height: 10px;
+  background: #FFFFFF;
+  border-left: 1px solid #E2E8F0;
+  border-bottom: 1px solid #E2E8F0;
+}
+
+.character-speech-text {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-main);
+  line-height: 1.4;
+}
+
+.character-subtext {
+  font-size: 11px;
+  color: var(--primary);
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+/* ==========================================================================
+   예산 게이지 (BudgetProgress) 카드
+   ========================================================================== */
+
+.budget-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+.budget-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 12px;
+  align-items: center;
+  margin-bottom: 10px;
 }
 
-.hp-title-wrap h3 {
-  font-size: 13px;
-  color: var(--text-muted);
-  font-weight: 500;
-  margin-bottom: 4px;
-}
-
-.hp-amount {
-  font-size: 26px;
-  font-weight: 800;
-  letter-spacing: -0.5px;
-  color: var(--text-main);
-}
-
-.hp-status-chip {
-  padding: 4px 10px;
-  border-radius: var(--radius-full);
+.budget-title {
   font-size: 12px;
   font-weight: 700;
+  color: var(--text-muted);
+}
+
+.budget-chip {
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: 800;
   display: flex;
   align-items: center;
   gap: 4px;
 }
 
-.hp-status-chip.good {
-  background: rgba(16, 185, 129, 0.15);
+.budget-chip.good {
+  background: var(--success-pastel);
   color: var(--success);
-  border: 1px solid rgba(16, 185, 129, 0.3);
+  border: 1px solid #A7F3D0;
 }
 
-.hp-status-chip.warn {
-  background: rgba(245, 158, 11, 0.15);
+.budget-chip.warn {
+  background: var(--warning-pastel);
   color: var(--warning);
-  border: 1px solid rgba(245, 158, 11, 0.3);
+  border: 1px solid #FDE68A;
 }
 
-.hp-status-chip.danger {
-  background: rgba(239, 68, 68, 0.15);
+.budget-chip.danger {
+  background: var(--danger-pastel);
   color: var(--danger);
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  border: 1px solid #FECACA;
 }
 
-/* HP 게이지 바 */
-.hp-gauge-bg {
+.budget-amount-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.budget-main-val {
+  font-size: 26px;
+  font-weight: 900;
+  color: var(--text-main);
+  letter-spacing: -0.5px;
+}
+
+.budget-gauge-bg {
   width: 100%;
   height: 12px;
-  background: rgba(255, 255, 255, 0.08);
+  background: #F1F5F9;
   border-radius: var(--radius-full);
   overflow: hidden;
-  margin: 14px 0 10px 0;
-  position: relative;
+  margin-bottom: 10px;
 }
 
-.hp-gauge-fill {
+.budget-gauge-fill {
   height: 100%;
   border-radius: var(--radius-full);
   transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.hp-gauge-fill.good {
+.budget-gauge-fill.good {
   background: linear-gradient(90deg, #10B981, #34D399);
-  box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
 }
 
-.hp-gauge-fill.warn {
+.budget-gauge-fill.warn {
   background: linear-gradient(90deg, #F59E0B, #FBBF24);
-  box-shadow: 0 0 12px rgba(245, 158, 11, 0.4);
 }
 
-.hp-gauge-fill.danger {
+.budget-gauge-fill.danger {
   background: linear-gradient(90deg, #EF4444, #F87171);
-  box-shadow: 0 0 12px rgba(239, 68, 68, 0.4);
 }
 
-.hp-subinfo {
+.budget-footer-info {
   display: flex;
   justify-content: space-between;
-  font-size: 12px;
-  color: var(--text-dim);
-}
-
-/* 일일 권장 지출 안내 배너 */
-.daily-target-banner {
-  background: rgba(99, 102, 241, 0.08);
-  border: 1px dashed rgba(99, 102, 241, 0.35);
-  border-radius: var(--radius-md);
-  padding: 12px 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 20px;
-}
-
-.daily-target-banner .text-group {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.daily-target-banner .label {
   font-size: 12px;
   color: var(--text-muted);
 }
 
-.daily-target-banner .val {
-  font-size: 14px;
-  font-weight: 700;
-  color: #A5B4FC;
+/* ==========================================================================
+   도감 카드 & 서식 몬스터 그리드
+   ========================================================================== */
+
+.active-monsters-wrap {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-sm);
 }
 
-/* 섹션 타이틀 */
-.section-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin: 22px 0 12px 0;
-}
-
-.section-header h4 {
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--text-main);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.section-header .action-link {
-  font-size: 12px;
-  color: var(--primary-light);
-  background: transparent;
-  border: none;
+.monster-mini-card {
+  background: #F8FAFC;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 12px 8px;
+  text-align: center;
+  transition: var(--transition-fast);
   cursor: pointer;
-  font-weight: 600;
 }
 
-/* 퀘스트 카드 리스트 */
-.quest-list {
+.monster-mini-card:hover {
+  transform: translateY(-2px);
+  border-color: #93C5FD;
+  background: #EFF6FF;
+}
+
+.monster-mini-card .mon-icon {
+  font-size: 26px;
+  margin-bottom: 4px;
+}
+
+.monster-mini-card .mon-name {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.monster-mini-card .mon-status {
+  font-size: 10px;
+  font-weight: 700;
+  color: #EF4444;
+}
+
+/* 도감 그리드 */
+.dex-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.dex-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  transition: var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+}
+
+.dex-card.discovered:hover {
+  transform: translateY(-2px);
+  border-color: #93C5FD;
+  box-shadow: var(--shadow-md);
+}
+
+.dex-card.silhouette {
+  background: #F8FAFC;
+  border: 1px dashed #CBD5E1;
+  filter: grayscale(1);
+  opacity: 0.7;
+}
+
+.dex-card-top {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-bottom: 20px;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
 }
 
-.quest-item {
+.dex-card-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  margin-bottom: 8px;
+}
+
+.dex-card-name {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text-main);
+  margin-bottom: 2px;
+}
+
+.dex-card-element {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.dex-card-quote {
+  font-size: 11px;
+  color: #4F46E5;
+  font-style: italic;
+  line-height: 1.35;
+  background: #EEF2FF;
+  padding: 6px 8px;
+  border-radius: 8px;
+  margin-top: 6px;
+}
+
+.dex-card-condition {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 6px;
+}
+
+/* ==========================================================================
+   미션 카드
+   ========================================================================== */
+
+.mission-card {
   background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
@@ -449,111 +595,140 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  transition: var(--transition-fast);
+  gap: 12px;
+  box-shadow: var(--shadow-sm);
 }
 
-.quest-item:hover {
-  background: var(--bg-surface-elevated);
-  border-color: rgba(255, 255, 255, 0.15);
+.mission-card.success {
+  background: #F0FDF4;
+  border-color: #86EFAC;
 }
 
-.quest-left {
+/* ==========================================================================
+   토스트 & 모달 애니메이션
+   ========================================================================== */
+
+.exp-gain-toast {
+  position: fixed;
+  top: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #1E40AF, #2563EB);
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: var(--radius-full);
+  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.35);
+  font-size: 13px;
+  font-weight: 800;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
+  z-index: 9999;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  animation: expToastIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
-.quest-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-sm);
-  background: rgba(255, 255, 255, 0.05);
+@keyframes expToastIn {
+  0% { opacity: 0; transform: translate(-50%, -20px) scale(0.85); }
+  100% { opacity: 1; transform: translate(-50%, 0) scale(1); }
+}
+
+.levelup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(6px);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
+  z-index: 10000;
+  padding: 20px;
 }
 
-.quest-info h5 {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--text-main);
-  margin-bottom: 2px;
-}
-
-.quest-info p {
-  font-size: 11px;
-  color: var(--text-muted);
-}
-
-.quest-reward {
-  text-align: right;
-}
-
-.quest-exp {
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--accent);
-}
-
-.quest-status {
-  font-size: 11px;
-  font-weight: 600;
-  margin-top: 2px;
-}
-.quest-status.success { color: var(--success); }
-.quest-status.progress { color: var(--warning); }
-
-/* 돈의 흐름 파이프라인 (Money Flow Visual) */
-.flow-diagram-card {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-subtle);
+.levelup-card {
+  background: #FFFFFF;
+  border: 2px solid #F59E0B;
   border-radius: var(--radius-lg);
-  padding: 18px;
-  margin-bottom: 20px;
+  width: 100%;
+  max-width: 340px;
+  padding: 28px 20px 20px;
+  text-align: center;
+  box-shadow: 0 10px 40px rgba(15, 23, 42, 0.2);
+  animation: levelupPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.flow-step-container {
+@keyframes levelupPop {
+  0% { transform: scale(0.6); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* ==========================================================================
+   버튼 및 공통 액션
+   ========================================================================== */
+
+.btn-primary {
+  width: 100%;
+  background: linear-gradient(135deg, #2563EB, #3B82F6);
+  color: #fff;
+  border: none;
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: var(--transition-fast);
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  position: relative;
-  margin-top: 14px;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
 }
 
-.flow-step-box {
-  flex: 1;
-  background: rgba(255, 255, 255, 0.03);
+.btn-primary:hover {
+  opacity: 0.95;
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: #F1F5F9;
+  color: var(--text-main);
   border: 1px solid var(--border-subtle);
+  padding: 8px 14px;
   border-radius: var(--radius-sm);
-  padding: 10px 8px;
-  text-align: center;
-  position: relative;
-}
-
-.flow-step-box.income { border-color: rgba(16, 185, 129, 0.4); }
-.flow-step-box.fixed { border-color: rgba(245, 158, 11, 0.4); }
-.flow-step-box.variable { border-color: rgba(239, 68, 68, 0.4); }
-.flow-step-box.savings { border-color: rgba(99, 102, 241, 0.5); background: rgba(99, 102, 241, 0.08); }
-
-.flow-step-title {
-  font-size: 10px;
-  color: var(--text-muted);
-  margin-bottom: 4px;
-}
-
-.flow-step-val {
   font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-secondary:hover {
+  background: #E2E8F0;
+}
+
+/* 대형 플로팅 CTA 버튼 */
+.btn-floating-cta {
+  background: linear-gradient(135deg, #2563EB, #3B82F6);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-full);
+  padding: 14px 20px;
+  font-size: 14px;
   font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  transition: var(--transition-fast);
 }
 
-.flow-arrow {
-  color: var(--text-dim);
-  padding: 0 4px;
-  font-size: 12px;
+.btn-floating-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.45);
 }
 
-/* 최근 지출 목록 아이템 */
+/* 트랜잭션 아이템 */
 .transaction-list {
   display: flex;
   flex-direction: column;
@@ -568,7 +743,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  transition: var(--transition-fast);
+  box-shadow: var(--shadow-sm);
 }
 
 .tx-left {
@@ -578,18 +753,19 @@ body {
 }
 
 .tx-icon-circle {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
+  font-size: 18px;
+  background: #F1F5F9;
 }
 
 .tx-details h6 {
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-main);
   margin-bottom: 2px;
 }
@@ -601,401 +777,7 @@ body {
 
 .tx-amount {
   font-size: 14px;
-  font-weight: 700;
-  color: var(--text-main);
-}
-.tx-amount.minus { color: #F87171; }
-.tx-amount.plus { color: #34D399; }
-
-/* ==========================================================================
-   스마트 인풋 (SMS 파서 및 명세서 첨부) UI
-   ========================================================================== */
-
-.dropzone-box {
-  border: 2px dashed rgba(99, 102, 241, 0.4);
-  background: rgba(99, 102, 241, 0.04);
-  border-radius: var(--radius-lg);
-  padding: 28px 16px;
-  text-align: center;
-  cursor: pointer;
-  transition: var(--transition-normal);
-  margin-bottom: 18px;
-}
-
-.dropzone-box:hover {
-  border-color: var(--primary-light);
-  background: rgba(99, 102, 241, 0.08);
-}
-
-.dropzone-icon {
-  font-size: 36px;
-  margin-bottom: 8px;
-  color: var(--primary-light);
-}
-
-.dropzone-title {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--text-main);
-  margin-bottom: 4px;
-}
-
-.dropzone-desc {
-  font-size: 11px;
-  color: var(--text-muted);
-}
-
-.sms-parser-box {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
-  padding: 16px;
-  margin-bottom: 18px;
-}
-
-.sms-textarea {
-  width: 100%;
-  height: 90px;
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  padding: 12px;
-  color: var(--text-main);
-  font-size: 12px;
-  resize: none;
-  font-family: inherit;
-  margin: 10px 0;
-  outline: none;
-}
-.sms-textarea:focus {
-  border-color: var(--primary-light);
-}
-
-/* 시뮬레이션 푸시 알림 배너 (상단 팝업) */
-.push-simulation-banner {
-  position: absolute;
-  top: 50px;
-  left: 16px;
-  right: 16px;
-  background: rgba(28, 35, 51, 0.95);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: var(--radius-md);
-  padding: 12px 14px;
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  box-shadow: var(--shadow-md);
-  z-index: 1000;
-  animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-20px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-.push-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  background: var(--primary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-  flex-shrink: 0;
-}
-
-.push-content {
-  flex: 1;
-}
-
-.push-header {
-  display: flex;
-  justify-content: space-between;
-  font-size: 11px;
-  color: var(--text-muted);
-  margin-bottom: 2px;
-}
-
-.push-msg {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-main);
-}
-
-/* 버튼 스타일 */
-.btn-primary {
-  width: 100%;
-  background: linear-gradient(135deg, #4F46E5, #6366F1);
-  color: #fff;
-  border: none;
-  padding: 12px 16px;
-  border-radius: var(--radius-md);
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: var(--transition-fast);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.35);
-}
-
-.btn-primary:hover {
-  opacity: 0.95;
-  transform: translateY(-1px);
-}
-
-.btn-secondary {
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--text-main);
-  border: 1px solid var(--border-subtle);
-  padding: 8px 14px;
-  border-radius: var(--radius-sm);
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-/* ==========================================================================
-   SOBIMON(소비몬) 고유 디자인 시스템 및 컴포넌트 스타일
-   ========================================================================== */
-
-/* 상단 SOBIMON 브랜드 로고 바 */
-.sobimon-header-logo {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 900;
-  font-size: 17px;
-  letter-spacing: -0.5px;
-  color: #fff;
-}
-
-.sobimon-logo-badge {
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
-  background: linear-gradient(135deg, #6366F1, #EC4899);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 15px;
-  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
-}
-
-.sobimon-logo-tag {
-  font-size: 10px;
-  font-weight: 700;
-  padding: 2px 6px;
-  border-radius: 4px;
-  background: rgba(99, 102, 241, 0.2);
-  color: #A5B4FC;
-  border: 1px solid rgba(99, 102, 241, 0.3);
-}
-
-/* EXP 획득 플로팅 토스트 */
-.exp-gain-toast {
-  position: fixed;
-  top: 70px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: linear-gradient(135deg, #4338CA, #7C3AED);
-  color: #fff;
-  padding: 10px 20px;
-  border-radius: var(--radius-full);
-  box-shadow: 0 8px 24px rgba(124, 58, 237, 0.45), 0 0 12px rgba(251, 191, 36, 0.4);
-  font-size: 13px;
   font-weight: 800;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  z-index: 9999;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  animation: expToastIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
-
-@keyframes expToastIn {
-  0% {
-    opacity: 0;
-    transform: translate(-50%, -20px) scale(0.85);
-  }
-  100% {
-    opacity: 1;
-    transform: translate(-50%, 0) scale(1);
-  }
-}
-
-/* 레벨업 축하 모달 */
-.levelup-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.78);
-  backdrop-filter: blur(8px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 10000;
-  padding: 20px;
-}
-
-.levelup-card {
-  background: linear-gradient(145deg, #1E1B4B, #0F172A);
-  border: 2px solid #FBBF24;
-  border-radius: var(--radius-lg);
-  width: 100%;
-  max-width: 340px;
-  padding: 28px 20px 20px;
-  text-align: center;
-  box-shadow: 0 0 40px rgba(251, 191, 36, 0.35);
-  animation: levelupPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-@keyframes levelupPop {
-  0% { transform: scale(0.6); opacity: 0; }
-  100% { transform: scale(1); opacity: 1; }
-}
-
-/* 출현 소비몬 카드 그리드 (홈 위젯용) */
-.active-monsters-wrap {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  padding: 16px;
-  margin-bottom: 18px;
-}
-
-.active-monsters-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-}
-
-.monster-badge-row {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-}
-
-.monster-mini-card {
-  background: var(--bg-surface-elevated);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  padding: 10px 8px;
-  text-align: center;
-  transition: var(--transition-fast);
-  cursor: pointer;
-}
-
-.monster-mini-card:hover {
-  transform: translateY(-2px);
-  border-color: rgba(99, 102, 241, 0.4);
-}
-
-.monster-mini-card .mon-icon {
-  font-size: 24px;
-  margin-bottom: 4px;
-}
-
-.monster-mini-card .mon-name {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--text-main);
-}
-
-.monster-mini-card .mon-status {
-  font-size: 9px;
-  color: #F87171;
-  font-weight: 600;
-}
-
-/* SOBIMON 도감 (DEX) 그리드 */
-.dex-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-  margin-bottom: 24px;
-}
-
-.dex-card {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  padding: 14px;
-  position: relative;
-  overflow: hidden;
-  transition: var(--transition-fast);
-}
-
-.dex-card.discovered:hover {
-  transform: translateY(-2px);
-  border-color: rgba(99, 102, 241, 0.4);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
-}
-
-.dex-card.silhouette {
-  background: rgba(20, 26, 40, 0.4);
-  border: 1px dashed rgba(255, 255, 255, 0.15);
-  filter: grayscale(1);
-  opacity: 0.65;
-}
-
-.dex-card-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-}
-
-.dex-card-avatar {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-  margin-bottom: 8px;
-}
-
-.dex-card-name {
-  font-size: 14px;
-  font-weight: 800;
-  color: var(--text-main);
-  margin-bottom: 2px;
-}
-
-.dex-card-element {
-  font-size: 10px;
-  font-weight: 600;
-  color: var(--text-muted);
-  margin-bottom: 6px;
-}
-
-.dex-card-quote {
-  font-size: 11px;
-  color: #DDD6FE;
-  font-style: italic;
-  line-height: 1.35;
-  background: rgba(0, 0, 0, 0.25);
-  padding: 6px 8px;
-  border-radius: 6px;
-  margin-top: 6px;
-}
-
-.dex-card-condition {
-  font-size: 10px;
-  color: #94A3B8;
-  margin-top: 6px;
-}
-
+.tx-amount.minus { color: #EF4444; }
+.tx-amount.plus { color: #10B981; }
