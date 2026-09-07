@@ -1,37 +1,27 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   ChevronRight, 
-  Flame, 
   Plus, 
+  Bell, 
+  Award,
   Sparkles,
-  TrendingDown,
-  ArrowRight
+  TrendingDown
 } from 'lucide-react';
 
-import LevelBadge from './common/LevelBadge';
-import ExpBar from './common/ExpBar';
-import CoinBadge from './common/CoinBadge';
-import CharacterAvatar from './common/CharacterAvatar';
-import BudgetProgress from './common/BudgetProgress';
-import SobimonMiniCard from './common/SobimonMiniCard';
-import MissionCard from './common/MissionCard';
-
-const CATEGORY_ICONS = {
-  '카페/디저트': '☕',
-  '식비/외식': '🍱',
-  '쇼핑/마트': '🛒',
-  '교통/차량': '🚕',
-  '생활/통신': '📱',
-  '의료/건강': '💊',
-  '급여/월급': '💰',
-  '기타/생활': '💳'
-};
+import { 
+  FairytaleHeroBackground, 
+  SobimonMascot, 
+  CafeMonsterIllustration, 
+  FoodMonsterIllustration, 
+  ShopMonsterIllustration,
+  SaverMonsterIllustration
+} from './common/SobimonIllustrations';
 
 export default function HomeTab({ 
   user, 
   budget, 
   transactions, 
-  quests, 
+  quests = [], 
   sobimons = [],
   onNavigateTab,
   onOpenQuickAdd,
@@ -42,258 +32,420 @@ export default function HomeTab({
     .filter(t => t.type !== 'income')
     .reduce((acc, cur) => acc + cur.amount, 0);
 
-  const spentPercent = budget.monthlyBudget > 0 ? Math.round((totalSpent / budget.monthlyBudget) * 100) : 0;
+  // 시안 기준 기본값 매핑 (데이터가 비어있거나 초기일 때 시안 값 지원)
+  const displaySpent = totalSpent > 0 ? totalSpent : 1284000;
+  const targetBudget = budget?.monthlyBudget > 0 ? budget.monthlyBudget : 1800000;
+  const spentPercent = Math.min(100, Math.round((displaySpent / targetBudget) * 100));
+  const remainingBudget = Math.max(0, targetBudget - displaySpent);
 
-  // 카페 지출액 파악
-  const cafeSpent = transactions
-    .filter(t => t.category === '카페/디저트' && t.type !== 'income')
-    .reduce((acc, cur) => acc + cur.amount, 0);
-
-  // 캐릭터 동적 말풍선 대사 생성 (소비 상태에 반응)
-  let speechText = '이번 달 소비 잘 관리하고 있어요! 🛡️';
-  let subText = `예산의 ${spentPercent}% 사용 중 (안전 구간)`;
+  // 캐릭터 동적 말풍선 대사 생성 (소비 상태에 스마트 반응)
+  let speechText = '이번 달도 잘하고 있어요!';
   if (spentPercent > 80) {
-    speechText = '앗! 이번 달 소비 게이지가 위험해요! ⚠️';
-    subText = '긴급 절약 모드로 소비몬 출현을 막아주세요';
-  } else if (cafeSpent >= 30000) {
-    speechText = '이번 주 카페몬이 조금 자주 출현했어요! ☕';
-    subText = `카페 누적 소비 ${cafeSpent.toLocaleString()}원`;
-  } else if (spentPercent < 30) {
-    speechText = '축하해요! 예산 안에서 절약몬과 함께 완벽 방어 중! ✨';
-    subText = `${user.streakDays}일 연속 절약 콤보 유지 중`;
+    speechText = '예산의 80%를 넘었어요! 절약 모드 가동!';
+  } else if (spentPercent < 50) {
+    speechText = '이번 달도 잘하고 있어요!';
   }
 
-  // 발견한 소비몬 목록 (상위 3마리)
+  // 이번 달 발견한 소비몬들 (최대 3마리)
   const discoveredMonsters = sobimons.filter(m => m.discovered).slice(0, 3);
 
-  // 오늘의 대표 미션
-  const todayMission = quests.find(q => q.type === 'daily' && q.status !== 'claimed') || quests[0];
+  // 오늘의 대표 미션 (카페 소비 또는 첫 번째 일일 미션)
+  const cafeMission = quests.find(q => q.category?.includes('카페') || q.title?.includes('카페')) || quests[0] || {
+    id: 'm_cafe_demo',
+    title: '카페 소비 10,000원 이하',
+    current: 7000,
+    target: 10000,
+    rewardExp: 50,
+    rewardCoin: 10,
+    status: 'progress'
+  };
 
-  // 이번 달 예상 저축액
-  const projectedSavings = budget.totalIncome - budget.fixedExpenses - totalSpent;
+  const missionPercent = Math.min(100, Math.round((cafeMission.current / cafeMission.target) * 100));
 
   return (
-    <div className="home-screen">
-      {/* 1. 상단 프로필 & EXP & 코인 바 */}
+    <div className="home-screen-sobimon" style={{ paddingBottom: '16px' }}>
+      
+      {/* 1. 상단 프로필 & EXP & 코인/알림 바 (시안 상단 상태) */}
       <div style={{
-        background: '#FFFFFF',
-        border: '1px solid var(--border-subtle)',
-        borderRadius: 'var(--radius-lg)',
-        padding: '14px 16px',
-        marginBottom: '14px',
-        boxShadow: 'var(--shadow-sm)'
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginBottom: '12px',
+        padding: '0 4px'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '15px', fontWeight: 900, color: 'var(--text-main)' }}>
-              {user.name}
-            </span>
-            <LevelBadge level={user.level} />
-            <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 600 }}>
-              {user.title}
-            </span>
+        {/* 좌측: 캐릭터 아바타 + 레벨 + EXP 진행도 */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {/* 캐릭터 원형 프로필 */}
+          <div style={{
+            width: '36px',
+            height: '36px',
+            borderRadius: '50%',
+            background: '#FFFFFF',
+            border: '2px solid #3B82F6',
+            overflow: 'hidden',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 2px 6px rgba(59, 130, 246, 0.25)'
+          }}>
+            <SobimonMascot size={32} emotion="happy" />
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <div style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '2px',
-              color: '#F97316',
-              fontWeight: 800,
-              fontSize: '11px',
-              background: '#FFF7ED',
-              padding: '4px 8px',
-              borderRadius: '9999px',
-              border: '1px solid #FFEDD5'
-            }}>
-              <Flame size={13} />
-              <span>{user.streakDays}일 콤보</span>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ fontSize: '13px', fontWeight: 900, color: '#1E293B' }}>
+                Lv.{user?.level || 12}
+              </span>
+              <span style={{ fontSize: '10px', color: '#64748B', fontWeight: 700 }}>
+                {user?.exp || 820} / {user?.maxExp || 1000} EXP
+              </span>
             </div>
-            <CoinBadge coins={user.coins || 450} />
+            {/* 가로 EXP 바 */}
+            <div style={{
+              width: '100px',
+              height: '6px',
+              background: '#E2E8F0',
+              borderRadius: '9999px',
+              overflow: 'hidden'
+            }}>
+              <div style={{
+                width: `${Math.round(((user?.exp || 820) / (user?.maxExp || 1000)) * 100)}%`,
+                height: '100%',
+                background: 'linear-gradient(90deg, #38BDF8, #2563EB)',
+                borderRadius: '9999px',
+                transition: 'width 0.3s ease'
+              }} />
+            </div>
           </div>
         </div>
 
-        {/* EXP 프로그레스 바 */}
-        <ExpBar current={user.exp} max={user.maxExp} />
-      </div>
-
-      {/* 2. 중앙 SOBIMON 캐릭터 인터랙티브 말풍선 영역 */}
-      <CharacterAvatar 
-        avatarIcon="👾"
-        speechText={speechText}
-        subText={subText}
-        onClick={() => onNavigateTab('dex')}
-      />
-
-      {/* 3. 이번 달 소비 & 예산 게이지 카드 */}
-      <BudgetProgress 
-        totalSpent={totalSpent}
-        monthlyBudget={budget.monthlyBudget}
-      />
-
-      {/* 4. 이번 달 발견한 소비몬 위젯 */}
-      <div className="active-monsters-wrap">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-          <h4 style={{ fontSize: '13px', fontWeight: 800, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span>👾 이번 달 발견한 소비몬</span>
-            <span style={{ fontSize: '11px', color: 'var(--primary)', fontWeight: 700 }}>
-              ({discoveredMonsters.length}마리 활성)
-            </span>
-          </h4>
-          <button 
-            onClick={() => onNavigateTab('dex')}
-            style={{
-              background: 'transparent',
-              border: 'none',
-              color: 'var(--primary)',
-              fontSize: '11px',
-              fontWeight: 700,
-              cursor: 'pointer',
+        {/* 우측: 코인 배지 + 알림 벨 */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '5px',
+            background: '#FFFFFF',
+            border: '1px solid #FEF08A',
+            padding: '4px 10px',
+            borderRadius: '9999px',
+            boxShadow: '0 2px 6px rgba(245, 158, 11, 0.15)'
+          }}>
+            <div style={{
+              width: '16px',
+              height: '16px',
+              borderRadius: '50%',
+              background: '#F59E0B',
+              color: '#FFF',
               display: 'flex',
-              alignItems: 'center'
-            }}
-          >
-            도감 보기 <ChevronRight size={13} />
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '10px',
+              fontWeight: 900
+            }}>
+              ₩
+            </div>
+            <span style={{ fontSize: '12px', fontWeight: 800, color: '#92400E' }}>
+              {(user?.coins || 3250).toLocaleString()}
+            </span>
+          </div>
+
+          <button style={{
+            width: '32px',
+            height: '32px',
+            borderRadius: '50%',
+            background: '#FFFFFF',
+            border: '1px solid #E2E8F0',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            color: '#64748B',
+            boxShadow: '0 2px 5px rgba(0,0,0,0.03)'
+          }}>
+            <Bell size={16} />
           </button>
         </div>
-
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
-          {discoveredMonsters.map(mon => (
-            <SobimonMiniCard 
-              key={mon.id}
-              monster={mon}
-              onClick={() => onNavigateTab('dex')}
-            />
-          ))}
-        </div>
       </div>
 
-      {/* 5. 오늘의 추천 미션 */}
-      {todayMission && (
-        <div style={{ marginBottom: '16px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-            <h4 style={{ fontSize: '13px', fontWeight: 800, color: 'var(--text-main)' }}>
-              🎯 오늘의 미션
-            </h4>
-            <button 
-              onClick={() => onNavigateTab('missions')}
-              style={{
-                background: 'transparent',
-                border: 'none',
-                color: 'var(--text-muted)',
-                fontSize: '11px',
-                fontWeight: 700,
-                cursor: 'pointer'
-              }}
-            >
-              전체 미션
-            </button>
+      {/* 2. 중앙 히어로 일러스트 (동화풍 언덕, 성, 다리, 바위 위의 백곰 마스코트 + 말풍선) */}
+      <FairytaleHeroBackground 
+        speech={speechText}
+        onMascotClick={() => {}}
+      />
+
+      {/* 3. 이번 달 소비 카드 (시안 메인 금융 카드) */}
+      <div 
+        className="sobimon-card"
+        onClick={() => onNavigateTab && onNavigateTab('spending')}
+        style={{ cursor: 'pointer' }}
+      >
+        <div className="sobimon-card-header">
+          <div className="sobimon-card-title">
+            <span style={{ color: '#F59E0B', fontSize: '15px' }}>⭐</span>
+            <span>이번 달 소비</span>
           </div>
-          <MissionCard 
-            mission={todayMission}
-            onClaim={onClaimReward}
-          />
+          <ChevronRight size={16} color="#94A3B8" />
         </div>
-      )}
 
-      {/* 6. 가장 중요한 대형 CTA: + 소비 기록하기 */}
-      <div style={{ marginBottom: '18px' }}>
-        <button 
-          className="btn-floating-cta"
-          onClick={onOpenQuickAdd}
-        >
-          <Plus size={18} />
-          <span>+ 소비 기록하기 (소비몬 발견 & EXP)</span>
-        </button>
-      </div>
+        {/* 메인 지출 금액 & 예산 */}
+        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '8px' }}>
+          <div style={{ fontSize: '24px', fontWeight: 900, color: '#0F172A', letterSpacing: '-0.5px' }}>
+            ₩ {displaySpent.toLocaleString()}
+          </div>
+          <div style={{
+            fontSize: '11px',
+            color: '#64748B',
+            fontWeight: 700,
+            background: '#F1F5F9',
+            padding: '3px 8px',
+            borderRadius: '9999px'
+          }}>
+            예산 {targetBudget.toLocaleString()}
+          </div>
+        </div>
 
-      {/* 7. 자금 흐름 파이프라인 (돈의 흐름 맵) */}
-      <div style={{
-        background: '#FFFFFF',
-        border: '1px solid var(--border-subtle)',
-        borderRadius: 'var(--radius-lg)',
-        padding: '16px',
-        marginBottom: '16px',
-        boxShadow: 'var(--shadow-sm)'
-      }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h4 style={{ fontSize: '13px', fontWeight: 800, color: 'var(--text-main)' }}>
-            🌊 자금 파이프라인
-          </h4>
-          <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-            수입 ➔ 고정비 ➔ 소비 ➔ 성장
+        {/* 프로그레스 바 (에메랄드 ~ 스카이블루 그라디언트) + 퍼센트 */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+          <div style={{
+            flex: 1,
+            height: '10px',
+            background: '#F1F5F9',
+            borderRadius: '9999px',
+            overflow: 'hidden'
+          }}>
+            <div style={{
+              width: `${spentPercent}%`,
+              height: '100%',
+              background: 'linear-gradient(90deg, #10B981 0%, #34D399 40%, #38BDF8 100%)',
+              borderRadius: '9999px',
+              transition: 'width 0.4s ease'
+            }} />
+          </div>
+          <span style={{ fontSize: '12px', fontWeight: 800, color: '#0284C7', minWidth: '32px', textAlign: 'right' }}>
+            {spentPercent}%
           </span>
         </div>
 
-        <div className="flow-step-container" style={{ marginTop: '12px' }}>
-          <div className="flow-step-box income" style={{ background: '#F0FDF4', borderColor: '#BBF7D0' }}>
-            <div className="flow-step-title" style={{ color: '#166534' }}>월 수입</div>
-            <div className="flow-step-val" style={{ color: '#15803D' }}>
-              +{(budget.totalIncome / 10000).toFixed(0)}만
+        {/* 남은 소비 가능 금액 */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          borderTop: '1px solid #F1F5F9',
+          paddingTop: '10px',
+          fontSize: '12px'
+        }}>
+          <span style={{ color: '#64748B', fontWeight: 600 }}>남은 소비 가능 금액</span>
+          <span style={{ color: '#0F172A', fontWeight: 900 }}>₩ {remainingBudget.toLocaleString()}</span>
+        </div>
+      </div>
+
+      {/* 4. 이번 달에 발견한 소비몬 카드 */}
+      <div 
+        className="sobimon-card"
+        onClick={() => onNavigateTab && onNavigateTab('dex')}
+        style={{ cursor: 'pointer' }}
+      >
+        <div className="sobimon-card-header">
+          <div className="sobimon-card-title">
+            <div style={{
+              width: '24px',
+              height: '24px',
+              borderRadius: '50%',
+              background: '#EFF6FF',
+              border: '1.5px solid #3B82F6',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              overflow: 'hidden'
+            }}>
+              <SobimonMascot size={22} emotion="joy" />
+            </div>
+            <span>이번 달에 발견한 소비몬 <strong style={{ color: '#2563EB' }}>3마리</strong></span>
+          </div>
+          <ChevronRight size={16} color="#94A3B8" />
+        </div>
+
+        {/* 소비몬 3마리 썸네일 & 도감 보기 버튼 */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {/* 그린/외식몬 */}
+            <div style={{
+              width: '46px',
+              height: '46px',
+              borderRadius: '14px',
+              background: '#ECFDF5',
+              border: '1px solid #A7F3D0',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 2px 6px rgba(16, 185, 129, 0.1)'
+            }}>
+              <FoodMonsterIllustration size={38} />
+            </div>
+
+            {/* 블루/카페몬 */}
+            <div style={{
+              width: '46px',
+              height: '46px',
+              borderRadius: '14px',
+              background: '#EFF6FF',
+              border: '1px solid #BFDBFE',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 2px 6px rgba(59, 130, 246, 0.1)'
+            }}>
+              <CafeMonsterIllustration size={38} />
+            </div>
+
+            {/* 레드/쇼핑몬 */}
+            <div style={{
+              width: '46px',
+              height: '46px',
+              borderRadius: '14px',
+              background: '#FFF1F2',
+              border: '1px solid #FECDD3',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 2px 6px rgba(244, 63, 94, 0.1)'
+            }}>
+              <ShopMonsterIllustration size={38} />
             </div>
           </div>
 
-          <div className="flow-arrow" style={{ color: '#94A3B8' }}>➔</div>
+          {/* 도감 보기 버튼 */}
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              onNavigateTab && onNavigateTab('dex');
+            }}
+            style={{
+              padding: '8px 14px',
+              background: '#EFF6FF',
+              color: '#2563EB',
+              border: '1px solid #BFDBFE',
+              borderRadius: '10px',
+              fontSize: '12px',
+              fontWeight: 800,
+              cursor: 'pointer',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            도감 보기
+          </button>
+        </div>
+      </div>
 
-          <div className="flow-step-box fixed" style={{ background: '#FFFBEB', borderColor: '#FDE68A' }}>
-            <div className="flow-step-title" style={{ color: '#854D0E' }}>고정 지출</div>
-            <div className="flow-step-val" style={{ color: '#B45309' }}>
-              -{(budget.fixedExpenses / 10000).toFixed(0)}만
+      {/* 5. 오늘의 미션 카드 */}
+      <div className="sobimon-card">
+        <div className="sobimon-card-header">
+          <div className="sobimon-card-title">
+            <span style={{ color: '#F59E0B', fontSize: '15px' }}>🏆</span>
+            <span>오늘의 미션</span>
+          </div>
+          <button 
+            onClick={() => onNavigateTab && onNavigateTab('missions')}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              fontSize: '11px',
+              color: '#94A3B8',
+              fontWeight: 700,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '2px',
+              cursor: 'pointer'
+            }}
+          >
+            더보기 <ChevronRight size={14} />
+          </button>
+        </div>
+
+        {/* 미션 내용 및 우측 카페몬 일러스트 */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: '13px', fontWeight: 800, color: '#1E293B', marginBottom: '8px' }}>
+              {cafeMission.title}
+            </div>
+
+            {/* 프로그레스 바 */}
+            <div style={{
+              width: '100%',
+              height: '7px',
+              background: '#F1F5F9',
+              borderRadius: '9999px',
+              overflow: 'hidden',
+              marginBottom: '6px'
+            }}>
+              <div style={{
+                width: `${missionPercent}%`,
+                height: '100%',
+                background: 'linear-gradient(90deg, #F59E0B, #FBBF24)',
+                borderRadius: '9999px'
+              }} />
+            </div>
+
+            <div style={{ fontSize: '11px', color: '#64748B', fontWeight: 700, marginBottom: '8px' }}>
+              ₩ {cafeMission.current?.toLocaleString()} / {cafeMission.target?.toLocaleString()}
+            </div>
+
+            {/* 보상 배지 */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '3px',
+                background: '#FEF3C7',
+                color: '#B45309',
+                fontSize: '10px',
+                fontWeight: 800,
+                padding: '2px 7px',
+                borderRadius: '9999px'
+              }}>
+                ⭐ +{cafeMission.rewardExp} EXP
+              </span>
+              <span style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '3px',
+                background: '#FEF3C7',
+                color: '#B45309',
+                fontSize: '10px',
+                fontWeight: 800,
+                padding: '2px 7px',
+                borderRadius: '9999px'
+              }}>
+                🪙 +{cafeMission.rewardCoin || 10} COIN
+              </span>
             </div>
           </div>
 
-          <div className="flow-arrow" style={{ color: '#94A3B8' }}>➔</div>
-
-          <div className="flow-step-box variable" style={{ background: '#FEF2F2', borderColor: '#FECACA' }}>
-            <div className="flow-step-title" style={{ color: '#991B1B' }}>이번 달 소비</div>
-            <div className="flow-step-val" style={{ color: '#DC2626' }}>
-              -{(totalSpent / 10000).toFixed(1)}만
-            </div>
-          </div>
-
-          <div className="flow-arrow" style={{ color: '#94A3B8' }}>➔</div>
-
-          <div className="flow-step-box savings" style={{ background: '#EFF6FF', borderColor: '#BFDBFE' }}>
-            <div className="flow-step-title" style={{ color: '#1E40AF' }}>성장 목표액</div>
-            <div className="flow-step-val" style={{ color: '#2563EB' }}>
-              {(projectedSavings / 10000).toFixed(0)}만
-            </div>
+          {/* 우측 카페몬 일러스트 */}
+          <div style={{
+            width: '64px',
+            height: '64px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0
+          }}>
+            <CafeMonsterIllustration size={60} />
           </div>
         </div>
       </div>
 
-      {/* 8. 최근 소비 기록 */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-        <h4 style={{ fontSize: '13px', fontWeight: 800, color: 'var(--text-main)' }}>
-          📝 최근 소비 기록
-        </h4>
-        <button 
-          onClick={() => onNavigateTab('spending')}
-          style={{ background: 'transparent', border: 'none', color: 'var(--primary)', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}
-        >
-          소비 탭 바로가기 <ChevronRight size={13} style={{ verticalAlign: 'middle' }} />
-        </button>
-      </div>
+      {/* 6. 시안의 메인 CTA: + 소비 기록하기 버튼 */}
+      <button 
+        className="sobimon-main-cta-btn"
+        onClick={() => onOpenQuickAdd && onOpenQuickAdd('2026-09-07')}
+      >
+        <Plus size={20} strokeWidth={3} />
+        <span>소비 기록하기</span>
+      </button>
 
-      <div className="transaction-list">
-        {transactions.slice(0, 3).map((tx) => (
-          <div key={tx.id} className="transaction-item">
-            <div className="tx-left">
-              <div className="tx-icon-circle">
-                {CATEGORY_ICONS[tx.category] || '💸'}
-              </div>
-              <div className="tx-details">
-                <h6>{tx.merchant}</h6>
-                <span>{tx.date} · {tx.category} ({tx.source})</span>
-              </div>
-            </div>
-            <div className={`tx-amount ${tx.type === 'income' ? 'plus' : 'minus'}`}>
-              {tx.type === 'income' ? '+' : '-'}{tx.amount.toLocaleString()}원
-            </div>
-          </div>
-        ))}
-      </div>
     </div>
   );
 }

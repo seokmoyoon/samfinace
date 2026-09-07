@@ -1,259 +1,241 @@
 import React, { useState } from 'react';
-import { Sparkles, HelpCircle, ChevronRight, X, ArrowRight, ShieldCheck, Flame } from 'lucide-react';
+import { ChevronLeft, ChevronRight, HelpCircle, Sparkles } from 'lucide-react';
+import { 
+  SobimonMascot, 
+  CafeMonsterIllustration, 
+  FoodMonsterIllustration, 
+  ShopMonsterIllustration, 
+  SaverMonsterIllustration 
+} from './common/SobimonIllustrations';
 
 export default function SobimonDexTab({ user, sobimons = [] }) {
-  const [selectedMon, setSelectedMon] = useState(null);
-  const [filterElement, setFilterElement] = useState('all');
+  const [filterRarity, setFilterRarity] = useState('all'); // 'all' | 'normal' | 'rare' | 'epic' | 'legend'
 
-  const elements = ['all', '카페/음료', '식비/외식', '쇼핑/마트', '교통/차량', '절약/무지출', '성장/저축', '구독/정기결제'];
+  // 시안 기준의 대표 소비몬 그리드 데이터
+  const dexList = [
+    {
+      id: 'food',
+      name: '식비몬',
+      level: 5,
+      rarity: 'normal',
+      discovered: true,
+      component: <FoodMonsterIllustration size={44} />,
+      bg: '#FFF7ED',
+      border: '#FED7AA'
+    },
+    {
+      id: 'cafe',
+      name: '카페몬',
+      level: 3,
+      rarity: 'normal',
+      discovered: true,
+      component: <CafeMonsterIllustration size={44} />,
+      bg: '#EFF6FF',
+      border: '#BFDBFE'
+    },
+    {
+      id: 'shop',
+      name: '쇼핑몬',
+      level: 6,
+      rarity: 'rare',
+      discovered: true,
+      component: <ShopMonsterIllustration size={44} />,
+      bg: '#FDF2F8',
+      border: '#FBCFE8'
+    },
+    {
+      id: 'saving',
+      name: '저축몬',
+      level: 6,
+      rarity: 'epic',
+      discovered: true,
+      component: (
+        <div style={{ fontSize: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          🪙
+        </div>
+      ),
+      bg: '#FEFCE8',
+      border: '#FEF08A'
+    },
+    {
+      id: 'saver',
+      name: '절약몬',
+      level: 4,
+      rarity: 'epic',
+      discovered: true,
+      component: <SaverMonsterIllustration size={44} />,
+      bg: '#ECFDF5',
+      border: '#A7F3D0'
+    },
+    {
+      id: 'hidden_1',
+      name: '???',
+      level: null,
+      rarity: 'legend',
+      discovered: false,
+      component: (
+        <div style={{ color: '#94A3B8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <HelpCircle size={32} />
+        </div>
+      ),
+      bg: '#F8FAFC',
+      border: '#E2E8F0'
+    }
+  ];
 
-  const filteredSobimons = sobimons.filter(m => {
-    if (filterElement === 'all') return true;
-    return m.element === filterElement;
+  const filteredList = dexList.filter(item => {
+    if (filterRarity === 'all') return true;
+    return item.rarity === filterRarity;
   });
 
-  const discoveredCount = sobimons.filter(m => m.discovered).length;
-  const totalCount = sobimons.length;
-  const dexRate = Math.round((discoveredCount / totalCount) * 100);
-
   return (
-    <div className="dex-screen">
-      {/* 도감 요약 헤더 */}
+    <div className="dex-screen-sobimon" style={{ paddingBottom: '20px' }}>
+      
+      {/* 상단 헤더: < 소비몬 도감 */}
       <div style={{
-        background: '#FFFFFF',
-        border: '1px solid var(--border-subtle)',
-        borderRadius: 'var(--radius-lg)',
-        padding: '16px',
-        marginBottom: '14px',
-        boxShadow: 'var(--shadow-sm)'
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        position: 'relative',
+        marginBottom: '16px'
       }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-          <div>
-            <h3 style={{ fontSize: '16px', fontWeight: 900, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span>📖 SOBIMON DEX</span>
-              <span style={{ fontSize: '11px', color: 'var(--primary)', fontWeight: 800 }}>(소비몬 도감)</span>
-            </h3>
-            <p style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-              내 소비 습관에 따라 소환되고 진화하는 몬스터 도감입니다.
-            </p>
-          </div>
-          <div style={{
-            background: 'var(--primary-pastel)',
-            border: '1px solid #BFDBFE',
-            borderRadius: '9999px',
-            padding: '4px 10px',
-            fontSize: '11px',
-            color: 'var(--primary)',
-            fontWeight: 900
-          }}>
-            수집률 {dexRate}% ({discoveredCount}/{totalCount})
-          </div>
-        </div>
-
-        {/* 수집 프로그레스 바 */}
-        <div style={{
-          width: '100%',
-          height: '6px',
-          background: '#F1F5F9',
-          borderRadius: '9999px',
-          overflow: 'hidden'
-        }}>
-          <div style={{
-            width: `${dexRate}%`,
-            height: '100%',
-            background: 'linear-gradient(90deg, #3B82F6, #8B5CF6)',
-            borderRadius: '9999px',
-            transition: 'width 0.4s ease'
-          }} />
-        </div>
+        <h3 style={{ fontSize: '17px', fontWeight: 900, color: '#0F172A' }}>
+          소비몬 도감
+        </h3>
       </div>
 
-      {/* 속성 필터 알약 칩 */}
+      {/* 1. 전체 / 일반 / 고급 / 희귀 / 전설 필터 칩 */}
       <div style={{
         display: 'flex',
         gap: '6px',
-        marginBottom: '14px',
+        marginBottom: '18px',
         overflowX: 'auto',
-        paddingBottom: '2px'
+        paddingBottom: '4px'
       }}>
-        {elements.map(el => (
+        {[
+          { id: 'all', label: '전체' },
+          { id: 'normal', label: '일반' },
+          { id: 'rare', label: '고급' },
+          { id: 'epic', label: '희귀' },
+          { id: 'legend', label: '전설' }
+        ].map(item => (
           <button
-            key={el}
-            onClick={() => setFilterElement(el)}
+            key={item.id}
+            onClick={() => setFilterRarity(item.id)}
             style={{
-              padding: '5px 12px',
+              padding: '6px 14px',
               borderRadius: '9999px',
               border: '1px solid',
-              borderColor: filterElement === el ? 'var(--primary)' : 'var(--border-subtle)',
-              background: filterElement === el ? 'var(--primary)' : '#FFFFFF',
-              color: filterElement === el ? '#FFFFFF' : 'var(--text-muted)',
-              fontSize: '11px',
-              fontWeight: 700,
+              borderColor: filterRarity === item.id ? '#2563EB' : '#E2E8F0',
+              background: filterRarity === item.id ? '#2563EB' : '#FFFFFF',
+              color: filterRarity === item.id ? '#FFFFFF' : '#64748B',
+              fontSize: '12px',
+              fontWeight: 800,
               cursor: 'pointer',
               whiteSpace: 'nowrap',
-              boxShadow: filterElement === el ? '0 2px 6px rgba(37, 99, 235, 0.25)' : 'none'
+              boxShadow: filterRarity === item.id ? '0 2px 6px rgba(37, 99, 235, 0.25)' : 'none',
+              transition: 'all 0.15s ease'
             }}
           >
-            {el === 'all' ? '전체 속성' : el}
+            {item.label}
           </button>
         ))}
       </div>
 
-      {/* 소비몬 그리드 */}
-      <div className="dex-grid">
-        {filteredSobimons.map(mon => {
-          if (mon.discovered) {
-            return (
-              <div 
-                key={mon.id}
-                className="dex-card discovered"
-                onClick={() => setSelectedMon(mon)}
-                style={{ cursor: 'pointer' }}
-              >
-                <div className="dex-card-top">
-                  <div className="dex-card-avatar" style={{ background: `${mon.color}15`, border: `1px solid ${mon.color}40` }}>
-                    {mon.badge}
-                  </div>
-                  <span style={{
-                    fontSize: '9px',
-                    fontWeight: 800,
-                    color: mon.threat === '보스급 소비몬' ? '#EF4444' : mon.threat === '아군 수호신' ? '#10B981' : '#F59E0B',
-                    background: '#F8FAFC',
-                    padding: '2px 6px',
-                    borderRadius: '4px',
-                    border: '1px solid #E2E8F0'
-                  }}>
-                    {mon.threat}
-                  </span>
-                </div>
+      {/* 2. 소비몬 그리드 카드 (3열 그리드) */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(3, 1fr)',
+        gap: '10px',
+        marginBottom: '20px'
+      }}>
+        {filteredList.map((mon) => (
+          <div
+            key={mon.id}
+            style={{
+              background: mon.bg,
+              border: `1.5px solid ${mon.border}`,
+              borderRadius: '18px',
+              padding: '14px 8px',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.03)',
+              transition: 'transform 0.15s ease',
+              cursor: 'pointer'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+            onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+          >
+            {/* 캐릭터 이미지 / 실루엣 */}
+            <div style={{
+              width: '50px',
+              height: '50px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              opacity: mon.discovered ? 1 : 0.4
+            }}>
+              {mon.component}
+            </div>
 
-                <div className="dex-card-name">
-                  {mon.name} <span style={{ fontSize: '11px', color: 'var(--primary)' }}>Lv.{mon.level}</span>
-                </div>
-                <div className="dex-card-element">
-                  속성: {mon.element}
-                </div>
-                <div className="dex-card-quote">
-                  {mon.quote}
-                </div>
-                <div className="dex-card-condition">
-                  🔍 {mon.condition}
-                </div>
-              </div>
-            );
-          } else {
-            return (
-              <div key={mon.id} className="dex-card silhouette">
-                <div className="dex-card-top">
-                  <div className="dex-card-avatar" style={{ background: '#E2E8F0', color: '#94A3B8' }}>
-                    ❓
-                  </div>
-                  <span style={{ fontSize: '9px', fontWeight: 800, color: '#94A3B8' }}>미발견</span>
-                </div>
-                <div className="dex-card-name" style={{ color: '#94A3B8' }}>
-                  ??? (미확인 몬스터)
-                </div>
-                <div className="dex-card-element">
-                  속성: 미확인
-                </div>
-                <div className="dex-card-quote" style={{ background: '#F1F5F9', color: '#94A3B8' }}>
-                  "아직 출현 조건이 해금되지 않았습니다..."
-                </div>
-                <div className="dex-card-condition" style={{ color: '#EF4444' }}>
-                  🔒 {mon.condition}
-                </div>
-              </div>
-            );
-          }
-        })}
+            {/* 소비몬 이름 */}
+            <span style={{
+              fontSize: '12px',
+              fontWeight: 800,
+              color: mon.discovered ? '#0F172A' : '#94A3B8'
+            }}>
+              {mon.name}
+            </span>
+
+            {/* 레벨 뱃지 */}
+            {mon.discovered && mon.level && (
+              <span style={{
+                fontSize: '10px',
+                color: '#64748B',
+                fontWeight: 700
+              }}>
+                Lv.{mon.level}
+              </span>
+            )}
+          </div>
+        ))}
       </div>
 
-      {/* 소비몬 상세 & 진화 트리 모달 (Section 11) */}
-      {selectedMon && (
-        <div className="levelup-overlay" onClick={() => setSelectedMon(null)}>
-          <div 
-            className="levelup-card" 
-            onClick={e => e.stopPropagation()}
-            style={{ border: '2px solid var(--primary)', maxWidth: '360px', textAlign: 'left' }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ fontSize: '28px' }}>{selectedMon.badge}</span>
-                <div>
-                  <h4 style={{ fontSize: '16px', fontWeight: 900, color: 'var(--text-main)' }}>
-                    {selectedMon.name} <span style={{ fontSize: '12px', color: 'var(--primary)' }}>Lv.{selectedMon.level}</span>
-                  </h4>
-                  <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-                    속성: {selectedMon.element} · {selectedMon.threat}
-                  </span>
-                </div>
-              </div>
-              <button 
-                onClick={() => setSelectedMon(null)}
-                style={{ background: 'transparent', border: 'none', color: '#94A3B8', cursor: 'pointer' }}
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            <div style={{
-              background: '#F8FAFC',
-              border: '1px solid var(--border-subtle)',
-              borderRadius: 'var(--radius-md)',
-              padding: '12px',
-              marginBottom: '14px'
-            }}>
-              <p style={{ fontSize: '12px', color: 'var(--text-main)', lineHeight: '1.4', marginBottom: '6px' }}>
-                {selectedMon.description}
-              </p>
-              <div style={{ fontSize: '11px', color: '#4F46E5', fontStyle: 'italic', fontWeight: 600 }}>
-                {selectedMon.quote}
-              </div>
-            </div>
-
-            {/* 진화 트리 (Section 11) */}
-            {selectedMon.evolutions && (
-              <div style={{ marginBottom: '16px' }}>
-                <h5 style={{ fontSize: '12px', fontWeight: 800, color: 'var(--text-muted)', marginBottom: '8px' }}>
-                  🌱 캐릭터 진화 트리
-                </h5>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  background: '#EFF6FF',
-                  padding: '8px 12px',
-                  borderRadius: 'var(--radius-sm)',
-                  border: '1px solid #DBEAFE'
-                }}>
-                  {selectedMon.evolutions.map((stage, idx) => (
-                    <React.Fragment key={stage}>
-                      <span style={{
-                        fontSize: '11px',
-                        fontWeight: stage === selectedMon.name ? 900 : 600,
-                        color: stage === selectedMon.name ? 'var(--primary)' : 'var(--text-muted)'
-                      }}>
-                        {stage}
-                      </span>
-                      {idx < selectedMon.evolutions.length - 1 && (
-                        <span style={{ color: '#94A3B8', fontSize: '10px' }}>➔</span>
-                      )}
-                    </React.Fragment>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            <button 
-              className="btn-primary"
-              onClick={() => setSelectedMon(null)}
-              style={{ width: '100%', padding: '10px' }}
-            >
-              닫기
-            </button>
+      {/* 3. 하단 CTA 다크 배너: "더 많은 소비몬을 만나보세요! >" */}
+      <div style={{
+        background: '#0F172A',
+        color: '#FFFFFF',
+        borderRadius: '16px',
+        padding: '12px 16px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        cursor: 'pointer',
+        boxShadow: '0 4px 16px rgba(15, 23, 42, 0.25)'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div style={{
+            width: '28px',
+            height: '28px',
+            borderRadius: '50%',
+            background: '#FFFFFF',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            overflow: 'hidden'
+          }}>
+            <SobimonMascot size={26} emotion="happy" />
           </div>
+          <span style={{ fontSize: '12px', fontWeight: 800 }}>
+            더 많은 소비몬을 만나보세요!
+          </span>
         </div>
-      )}
+        <ChevronRight size={16} color="#94A3B8" />
+      </div>
+
     </div>
   );
 }

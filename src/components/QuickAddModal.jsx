@@ -1,44 +1,69 @@
 import React, { useState } from 'react';
-import { X, Check, ArrowDownCircle, ArrowUpCircle, Repeat } from 'lucide-react';
+import { 
+  ChevronLeft, 
+  X, 
+  Sparkles,
+  Utensils,
+  Coffee,
+  Bus,
+  ShoppingBag,
+  Home as HomeIcon,
+  Gamepad2,
+  Pill,
+  LayoutGrid
+} from 'lucide-react';
+
+import { SobimonMascot } from './common/SobimonIllustrations';
 import { INITIAL_ACCOUNTS } from '../data/mockData';
 
-const EXPENSE_CATEGORIES = ['식비/외식', '카페/디저트', '쇼핑/마트', '교통/차량', '생활/통신', '의료/건강', '기타/생활'];
-const INCOME_CATEGORIES = ['급여/월급', '상여금', '금융소득', '부수입/용돈', '기타 수입'];
-const TRANSFER_CATEGORIES = ['적금/저축', '투자/주식', '대출상환', '통장간이체'];
+// 시안의 8대 카테고리 정의
+const CATEGORIES_DATA = [
+  { id: '식비/외식', label: '식비', icon: Utensils, bg: '#FFEDD5', color: '#EA580C' },
+  { id: '카페/디저트', label: '카페', icon: Coffee, bg: '#CCFBF1', color: '#0D9488' },
+  { id: '교통/차량', label: '교통', icon: Bus, bg: '#E0F2FE', color: '#0284C7' },
+  { id: '쇼핑/마트', label: '쇼핑', icon: ShoppingBag, bg: '#FCE7F3', color: '#DB2777' },
+  { id: '생활/통신', label: '생활', icon: HomeIcon, bg: '#D1FAE5', color: '#059669' },
+  { id: '문화/여가', label: '문화/여가', icon: Gamepad2, bg: '#EDE9FE', color: '#7C3AED' },
+  { id: '의료/건강', label: '의료', icon: Pill, bg: '#DBEAFE', color: '#2563EB' },
+  { id: '기타/생활', label: '기타', icon: LayoutGrid, bg: '#FEF3C7', color: '#D97706' }
+];
 
 export default function QuickAddModal({ isOpen, onClose, onSave, defaultDate }) {
   if (!isOpen) return null;
 
   const [type, setType] = useState('expense'); // 'expense' | 'income' | 'transfer'
-  const [amount, setAmount] = useState('');
-  const [merchant, setMerchant] = useState('');
-  const [category, setCategory] = useState(EXPENSE_CATEGORIES[0]);
-  const [account, setAccount] = useState(INITIAL_ACCOUNTS[0].name);
-  const [date, setDate] = useState(defaultDate || '2026-09-07');
+  const [amount, setAmount] = useState('12000');
+  const [selectedCat, setSelectedCat] = useState(CATEGORIES_DATA[0].id);
   const [memo, setMemo] = useState('');
+  const [date, setDate] = useState(defaultDate || '2026-09-07');
+  const [showDiscoveryPopup, setShowDiscoveryPopup] = useState(false);
+  const [savedData, setSavedData] = useState(null);
 
-  const handleTypeChange = (newType) => {
-    setType(newType);
-    if (newType === 'expense') setCategory(EXPENSE_CATEGORIES[0]);
-    else if (newType === 'income') setCategory(INCOME_CATEGORIES[0]);
-    else setCategory(TRANSFER_CATEGORIES[0]);
+  // 금액 포맷팅
+  const handleAmountChange = (e) => {
+    const raw = e.target.value.replace(/[^0-9]/g, '');
+    setAmount(raw);
+  };
+
+  const handleClearAmount = () => {
+    setAmount('');
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const numAmount = parseInt(amount.replace(/[^0-9]/g, ''), 10);
+    const numAmount = parseInt(amount, 10);
     if (isNaN(numAmount) || numAmount <= 0) {
       alert('올바른 금액을 입력해 주세요.');
       return;
     }
 
     const newItem = {
-      id: 'manual_' + Date.now(),
+      id: 'tx_' + Date.now(),
       type: type === 'transfer' ? 'expense' : type,
       amount: numAmount,
-      merchant: merchant.trim() || (type === 'income' ? '수입' : '지출'),
-      cardCompany: account,
-      category,
+      merchant: memo.trim() || (type === 'income' ? '수입' : selectedCat.split('/')[0]),
+      cardCompany: INITIAL_ACCOUNTS[0].name,
+      category: selectedCat,
       date,
       time: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }),
       source: '직접 입력',
@@ -46,14 +71,15 @@ export default function QuickAddModal({ isOpen, onClose, onSave, defaultDate }) 
     };
 
     onSave(newItem);
-    onClose();
+    setSavedData(newItem);
+    // 시안의 "소비몬이 발견됐어요!" 피드백 팝업 띄우기
+    setShowDiscoveryPopup(true);
   };
 
-  const categories = type === 'expense' 
-    ? EXPENSE_CATEGORIES 
-    : type === 'income' 
-      ? INCOME_CATEGORIES 
-      : TRANSFER_CATEGORIES;
+  const handleFinish = () => {
+    setShowDiscoveryPopup(false);
+    onClose();
+  };
 
   return (
     <div style={{
@@ -62,259 +88,296 @@ export default function QuickAddModal({ isOpen, onClose, onSave, defaultDate }) 
       left: 0,
       right: 0,
       bottom: 0,
-      background: 'rgba(0, 0, 0, 0.75)',
-      backdropFilter: 'blur(6px)',
+      background: 'rgba(15, 23, 42, 0.65)',
+      backdropFilter: 'blur(5px)',
       display: 'flex',
       alignItems: 'flex-end',
       justifyContent: 'center',
       zIndex: 2000
     }}>
       <div style={{
-        background: 'var(--bg-surface)',
+        background: '#FFFFFF',
         borderTopLeftRadius: '28px',
         borderTopRightRadius: '28px',
-        border: '1px solid var(--border-subtle)',
         width: '100%',
-        maxWidth: '420px',
-        padding: '24px 20px',
-        boxShadow: 'var(--shadow-md)',
+        maxWidth: '430px',
+        maxHeight: '92vh',
+        overflowY: 'auto',
+        padding: '20px 20px 32px',
+        boxShadow: '0 -10px 40px rgba(0, 0, 0, 0.15)',
         animation: 'slideUp 0.25s ease-out'
       }}>
-        {/* 모달 상단 헤더 */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px' }}>
-          <h3 style={{ fontSize: '16px', fontWeight: 800, color: 'var(--text-main)' }}>
-            ⚡ 소비 & 수입 직접 기록
-          </h3>
+        {/* 상단 헤더: < 소비 기록     우측: 캐릭터 아바타 */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
           <button 
             onClick={onClose}
-            style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              color: '#334155'
+            }}
           >
-            <X size={20} />
+            <ChevronLeft size={24} />
           </button>
+
+          <h3 style={{ fontSize: '17px', fontWeight: 900, color: '#0F172A', letterSpacing: '-0.3px' }}>
+            소비 기록
+          </h3>
+
+          {/* 우측 캐릭터 아바타 */}
+          <div style={{
+            width: '32px',
+            height: '32px',
+            borderRadius: '50%',
+            background: '#EFF6FF',
+            border: '1.5px solid #3B82F6',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            overflow: 'hidden'
+          }}>
+            <SobimonMascot size={30} emotion="happy" />
+          </div>
         </div>
 
-        {/* 1. 수입 / 소비 / 저축 3단 탭 */}
+        {/* 1. 지출 / 수입 / 이체 세그먼트 버튼 */}
         <div style={{
           display: 'flex',
-          gap: '4px',
-          background: 'rgba(255, 255, 255, 0.05)',
+          background: '#F1F5F9',
           padding: '4px',
-          borderRadius: 'var(--radius-md)',
-          marginBottom: '18px'
+          borderRadius: '9999px',
+          marginBottom: '20px'
         }}>
-          <button
-            type="button"
-            onClick={() => handleTypeChange('expense')}
-            style={{
-              flex: 1,
-              padding: '8px',
-              border: 'none',
-              borderRadius: 'var(--radius-sm)',
-              fontSize: '12px',
-              fontWeight: 700,
-              cursor: 'pointer',
-              background: type === 'expense' ? '#EF4444' : 'transparent',
-              color: type === 'expense' ? '#fff' : 'var(--text-muted)'
-            }}
-          >
-            소비 (-)
-          </button>
-          <button
-            type="button"
-            onClick={() => handleTypeChange('income')}
-            style={{
-              flex: 1,
-              padding: '8px',
-              border: 'none',
-              borderRadius: 'var(--radius-sm)',
-              fontSize: '12px',
-              fontWeight: 700,
-              cursor: 'pointer',
-              background: type === 'income' ? 'var(--success)' : 'transparent',
-              color: type === 'income' ? '#fff' : 'var(--text-muted)'
-            }}
-          >
-            수입 (+)
-          </button>
-          <button
-            type="button"
-            onClick={() => handleTypeChange('transfer')}
-            style={{
-              flex: 1,
-              padding: '8px',
-              border: 'none',
-              borderRadius: 'var(--radius-sm)',
-              fontSize: '12px',
-              fontWeight: 700,
-              cursor: 'pointer',
-              background: type === 'transfer' ? 'var(--primary)' : 'transparent',
-              color: type === 'transfer' ? '#fff' : 'var(--text-muted)'
-            }}
-          >
-            성장/저축 (⇄)
-          </button>
+          {[
+            { id: 'expense', label: '지출' },
+            { id: 'income', label: '수입' },
+            { id: 'transfer', label: '이체' }
+          ].map(item => (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => setType(item.id)}
+              style={{
+                flex: 1,
+                padding: '9px 0',
+                border: 'none',
+                borderRadius: '9999px',
+                fontSize: '13px',
+                fontWeight: 800,
+                cursor: 'pointer',
+                background: type === item.id ? '#2563EB' : 'transparent',
+                color: type === item.id ? '#FFFFFF' : '#64748B',
+                boxShadow: type === item.id ? '0 2px 8px rgba(37, 99, 235, 0.3)' : 'none',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              {item.label}
+            </button>
+          ))}
         </div>
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-          {/* 금액 입력 */}
-          <div>
-            <label style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>
-              금액
-            </label>
+        {/* 2. 금액 입력 (12,000 원 + 클리어 버튼) */}
+        <div style={{ marginBottom: '22px' }}>
+          <label style={{ fontSize: '12px', fontWeight: 700, color: '#64748B', display: 'block', marginBottom: '8px' }}>
+            금액
+          </label>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            background: '#F8FAFC',
+            border: '1.5px solid #E2E8F0',
+            borderRadius: '16px',
+            padding: '12px 16px'
+          }}>
             <input
               type="text"
-              placeholder="0원"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value.replace(/[^0-9]/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, ','))}
-              style={{
-                width: '100%',
-                background: 'rgba(0, 0, 0, 0.3)',
-                border: '1px solid var(--border-subtle)',
-                borderRadius: 'var(--radius-md)',
-                padding: '12px',
-                fontSize: '18px',
-                fontWeight: 800,
-                color: type === 'income' ? 'var(--success)' : '#F87171',
-                outline: 'none'
-              }}
+              value={amount ? Number(amount).toLocaleString() : ''}
+              onChange={handleAmountChange}
+              placeholder="0"
               autoFocus
-            />
-          </div>
-
-          {/* 가맹점 / 내용 */}
-          <div>
-            <label style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>
-              사용처 / 가맹점
-            </label>
-            <input
-              type="text"
-              placeholder="예: 스타벅스, 회사 월급, 저축 등"
-              value={merchant}
-              onChange={(e) => setMerchant(e.target.value)}
               style={{
+                border: 'none',
+                background: 'transparent',
+                fontSize: '22px',
+                fontWeight: 900,
+                color: '#0F172A',
                 width: '100%',
-                background: 'rgba(0, 0, 0, 0.3)',
-                border: '1px solid var(--border-subtle)',
-                borderRadius: 'var(--radius-md)',
-                padding: '10px 12px',
-                fontSize: '13px',
-                color: 'var(--text-main)',
                 outline: 'none'
               }}
             />
-          </div>
-
-          {/* 자산 / 결제수단 & 날짜 2열 */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-            <div>
-              <label style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>
-                결제수단 / 자산
-              </label>
-              <select
-                value={account}
-                onChange={(e) => setAccount(e.target.value)}
-                style={{
-                  width: '100%',
-                  background: '#1A2138',
-                  border: '1px solid var(--border-subtle)',
-                  borderRadius: 'var(--radius-md)',
-                  padding: '10px',
-                  fontSize: '12px',
-                  color: 'var(--text-main)',
-                  outline: 'none'
-                }}
-              >
-                {INITIAL_ACCOUNTS.map((acc) => (
-                  <option key={acc.id} value={acc.name}>
-                    {acc.icon} {acc.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>
-                날짜
-              </label>
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                style={{
-                  width: '100%',
-                  background: '#1A2138',
-                  border: '1px solid var(--border-subtle)',
-                  borderRadius: 'var(--radius-md)',
-                  padding: '9px 10px',
-                  fontSize: '12px',
-                  color: 'var(--text-main)',
-                  outline: 'none'
-                }}
-              />
-            </div>
-          </div>
-
-          {/* 카테고리 선택 알약 칩 */}
-          <div>
-            <label style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>
-              소비 속성 (카테고리)
-            </label>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-              {categories.map((cat) => (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              {amount && (
                 <button
                   type="button"
-                  key={cat}
-                  onClick={() => setCategory(cat)}
+                  onClick={handleClearAmount}
                   style={{
-                    padding: '6px 10px',
-                    borderRadius: 'var(--radius-full)',
-                    border: '1px solid',
-                    borderColor: category === cat ? 'var(--primary-light)' : 'var(--border-subtle)',
-                    background: category === cat ? 'rgba(99, 102, 241, 0.2)' : 'rgba(255, 255, 255, 0.03)',
-                    color: category === cat ? '#fff' : 'var(--text-muted)',
-                    fontSize: '11px',
-                    fontWeight: 600,
+                    width: '20px',
+                    height: '20px',
+                    borderRadius: '50%',
+                    background: '#CBD5E1',
+                    border: 'none',
+                    color: '#FFF',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
                     cursor: 'pointer'
                   }}
                 >
-                  {cat}
+                  <X size={12} strokeWidth={3} />
                 </button>
-              ))}
+              )}
+              <span style={{ fontSize: '16px', fontWeight: 800, color: '#64748B' }}>원</span>
             </div>
           </div>
+        </div>
 
-          {/* 메모 */}
-          <div>
-            <label style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>
-              메모 (선택)
+        {/* 3. 카테고리 8개 그리드 (시안 반영) */}
+        <div style={{ marginBottom: '20px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+            <label style={{ fontSize: '12px', fontWeight: 700, color: '#64748B' }}>
+              카테고리
             </label>
-            <input
-              type="text"
-              placeholder="상세 메모"
-              value={memo}
-              onChange={(e) => setMemo(e.target.value)}
-              style={{
-                width: '100%',
-                background: 'rgba(0, 0, 0, 0.3)',
-                border: '1px solid var(--border-subtle)',
-                borderRadius: 'var(--radius-md)',
-                padding: '8px 12px',
-                fontSize: '12px',
-                color: 'var(--text-main)',
-                outline: 'none'
-              }}
-            />
+            <span style={{ fontSize: '11px', color: '#2563EB', fontWeight: 800 }}>
+              {selectedCat.split('/')[0]} &gt;
+            </span>
           </div>
 
-          {/* 저장 버튼 */}
-          <button
-            type="submit"
-            className="btn-primary"
-            style={{ marginTop: '8px', padding: '14px', fontSize: '14px' }}
-          >
-            기록 완료 (+10 EXP 획득 ⚡)
-          </button>
-        </form>
+          <div className="sobimon-category-grid">
+            {CATEGORIES_DATA.map((cat) => {
+              const IconComp = cat.icon;
+              const isSelected = selectedCat === cat.id;
+
+              return (
+                <div
+                  key={cat.id}
+                  className={`sobimon-cat-btn ${isSelected ? 'active' : ''}`}
+                  onClick={() => setSelectedCat(cat.id)}
+                >
+                  <div 
+                    className="sobimon-cat-icon"
+                    style={{ background: cat.bg, color: cat.color }}
+                  >
+                    <IconComp size={22} strokeWidth={2.2} />
+                  </div>
+                  <span style={{
+                    fontSize: '11px',
+                    fontWeight: isSelected ? 800 : 600,
+                    color: isSelected ? '#1D4ED8' : '#64748B'
+                  }}>
+                    {cat.label}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* 4. 메모 (선택) */}
+        <div style={{ marginBottom: '24px' }}>
+          <label style={{ fontSize: '12px', fontWeight: 700, color: '#64748B', display: 'block', marginBottom: '8px' }}>
+            메모 (선택)
+          </label>
+          <input
+            type="text"
+            value={memo}
+            onChange={(e) => setMemo(e.target.value)}
+            placeholder="예) 점심 식사"
+            style={{
+              width: '100%',
+              padding: '12px 14px',
+              borderRadius: '14px',
+              border: '1.5px solid #E2E8F0',
+              background: '#F8FAFC',
+              fontSize: '13px',
+              color: '#0F172A',
+              outline: 'none',
+              boxSizing: 'border-box'
+            }}
+          />
+        </div>
+
+        {/* 5. 기록하기 버튼 (시안) */}
+        <button
+          type="button"
+          onClick={handleSubmit}
+          className="sobimon-main-cta-btn"
+          style={{ marginBottom: '0px' }}
+        >
+          기록하기
+        </button>
+
+        {/* 시안의 '소비몬이 발견됐어요!' 축하 팝업/카드 피드백 */}
+        {showDiscoveryPopup && (
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(15, 23, 42, 0.75)',
+            backdropFilter: 'blur(6px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 2100,
+            padding: '20px'
+          }}>
+            <div style={{
+              background: '#FFFFFF',
+              borderRadius: '24px',
+              padding: '24px 20px',
+              width: '100%',
+              maxWidth: '340px',
+              textAlign: 'center',
+              boxShadow: '0 20px 40px rgba(0, 0, 0, 0.2)',
+              animation: 'slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'
+            }}>
+              <div style={{ marginBottom: '10px' }}>
+                <SobimonMascot size={110} emotion="joy" />
+              </div>
+
+              <h4 style={{ fontSize: '18px', fontWeight: 900, color: '#0F172A', marginBottom: '6px' }}>
+                소비몬이 발견됐어요!
+              </h4>
+              <p style={{ fontSize: '12px', color: '#64748B', marginBottom: '14px' }}>
+                [{savedData?.category.split('/')[0]}] {savedData?.amount.toLocaleString()}원 기록 완료
+              </p>
+
+              {/* 획득 보상 칩 */}
+              <div style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '12px',
+                background: '#FEF3C7',
+                border: '1px solid #FDE68A',
+                padding: '8px 16px',
+                borderRadius: '9999px',
+                marginBottom: '18px'
+              }}>
+                <span style={{ fontSize: '12px', fontWeight: 800, color: '#B45309' }}>
+                  ⭐ +10 EXP
+                </span>
+                <span style={{ fontSize: '12px', fontWeight: 800, color: '#B45309' }}>
+                  🪙 +5 COIN
+                </span>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleFinish}
+                className="sobimon-main-cta-btn"
+                style={{ margin: 0 }}
+              >
+                확인
+              </button>
+            </div>
+          </div>
+        )}
+
       </div>
     </div>
   );

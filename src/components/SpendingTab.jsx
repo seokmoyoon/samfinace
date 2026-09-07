@@ -2,12 +2,7 @@ import React, { useState } from 'react';
 import { 
   Calendar as CalendarIcon, 
   UploadCloud, 
-  PieChart, 
-  Plus, 
-  Sparkles,
-  Flame,
-  ChevronLeft,
-  ChevronRight
+  PieChart
 } from 'lucide-react';
 
 import CalendarTab from './CalendarTab';
@@ -22,38 +17,59 @@ export default function SpendingTab({
   onTriggerPushSimulation,
   onOpenQuickAdd 
 }) {
-  const [subTab, setSubTab] = useState('calendar'); // 'calendar' | 'smart' | 'report'
+  const [subTab, setSubTab] = useState('report'); // 시안의 소비 분석을 우선 확인 가능하게 지원
 
   return (
-    <div className="spending-screen">
-      {/* 3단 서브 탭 스위처 */}
+    <div className="spending-screen" style={{ paddingBottom: '16px' }}>
+      {/* 3단 서브 탭 스위처 (시안 감성 알약 버튼) */}
       <div style={{
         display: 'flex',
-        gap: '4px',
-        background: '#FFFFFF',
+        background: '#F1F5F9',
         padding: '4px',
-        borderRadius: 'var(--radius-md)',
-        marginBottom: '16px',
-        border: '1px solid var(--border-subtle)',
-        boxShadow: 'var(--shadow-sm)'
+        borderRadius: '9999px',
+        marginBottom: '16px'
       }}>
+        <button
+          onClick={() => setSubTab('report')}
+          style={{
+            flex: 1,
+            padding: '8px 4px',
+            border: 'none',
+            borderRadius: '9999px',
+            fontSize: '12px',
+            fontWeight: 800,
+            cursor: 'pointer',
+            background: subTab === 'report' ? '#2563EB' : 'transparent',
+            color: subTab === 'report' ? '#FFFFFF' : '#64748B',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '5px',
+            boxShadow: subTab === 'report' ? '0 2px 6px rgba(37, 99, 235, 0.3)' : 'none',
+            transition: 'all 0.15s ease'
+          }}
+        >
+          <PieChart size={14} /> 소비 분석
+        </button>
+
         <button
           onClick={() => setSubTab('calendar')}
           style={{
             flex: 1,
             padding: '8px 4px',
             border: 'none',
-            borderRadius: 'var(--radius-sm)',
+            borderRadius: '9999px',
             fontSize: '12px',
             fontWeight: 800,
             cursor: 'pointer',
-            background: subTab === 'calendar' ? 'var(--primary)' : 'transparent',
-            color: subTab === 'calendar' ? '#FFFFFF' : 'var(--text-muted)',
+            background: subTab === 'calendar' ? '#2563EB' : 'transparent',
+            color: subTab === 'calendar' ? '#FFFFFF' : '#64748B',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '4px',
-            transition: 'var(--transition-fast)'
+            gap: '5px',
+            boxShadow: subTab === 'calendar' ? '0 2px 6px rgba(37, 99, 235, 0.3)' : 'none',
+            transition: 'all 0.15s ease'
           }}
         >
           <CalendarIcon size={14} /> 일별 달력
@@ -65,46 +81,32 @@ export default function SpendingTab({
             flex: 1,
             padding: '8px 4px',
             border: 'none',
-            borderRadius: 'var(--radius-sm)',
+            borderRadius: '9999px',
             fontSize: '12px',
             fontWeight: 800,
             cursor: 'pointer',
-            background: subTab === 'smart' ? 'var(--primary)' : 'transparent',
-            color: subTab === 'smart' ? '#FFFFFF' : 'var(--text-muted)',
+            background: subTab === 'smart' ? '#2563EB' : 'transparent',
+            color: subTab === 'smart' ? '#FFFFFF' : '#64748B',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '4px',
-            transition: 'var(--transition-fast)'
+            gap: '5px',
+            boxShadow: subTab === 'smart' ? '0 2px 6px rgba(37, 99, 235, 0.3)' : 'none',
+            transition: 'all 0.15s ease'
           }}
         >
           <UploadCloud size={14} /> 스마트 수집
         </button>
-
-        <button
-          onClick={() => setSubTab('report')}
-          style={{
-            flex: 1,
-            padding: '8px 4px',
-            border: 'none',
-            borderRadius: 'var(--radius-sm)',
-            fontSize: '12px',
-            fontWeight: 800,
-            cursor: 'pointer',
-            background: subTab === 'report' ? 'var(--primary)' : 'transparent',
-            color: subTab === 'report' ? '#FFFFFF' : 'var(--text-muted)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '4px',
-            transition: 'var(--transition-fast)'
-          }}
-        >
-          <PieChart size={14} /> 소비 분석
-        </button>
       </div>
 
       {/* 서브 탭 컨텐츠 */}
+      {subTab === 'report' && (
+        <ReportTab 
+          transactions={transactions}
+          budget={budget}
+        />
+      )}
+
       {subTab === 'calendar' && (
         <CalendarTab 
           transactions={transactions}
@@ -117,13 +119,6 @@ export default function SpendingTab({
           onAddTransaction={onAddTransaction}
           onAddMultipleTransactions={onAddMultipleTransactions}
           onTriggerPushSimulation={onTriggerPushSimulation}
-        />
-      )}
-
-      {subTab === 'report' && (
-        <ReportTab 
-          transactions={transactions}
-          budget={budget}
         />
       )}
     </div>
