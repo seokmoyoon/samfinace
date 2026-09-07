@@ -65,120 +65,18 @@ export default function HomeTab({
   return (
     <div className="home-screen-sobimon" style={{ paddingBottom: '16px' }}>
       
-      {/* 1. 상단 프로필 & EXP & 코인/알림 바 (시안 상단 상태) */}
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        marginBottom: '12px',
-        padding: '0 4px'
-      }}>
-        {/* 좌측: 캐릭터 아바타 + 레벨 + EXP 진행도 */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          {/* 캐릭터 원형 프로필 */}
-          <div style={{
-            width: '36px',
-            height: '36px',
-            borderRadius: '50%',
-            background: '#FFFFFF',
-            border: '2px solid #3B82F6',
-            overflow: 'hidden',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 2px 6px rgba(59, 130, 246, 0.25)'
-          }}>
-            <SobimonMascot size={32} emotion="happy" />
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ fontSize: '13px', fontWeight: 900, color: '#1E293B' }}>
-                Lv.{user?.level || 12}
-              </span>
-              <span style={{ fontSize: '10px', color: '#64748B', fontWeight: 700 }}>
-                {user?.exp || 820} / {user?.maxExp || 1000} EXP
-              </span>
-            </div>
-            {/* 가로 EXP 바 */}
-            <div style={{
-              width: '100px',
-              height: '6px',
-              background: '#E2E8F0',
-              borderRadius: '9999px',
-              overflow: 'hidden'
-            }}>
-              <div style={{
-                width: `${Math.round(((user?.exp || 820) / (user?.maxExp || 1000)) * 100)}%`,
-                height: '100%',
-                background: 'linear-gradient(90deg, #38BDF8, #2563EB)',
-                borderRadius: '9999px',
-                transition: 'width 0.3s ease'
-              }} />
-            </div>
-          </div>
-        </div>
-
-        {/* 우측: 코인 배지 + 알림 벨 */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '5px',
-            background: '#FFFFFF',
-            border: '1px solid #FEF08A',
-            padding: '4px 10px',
-            borderRadius: '9999px',
-            boxShadow: '0 2px 6px rgba(245, 158, 11, 0.15)'
-          }}>
-            <div style={{
-              width: '16px',
-              height: '16px',
-              borderRadius: '50%',
-              background: '#F59E0B',
-              color: '#FFF',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '10px',
-              fontWeight: 900
-            }}>
-              ₩
-            </div>
-            <span style={{ fontSize: '12px', fontWeight: 800, color: '#92400E' }}>
-              {(user?.coins || 3250).toLocaleString()}
-            </span>
-          </div>
-
-          <button style={{
-            width: '32px',
-            height: '32px',
-            borderRadius: '50%',
-            background: '#FFFFFF',
-            border: '1px solid #E2E8F0',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            color: '#64748B',
-            boxShadow: '0 2px 5px rgba(0,0,0,0.03)'
-          }}>
-            <Bell size={16} />
-          </button>
-        </div>
-      </div>
-
-      {/* 2. 중앙 히어로 일러스트 (동화풍 언덕, 성, 다리, 바위 위의 백곰 마스코트 + 말풍선) */}
+      {/* 1. 첨부 이미지와 동일한 1번 전체 배경 (프로필 + 성 + 2번 캐릭터 + 말풍선 통합) */}
       <FairytaleHeroBackground 
+        user={user}
         speech={speechText}
         onMascotClick={() => {}}
       />
 
-      {/* 3. 이번 달 소비 카드 (시안 메인 금융 카드) */}
+      {/* 2. 이번 달 소비 카드 (시안 메인 금융 카드 - 1번 배경과 자연스럽게 오버랩) */}
       <div 
         className="sobimon-card"
         onClick={() => onNavigateTab && onNavigateTab('spending')}
-        style={{ cursor: 'pointer' }}
+        style={{ cursor: 'pointer', position: 'relative', zIndex: 15, marginTop: '-14px' }}
       >
         <div className="sobimon-card-header">
           <div className="sobimon-card-title">

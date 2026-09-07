@@ -6,7 +6,6 @@ import SobimonImg from './SobimonImg';
  * public/images/sobimon/mascot-*.png 이미지를 우선 로드하고, 없을 시 완성형 SVG 벡터 렌더링
  */
 export function SobimonMascot({ size = 120, emotion = 'happy', className = '' }) {
-  // 표정에 따른 이미지 파일명 매핑
   const imageNameMap = {
     happy: 'mascot-main',
     joy: 'mascot-happy',
@@ -17,7 +16,6 @@ export function SobimonMascot({ size = 120, emotion = 'happy', className = '' })
 
   const imageName = imageNameMap[emotion] || 'mascot-main';
 
-  // 표정에 따른 눈/입 변화 SVG
   const renderFace = () => {
     switch (emotion) {
       case 'joy':
@@ -80,14 +78,14 @@ export function SobimonMascot({ size = 120, emotion = 'happy', className = '' })
   };
 
   const vectorFallback = (
-    <svg 
-      width={size} 
-      height={size} 
-      viewBox="0 0 136 136" 
-      fill="none" 
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 136 136"
+      fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
-      style={{ filter: 'drop-shadow(0 4px 10px rgba(37, 99, 235, 0.15))' }}
+      style={{ filter: 'drop-shadow(0 6px 14px rgba(37, 99, 235, 0.2))' }}
     >
       <g>
         <ellipse cx="68" cy="126" rx="36" ry="7" fill="#CBD5E1" opacity="0.6" />
@@ -136,148 +134,337 @@ export function SobimonMascot({ size = 120, emotion = 'happy', className = '' })
 }
 
 /**
- * 시안 홈 상단의 아름다운 동화풍 풍경 배경 SVG
- * public/images/sobimon/hero-bg.png 가 있으면 이미지로 보여주고,
- * 없으면 동화풍 SVG 풍경으로 렌더링합니다.
+ * 첨부 이미지의 1번 전체 배경 (Full-bleed Hero Banner)
+ * - 상단: 프로필 (아바타, Lv.12, EXP 바, 코인 3,250, 알림 벨)
+ * - 우측 뒤편: 절벽 언덕 위의 성채
+ * - 중앙 살짝 우측: 바위/그루터기 위에 앉아 있는 2번 캐릭터
+ * - 좌측: "이번 달도 잘하고 있어요!" 둥근 말풍선
+ * - 하단: 푸른 잔디와 흙 언덕이 아래쪽 카드로 자연스럽게 연결
  */
-export function FairytaleHeroBackground({ speech = "이번 달도 잘하고 있어요!", onMascotClick }) {
+export function FairytaleHeroBackground({
+  user,
+  speech = "이번 달도 잘하고 있어요!",
+  onMascotClick
+}) {
   const [useImgBg, setUseImgBg] = React.useState(true);
 
   return (
     <div className="fairytale-hero-container" style={{
       position: 'relative',
-      width: '100%',
-      height: '180px',
-      borderRadius: '24px',
+      width: 'calc(100% + 36px)',
+      margin: '-20px -18px 12px -18px',
+      height: '315px',
       overflow: 'hidden',
-      background: 'linear-gradient(180deg, #74C0FC 0%, #BAE6FD 35%, #DCFCE7 70%, #A7F3D0 100%)',
-      boxShadow: '0 8px 24px rgba(56, 189, 248, 0.18)',
-      marginBottom: '14px'
+      borderBottomLeftRadius: '28px',
+      borderBottomRightRadius: '28px',
+      background: 'linear-gradient(180deg, #38BDF8 0%, #7DD3FC 35%, #BAE6FD 60%, #BBF7D0 85%, #86EFAC 100%)',
+      boxShadow: '0 10px 28px rgba(56, 189, 248, 0.25)'
     }}>
-      {/* 1. 사용자가 hero-bg.png를 넣었을 때 표시되는 실물 배경 이미지 */}
+
+      {/* 1. 실물 hero-bg.png 배경 이미지 (있을 경우 꽉 채움) */}
       {useImgBg && (
         <img
           src="/images/sobimon/hero-bg.png"
-          alt="동화풍 히어로 배경"
+          alt="1번 전체 동화풍 배경"
           onError={() => setUseImgBg(false)}
           style={{
             position: 'absolute',
             top: 0,
             left: 0,
             width: '100%',
-            height: '100%',
+            // height: '100%',
             objectFit: 'cover',
             zIndex: 1
           }}
         />
       )}
 
-      {/* 2. 이미지가 없을 때의 벡터 풍경 일러스트 */}
+      {/* 2. 이미지가 없을 때 렌더링되는 시안 1:1 고화질 SVG 동화 풍경 */}
       {!useImgBg && (
         <svg
-          viewBox="0 0 400 200"
+          viewBox="0 0 400 315"
           preserveAspectRatio="none"
-          style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
+          style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 1 }}
         >
           <defs>
-            <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#60A5FA" />
-              <stop offset="50%" stopColor="#93C5FD" />
-              <stop offset="100%" stopColor="#E0F2FE" />
+            <linearGradient id="skyGradFull" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#38BDF8" />
+              <stop offset="45%" stopColor="#7DD3FC" />
+              <stop offset="75%" stopColor="#BAE6FD" />
+              <stop offset="100%" stopColor="#BBF7D0" />
             </linearGradient>
-            <linearGradient id="hillGrad1" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#86EFAC" />
-              <stop offset="100%" stopColor="#4ADE80" />
+            <linearGradient id="cliffGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#F59E0B" />
+              <stop offset="100%" stopColor="#B45309" />
             </linearGradient>
-            <linearGradient id="hillGrad2" x1="0" y1="0" x2="0" y2="1">
+            <linearGradient id="hillGreen1" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="#4ADE80" />
+              <stop offset="100%" stopColor="#16A34A" />
+            </linearGradient>
+            <linearGradient id="hillGreen2" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#86EFAC" />
               <stop offset="100%" stopColor="#22C55E" />
             </linearGradient>
-            <linearGradient id="waterGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#38BDF8" />
-              <stop offset="100%" stopColor="#0284C7" />
+            <linearGradient id="rockGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#D97706" />
+              <stop offset="60%" stopColor="#92400E" />
+              <stop offset="100%" stopColor="#78350F" />
             </linearGradient>
           </defs>
 
-          <rect width="400" height="200" fill="url(#skyGrad)" />
-          <ellipse cx="60" cy="35" rx="28" ry="12" fill="#FFFFFF" opacity="0.85" />
-          <ellipse cx="80" cy="30" rx="18" ry="14" fill="#FFFFFF" opacity="0.9" />
-          <ellipse cx="40" cy="40" rx="18" ry="9" fill="#FFFFFF" opacity="0.8" />
-          <ellipse cx="320" cy="42" rx="30" ry="13" fill="#FFFFFF" opacity="0.8" />
-          <ellipse cx="345" cy="36" rx="20" ry="14" fill="#FFFFFF" opacity="0.85" />
+          {/* 푸른 하늘 */}
+          <rect width="400" height="315" fill="url(#skyGradFull)" />
 
-          {/* 성 */}
-          <g opacity="0.85" transform="translate(295, 38) scale(0.6)">
-            <rect x="20" y="40" width="60" height="40" fill="#93C5FD" />
-            <rect x="10" y="25" width="22" height="55" fill="#60A5FA" />
-            <rect x="68" y="25" width="22" height="55" fill="#60A5FA" />
-            <polygon points="21,25 9,0 33,0" fill="#2563EB" />
-            <polygon points="79,25 67,0 91,0" fill="#2563EB" />
-            <polygon points="9,0 0,-7 9,-7" fill="#F59E0B" />
-            <polygon points="67,0 58,-7 67,-7" fill="#F59E0B" />
+          {/* 뭉게구름 */}
+          <ellipse cx="60" cy="90" rx="38" ry="16" fill="#FFFFFF" opacity="0.85" />
+          <ellipse cx="85" cy="85" rx="26" ry="18" fill="#FFFFFF" opacity="0.9" />
+          <ellipse cx="330" cy="110" rx="42" ry="18" fill="#FFFFFF" opacity="0.85" />
+          <ellipse cx="360" cy="100" rx="28" ry="16" fill="#FFFFFF" opacity="0.9" />
+
+          {/* 우측 뒤편: 절벽 언덕 & 성채 (Castle on Cliff) */}
+          <g transform="translate(265, 100)">
+            {/* 절벽 바위산 */}
+            <path d="M15 65 L40 15 L95 25 L120 75 L120 150 L5 150 Z" fill="#D97706" opacity="0.9" />
+            <path d="M25 65 L45 20 L85 28 L105 75 L105 150 L20 150 Z" fill="#B45309" opacity="0.7" />
+
+            {/* 성 본관 & 탑 (시안 반영) */}
+            <rect x="35" y="15" width="45" height="32" rx="3" fill="#FEF08A" stroke="#78350F" strokeWidth="1.5" />
+            <rect x="25" y="0" width="18" height="46" rx="2" fill="#BAE6FD" stroke="#1E293B" strokeWidth="1.5" />
+            <rect x="72" y="0" width="18" height="46" rx="2" fill="#BAE6FD" stroke="#1E293B" strokeWidth="1.5" />
+
+            {/* 푸른 원뿔 지붕 */}
+            <polygon points="34,-16 20,0 48,0" fill="#2563EB" stroke="#1E293B" strokeWidth="1.5" />
+            <polygon points="81,-16 67,0 95,0" fill="#2563EB" stroke="#1E293B" strokeWidth="1.5" />
+            {/* 중앙 작은 첨탑 */}
+            <rect x="52" y="5" width="12" height="15" fill="#93C5FD" stroke="#1E293B" strokeWidth="1.2" />
+            <polygon points="58,-5 49,5 67,5" fill="#3B82F6" stroke="#1E293B" strokeWidth="1.2" />
+
+            {/* 절벽 위 나무 수풀 */}
+            <circle cx="20" cy="65" r="14" fill="#22C55E" />
+            <circle cx="100" cy="70" r="16" fill="#16A34A" />
           </g>
 
-          <path d="M-20 130 Q100 80 230 125 T420 120 L420 200 L-20 200 Z" fill="url(#hillGrad1)" opacity="0.7" />
-          <path d="M-10 160 Q120 110 250 145 T410 150 L410 200 L-10 200 Z" fill="url(#hillGrad2)" />
-          <path d="M90 200 Q150 165 240 180 T360 200 Z" fill="url(#waterGrad)" opacity="0.8" />
-          <path d="M120 195 Q200 160 280 195 L270 200 Q200 172 130 200 Z" fill="#E2E8F0" stroke="#94A3B8" strokeWidth="2" />
-          <ellipse cx="200" cy="148" rx="48" ry="18" fill="#64748B" stroke="#334155" strokeWidth="2" />
-          <ellipse cx="200" cy="144" rx="42" ry="14" fill="#94A3B8" />
-          <ellipse cx="185" cy="142" rx="15" ry="6" fill="#CBD5E1" />
-          <circle cx="50" cy="175" r="3" fill="#F43F5E" />
-          <circle cx="75" cy="182" r="2.5" fill="#F59E0B" />
-          <circle cx="340" cy="178" r="3" fill="#EC4899" />
-          <circle cx="370" cy="185" r="2.5" fill="#F59E0B" />
+          {/* 좌측 먼 언덕 & 나무들 */}
+          <path d="M-20 220 Q60 165 180 215 L180 315 L-20 315 Z" fill="url(#hillGreen1)" opacity="0.75" />
+          <circle cx="25" cy="190" r="22" fill="#22C55E" />
+          <circle cx="50" cy="180" r="26" fill="#16A34A" />
+          <circle cx="78" cy="195" r="20" fill="#15803D" />
+
+          {/* 우측 앞 언덕 수풀 */}
+          <path d="M220 235 Q310 180 420 210 L420 315 L220 315 Z" fill="url(#hillGreen2)" />
+          <circle cx="330" cy="225" r="24" fill="#22C55E" />
+          <circle cx="365" cy="215" r="28" fill="#16A34A" />
+          <circle cx="395" cy="230" r="22" fill="#15803D" />
+
+          {/* 전면 넓은 푸른 잔디 언덕 베이스 */}
+          <path d="M-10 270 Q140 230 260 250 T410 260 L410 315 L-10 315 Z" fill="#4ADE80" />
+
+          {/* 중앙 나무 그루터기 / 바위 단상 (2번 캐릭터가 앉는 위치) */}
+          <g transform="translate(145, 230)">
+            {/* 바위 베이스 */}
+            <path d="M10 50 L20 18 L100 18 L110 50 Z" fill="url(#rockGrad)" stroke="#451A03" strokeWidth="2.5" />
+            {/* 바위 상단 착석 평면 */}
+            <ellipse cx="60" cy="18" rx="44" ry="14" fill="#B45309" stroke="#451A03" strokeWidth="2" />
+            <ellipse cx="60" cy="16" rx="36" ry="10" fill="#FDE68A" opacity="0.6" />
+            {/* 바위 질감 선 */}
+            <line x1="38" y1="26" x2="32" y2="48" stroke="#78350F" strokeWidth="2" />
+            <line x1="82" y1="26" x2="88" y2="48" stroke="#78350F" strokeWidth="2" />
+          </g>
+
+          {/* 아기자기한 들꽃 */}
+          <circle cx="45" cy="285" r="3" fill="#F43F5E" />
+          <circle cx="70" cy="295" r="2.5" fill="#F59E0B" />
+          <circle cx="330" cy="285" r="3.5" fill="#EC4899" />
+          <circle cx="360" cy="292" r="2.5" fill="#FEF08A" />
         </svg>
       )}
 
-      {/* 말풍선 */}
+      {/* 3. 상단 프로필 & 상태 (하늘 위에 자연스럽게 오버레이) */}
+      <div style={{
+        position: 'relative',
+        zIndex: 10,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '16px 18px 0'
+      }}>
+        {/* 좌측: 동그란 흰색 아바타 + Lv.12 + EXP 게이지 */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{
+            width: '42px',
+            height: '42px',
+            borderRadius: '50%',
+            background: '#FFFFFF',
+            boxShadow: '0 4px 10px rgba(0, 0, 0, 0.12)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            overflow: 'hidden',
+            border: '2px solid #FFFFFF'
+          }}>
+            <SobimonMascot size={36} emotion="happy" />
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{
+                fontSize: '14px',
+                fontWeight: 900,
+                color: '#FFFFFF',
+                textShadow: '0 1px 4px rgba(15, 23, 42, 0.45)'
+              }}>
+                Lv.{user?.level || 12}
+              </span>
+            </div>
+
+            {/* EXP 반투명 프로그레스 바 (시안 반영) */}
+            <div style={{
+              width: '110px',
+              height: '8px',
+              background: 'rgba(255, 255, 255, 0.45)',
+              backdropFilter: 'blur(4px)',
+              borderRadius: '9999px',
+              overflow: 'hidden',
+              boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.1)'
+            }}>
+              <div style={{
+                width: `${Math.round(((user?.exp || 820) / (user?.maxExp || 1000)) * 100)}%`,
+                height: '100%',
+                background: 'linear-gradient(90deg, #38BDF8, #2563EB)',
+                borderRadius: '9999px',
+                transition: 'width 0.3s ease'
+              }} />
+            </div>
+
+            {/* 820 / 1000 EXP 텍스트 */}
+            <span style={{
+              fontSize: '10px',
+              color: '#FFFFFF',
+              fontWeight: 800,
+              textShadow: '0 1px 3px rgba(15, 23, 42, 0.5)'
+            }}>
+              {user?.exp || 820} / {user?.maxExp || 1000} EXP
+            </span>
+          </div>
+        </div>
+
+        {/* 우측: 코인 배지 (⭐/🪙 3,250) + 알림 벨 (🔔 빨간 닷) */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            background: 'rgba(255, 255, 255, 0.92)',
+            backdropFilter: 'blur(8px)',
+            padding: '5px 12px',
+            borderRadius: '9999px',
+            boxShadow: '0 4px 12px rgba(15, 23, 42, 0.1)',
+            border: '1px solid rgba(255, 255, 255, 0.8)'
+          }}>
+            <div style={{
+              width: '18px',
+              height: '18px',
+              borderRadius: '50%',
+              background: '#F59E0B',
+              color: '#FFF',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '11px',
+              fontWeight: 900
+            }}>
+              ⭐
+            </div>
+            <span style={{ fontSize: '13px', fontWeight: 900, color: '#1E293B' }}>
+              {(user?.coins || 3250).toLocaleString()}
+            </span>
+          </div>
+
+          {/* 알림 벨 버튼 */}
+          <div style={{
+            position: 'relative',
+            width: '36px',
+            height: '36px',
+            borderRadius: '50%',
+            background: 'rgba(255, 255, 255, 0.92)',
+            backdropFilter: 'blur(8px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 4px 12px rgba(15, 23, 42, 0.1)',
+            border: '1px solid rgba(255, 255, 255, 0.8)',
+            cursor: 'pointer'
+          }}>
+            <span style={{ fontSize: '16px' }}>🔔</span>
+            {/* 시안의 우측 상단 빨간 점 (알림 인디케이터) */}
+            <div style={{
+              position: 'absolute',
+              top: '7px',
+              right: '8px',
+              width: '6px',
+              height: '6px',
+              borderRadius: '50%',
+              background: '#EF4444',
+              border: '1px solid #FFFFFF'
+            }} />
+          </div>
+        </div>
+      </div>
+
+      {/* 4. 좌측 말풍선 ("이번 달도 잘하고 있어요!") */}
       <div style={{
         position: 'absolute',
-        top: '20px',
-        left: '18px',
-        background: 'rgba(255, 255, 255, 0.95)',
-        backdropFilter: 'blur(4px)',
-        padding: '7px 13px',
-        borderRadius: '16px',
-        boxShadow: '0 4px 12px rgba(15, 23, 42, 0.08)',
-        border: '1px solid #BAE6FD',
+        bottom: '100px',
+        left: '60px',
+        background: '#FFFFFF',
+        padding: '9px 14px',
+        borderRadius: '18px',
+        boxShadow: '0 6px 16px rgba(15, 23, 42, 0.12)',
+        border: '1.5px solid #BAE6FD',
         zIndex: 10,
         animation: 'floatSpeech 3s ease-in-out infinite'
       }}>
-        <div style={{ fontSize: '11px', fontWeight: 800, color: '#0369A1', display: 'flex', alignItems: 'center', gap: '4px' }}>
-          <span>💬</span>
-          <span>{speech}</span>
+        <div style={{
+          fontSize: '12px',
+          fontWeight: 800,
+          color: '#0369A1',
+          lineHeight: '1.35',
+          textAlign: 'center'
+        }}>
+          이번 달도<br />잘하고 있어요!
         </div>
+        {/* 말풍선 우측 꼬리 (캐릭터를 향함) */}
         <div style={{
           position: 'absolute',
-          bottom: '-5px',
-          right: '18px',
+          top: '50%',
+          right: '-7px',
+          transform: 'translateY(-50%)',
           width: 0,
           height: 0,
-          borderLeft: '5px solid transparent',
-          borderRight: '5px solid transparent',
-          borderTop: '6px solid rgba(255, 255, 255, 0.95)'
+          borderTop: '6px solid transparent',
+          borderBottom: '6px solid transparent',
+          borderLeft: '8px solid #FFFFFF'
         }} />
       </div>
 
-      {/* 중앙 마스코트 캐릭터 */}
-      <div 
+      {/* 5. 2번 캐릭터: 바위 위에 앉아 있는 메인 백곰 마스코트 */}
+      <div
         onClick={onMascotClick}
         style={{
           position: 'absolute',
-          bottom: '8px',
-          left: '50%',
+          bottom: '25px',
+          left: '60%',
           transform: 'translateX(-50%)',
           cursor: 'pointer',
-          zIndex: 11,
+          zIndex: 12,
           transition: 'transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)'
         }}
         onMouseEnter={(e) => e.currentTarget.style.transform = 'translateX(-50%) scale(1.06)'}
         onMouseLeave={(e) => e.currentTarget.style.transform = 'translateX(-50%) scale(1)'}
       >
-        <SobimonMascot size={106} emotion="joy" />
+        <SobimonMascot size={160} emotion="joy" />
       </div>
+
     </div>
   );
 }
