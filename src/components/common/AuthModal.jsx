@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Sparkles, Lock, Mail, User, ShieldCheck, ArrowRight, Cloud, CheckCircle } from 'lucide-react';
+import { ChevronLeft, X, Sparkles, Lock, Mail, User, ShieldCheck, ArrowRight, Cloud, CheckCircle } from 'lucide-react';
 import { authService } from '../../services/authService';
 
 export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
@@ -59,28 +59,36 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
   };
 
   return (
-    <div className="holo-modal-backdrop" onClick={onClose}>
-      <div 
-        className="auth-modal-card" 
-        onClick={(e) => e.stopPropagation()}
-        style={{
-          width: '90%',
-          maxWidth: '400px',
-          background: '#FFFFFF',
-          borderRadius: '24px',
-          padding: '24px',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-          border: '1px solid #E2E8F0',
-          position: 'relative'
-        }}
-      >
+    <div className="fullscreen-sub-page" style={{ background: '#FFFFFF' }}>
+      {/* 상단 네비게이션 헤더 */}
+      <div className="sub-page-header">
+        <button 
+          onClick={onClose}
+          style={{
+            background: 'transparent',
+            border: 'none',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#1E293B',
+            padding: '8px',
+            marginLeft: '-8px',
+            borderRadius: '50%'
+          }}
+          aria-label="뒤로가기"
+        >
+          <ChevronLeft size={24} />
+        </button>
+
+        <h3 style={{ fontSize: '17px', fontWeight: 900, color: '#0F172A', letterSpacing: '-0.3px', margin: 0 }}>
+          {mode === 'login' ? '로그인' : '회원가입'}
+        </h3>
+
         {/* 닫기 버튼 */}
         <button 
           onClick={onClose}
           style={{
-            position: 'absolute',
-            top: '16px',
-            right: '16px',
             background: '#F1F5F9',
             border: 'none',
             borderRadius: '50%',
@@ -90,14 +98,19 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
             alignItems: 'center',
             justifyContent: 'center',
             cursor: 'pointer',
-            color: '#64748B'
+            color: '#64748B',
+            marginRight: '-4px'
           }}
+          aria-label="닫기"
         >
           <X size={18} />
         </button>
+      </div>
 
-        {/* 상단 헤더 */}
-        <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+      {/* 스크롤 가능한 본문 영역 */}
+      <div className="sub-page-body" style={{ padding: '24px 20px 40px' }}>
+        {/* 상단 히어로 */}
+        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
           <div style={{
             width: '56px',
             height: '56px',

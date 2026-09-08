@@ -82,44 +82,50 @@ export default function QuickAddModal({ isOpen, onClose, onSave, defaultDate }) 
   };
 
   return (
-    <div className="quick-add-modal-overlay">
-      <div className="quick-add-modal-card">
-        {/* 상단 헤더: < 소비 기록     우측: 캐릭터 아바타 */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-          <button 
-            onClick={onClose}
-            style={{
-              background: 'transparent',
-              border: 'none',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              color: '#334155'
-            }}
-          >
-            <ChevronLeft size={24} />
-          </button>
-
-          <h3 style={{ fontSize: '17px', fontWeight: 900, color: '#0F172A', letterSpacing: '-0.3px' }}>
-            소비 기록
-          </h3>
-
-          {/* 우측 캐릭터 아바타 */}
-          <div style={{
-            width: '32px',
-            height: '32px',
-            borderRadius: '50%',
-            background: '#EFF6FF',
-            border: '1.5px solid #3B82F6',
+    <div className="fullscreen-sub-page">
+      {/* 상단 네비게이션 헤더 */}
+      <div className="sub-page-header">
+        <button 
+          onClick={onClose}
+          style={{
+            background: 'transparent',
+            border: 'none',
+            cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            overflow: 'hidden'
-          }}>
-            <SobimonMascot size={30} emotion="happy" />
-          </div>
-        </div>
+            color: '#1E293B',
+            padding: '8px',
+            marginLeft: '-8px',
+            borderRadius: '50%'
+          }}
+          aria-label="뒤로가기"
+        >
+          <ChevronLeft size={24} />
+        </button>
 
+        <h3 style={{ fontSize: '17px', fontWeight: 900, color: '#0F172A', letterSpacing: '-0.3px', margin: 0 }}>
+          소비 기록
+        </h3>
+
+        {/* 우측 캐릭터 아바타 */}
+        <div style={{
+          width: '32px',
+          height: '32px',
+          borderRadius: '50%',
+          background: '#EFF6FF',
+          border: '1.5px solid #3B82F6',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          overflow: 'hidden'
+        }}>
+          <SobimonMascot size={30} emotion="happy" />
+        </div>
+      </div>
+
+      {/* 스크롤 가능한 본문 영역 */}
+      <div className="sub-page-body" style={{ padding: '20px 20px 24px' }}>
         {/* 1. 지출 / 수입 / 이체 세그먼트 버튼 */}
         <div style={{
           display: 'flex',
@@ -253,8 +259,32 @@ export default function QuickAddModal({ isOpen, onClose, onSave, defaultDate }) 
           </div>
         </div>
 
-        {/* 4. 메모 (선택) */}
-        <div style={{ marginBottom: '24px' }}>
+        {/* 4. 날짜 선택 */}
+        <div style={{ marginBottom: '18px' }}>
+          <label style={{ fontSize: '12px', fontWeight: 700, color: '#64748B', display: 'block', marginBottom: '8px' }}>
+            날짜
+          </label>
+          <input
+            type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            style={{
+              width: '100%',
+              padding: '12px 14px',
+              borderRadius: '14px',
+              border: '1.5px solid #E2E8F0',
+              background: '#FFFFFF',
+              fontSize: '13px',
+              fontWeight: 700,
+              color: '#0F172A',
+              outline: 'none',
+              boxSizing: 'border-box'
+            }}
+          />
+        </div>
+
+        {/* 5. 메모 (선택) */}
+        <div style={{ marginBottom: '10px' }}>
           <label style={{ fontSize: '12px', fontWeight: 700, color: '#64748B', display: 'block', marginBottom: '8px' }}>
             메모 (선택)
           </label>
@@ -268,7 +298,7 @@ export default function QuickAddModal({ isOpen, onClose, onSave, defaultDate }) 
               padding: '12px 14px',
               borderRadius: '14px',
               border: '1.5px solid #E2E8F0',
-              background: '#F8FAFC',
+              background: '#FFFFFF',
               fontSize: '13px',
               color: '#0F172A',
               outline: 'none',
@@ -276,86 +306,87 @@ export default function QuickAddModal({ isOpen, onClose, onSave, defaultDate }) 
             }}
           />
         </div>
+      </div>
 
-        {/* 5. 기록하기 버튼 (시안) */}
+      {/* 하단 고정 액션 버튼 푸터 */}
+      <div className="sub-page-footer">
         <button
           type="button"
           onClick={handleSubmit}
           className="sobimon-main-cta-btn"
-          style={{ marginBottom: '0px' }}
+          style={{ margin: 0, width: '100%' }}
         >
-          기록하기
+          소비 기록 완료 ✨
         </button>
-
-        {/* 시안의 '소비몬이 발견됐어요!' 축하 팝업/카드 피드백 */}
-        {showDiscoveryPopup && (
-          <div style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'rgba(15, 23, 42, 0.75)',
-            backdropFilter: 'blur(6px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 2100,
-            padding: '20px'
-          }}>
-            <div style={{
-              background: '#FFFFFF',
-              borderRadius: '24px',
-              padding: '24px 20px',
-              width: '100%',
-              maxWidth: '340px',
-              textAlign: 'center',
-              boxShadow: '0 20px 40px rgba(0, 0, 0, 0.2)',
-              animation: 'slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'
-            }}>
-              <div style={{ marginBottom: '10px' }}>
-                <SobimonMascot size={110} emotion="joy" />
-              </div>
-
-              <h4 style={{ fontSize: '18px', fontWeight: 900, color: '#0F172A', marginBottom: '6px' }}>
-                소비몬이 발견됐어요!
-              </h4>
-              <p style={{ fontSize: '12px', color: '#64748B', marginBottom: '14px' }}>
-                [{savedData?.category.split('/')[0]}] {savedData?.amount.toLocaleString()}원 기록 완료
-              </p>
-
-              {/* 획득 보상 칩 */}
-              <div style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '12px',
-                background: '#FEF3C7',
-                border: '1px solid #FDE68A',
-                padding: '8px 16px',
-                borderRadius: '9999px',
-                marginBottom: '18px'
-              }}>
-                <span style={{ fontSize: '12px', fontWeight: 800, color: '#B45309' }}>
-                  ⭐ +10 EXP
-                </span>
-                <span style={{ fontSize: '12px', fontWeight: 800, color: '#B45309' }}>
-                  🪙 +5 COIN
-                </span>
-              </div>
-
-              <button
-                type="button"
-                onClick={handleFinish}
-                className="sobimon-main-cta-btn"
-                style={{ margin: 0 }}
-              >
-                확인
-              </button>
-            </div>
-          </div>
-        )}
-
       </div>
+
+      {/* 시안의 '소비몬이 발견됐어요!' 축하 팝업/카드 피드백 */}
+      {showDiscoveryPopup && (
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(15, 23, 42, 0.75)',
+          backdropFilter: 'blur(6px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 2100,
+          padding: '20px'
+        }}>
+          <div style={{
+            background: '#FFFFFF',
+            borderRadius: '24px',
+            padding: '24px 20px',
+            width: '100%',
+            maxWidth: '340px',
+            textAlign: 'center',
+            boxShadow: '0 20px 40px rgba(0, 0, 0, 0.2)',
+            animation: 'slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'
+          }}>
+            <div style={{ marginBottom: '10px' }}>
+              <SobimonMascot size={110} emotion="joy" />
+            </div>
+
+            <h4 style={{ fontSize: '18px', fontWeight: 900, color: '#0F172A', marginBottom: '6px' }}>
+              소비몬이 발견됐어요!
+            </h4>
+            <p style={{ fontSize: '12px', color: '#64748B', marginBottom: '14px' }}>
+              [{savedData?.category.split('/')[0]}] {savedData?.amount.toLocaleString()}원 기록 완료
+            </p>
+
+            {/* 획득 보상 칩 */}
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '12px',
+              background: '#FEF3C7',
+              border: '1px solid #FDE68A',
+              padding: '8px 16px',
+              borderRadius: '9999px',
+              marginBottom: '18px'
+            }}>
+              <span style={{ fontSize: '12px', fontWeight: 800, color: '#B45309' }}>
+                ⭐ +10 EXP
+              </span>
+              <span style={{ fontSize: '12px', fontWeight: 800, color: '#B45309' }}>
+                🪙 +5 COIN
+              </span>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleFinish}
+              className="sobimon-main-cta-btn"
+              style={{ margin: 0 }}
+            >
+              확인
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

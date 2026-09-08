@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight, HelpCircle, Sparkles } from 'lucide-react';
-import { 
-  SobimonMascot, 
-  CafeMonsterIllustration, 
-  FoodMonsterIllustration, 
-  ShopMonsterIllustration, 
-  SaverMonsterIllustration 
+import {
+  SobimonMascot,
+  CafeMonsterIllustration,
+  FoodMonsterIllustration,
+  ShopMonsterIllustration,
+  SaverMonsterIllustration
 } from './common/SobimonIllustrations';
 import SobimonHoloCardModal from './common/SobimonHoloCardModal';
 
@@ -189,7 +189,7 @@ export default function SobimonDexTab({ user, sobimons = [] }) {
 
   return (
     <div className="dex-screen-sobimon" style={{ paddingBottom: '20px' }}>
-      
+
       {/* 상단 헤더: < 소비몬 도감 */}
       <div style={{
         display: 'flex',
@@ -358,7 +358,7 @@ export default function SobimonDexTab({ user, sobimons = [] }) {
       </div>
 
       {/* 3. 하단 CTA 다크 배너: "더 많은 소비몬을 만나보세요! >" */}
-      <div 
+      <div
         className="sobimon-card-banner"
         onClick={() => setSelectedHoloMonster(dexList[1])} // 카페몬 홀로 카드 미리보기
         style={{
@@ -394,7 +394,7 @@ export default function SobimonDexTab({ user, sobimons = [] }) {
       </div>
 
       {/* 4. 3D 인터랙티브 홀로그램 포켓몬 TCG 카드 모달 */}
-      <SobimonHoloCardModal 
+      <SobimonHoloCardModal
         isOpen={!!selectedHoloMonster}
         onClose={() => setSelectedHoloMonster(null)}
         monster={selectedHoloMonster}

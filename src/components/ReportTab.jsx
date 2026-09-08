@@ -39,7 +39,7 @@ export default function ReportTab({ transactions = [], budget, currentUser, onSw
 
   return (
     <div className="report-screen-sobimon" style={{ paddingBottom: '20px' }}>
-      
+
       {/* 상단 헤더: < 소비 분석 */}
       <div style={{
         display: 'flex',
@@ -103,7 +103,7 @@ export default function ReportTab({ transactions = [], budget, currentUser, onSw
       {/* 2. 도넛 차트 & 카테고리별 범례 카드 */}
       <div className="sobimon-card" style={{ padding: '20px 16px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
-          
+
           {/* 좌측: SVG 도넛 차트 (중앙에 총 소비 금액) */}
           <div style={{ position: 'relative', width: '150px', height: '150px', flexShrink: 0 }}>
             <svg width="150" height="150" viewBox="0 0 150 150" style={{ transform: 'rotate(-90deg)' }}>
@@ -174,7 +174,7 @@ export default function ReportTab({ transactions = [], budget, currentUser, onSw
       </div>
 
       {/* 🌟 체육관 PC버전 이동 배너 (참고 디자인 시안 A 반영) */}
-      <div 
+      <div
         onClick={onSwitchToPCMode}
         role="button"
         tabIndex={0}
@@ -187,7 +187,7 @@ export default function ReportTab({ transactions = [], budget, currentUser, onSw
           cursor: 'pointer',
           border: '1.5px solid #FDE68A',
           boxShadow: '0 4px 16px rgba(245, 158, 11, 0.12)',
-          backgroundImage: 'url(/images/banner_gym_pc.jpg)',
+          backgroundImage: 'url(/images/banner_gym_pc.png)',
           backgroundSize: 'cover',
           backgroundPosition: 'center right',
           minHeight: '130px',
@@ -253,8 +253,8 @@ export default function ReportTab({ transactions = [], budget, currentUser, onSw
             margin: '0 0 10px 0',
             lineHeight: 1.3
           }}>
-            {currentUser 
-              ? '소비몬을 훈련하고 3단 분석 대시보드로 배틀!' 
+            {currentUser
+              ? '소비몬을 훈련하고 3단 분석 대시보드로 배틀!'
               : '로그인하고 PC 3단 아레나 체육관에 입장하세요!'}
           </p>
 
