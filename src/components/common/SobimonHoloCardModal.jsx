@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { X, Sparkles, RotateCw, Shield, Zap, Award, Flame } from 'lucide-react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { X, Sparkles, RotateCw, Shield, Zap, Award, Flame, Smartphone, Compass } from 'lucide-react';
 import { 
   CafeMonsterIllustration, 
   FoodMonsterIllustration, 
@@ -180,7 +180,10 @@ export default function SobimonHoloCardModal({ isOpen, onClose, monster }) {
   if (!isOpen || !monster) return null;
 
   const cardRef = useRef(null);
+  const isTouchRef = useRef(false);
   const [isFlipped, setIsFlipped] = useState(false);
+  const [gyroActive, setGyroActive] = useState(false);
+  const [gyroPermissionRequired, setGyroPermissionRequired] = useState(false);
   const [tilt, setTilt] = useState({
     rotateX: 0,
     rotateY: 0,
@@ -224,6 +227,84 @@ export default function SobimonHoloCardModal({ isOpen, onClose, monster }) {
     illustrator: 'SOBIMON'
   };
 
+  // 모바일 자이로스코프(스마트폰 기울기) 이벤트 핸들러
+  const handleOrientation = useCallback((e) => {
+    // 사용자가 손가락으로 화면을 직접 터치 드래그 중이면 터치 우선
+    if (isTouchRef.current) return;
+
+    const gamma = e.gamma; // 좌우 회전각 (-90 ~ 90)
+    const beta = e.beta;   // 전후 회전각 (-180 ~ 180)
+
+    if (gamma === null || beta === null) return;
+
+    setGyroActive(true);
+
+    // 사용자가 스마트폰을 손에 들고 편안히 바라보는 평균 기울기 각도 (약 45도 기준)
+    const deltaBeta = beta - 45;
+
+    // 안전 각도 범위 클램핑 (-28도 ~ +28도)
+    const clampedGamma = Math.max(-28, Math.min(28, gamma));
+    const clampedDeltaBeta = Math.max(-28, Math.min(28, deltaBeta));
+
+    // 3D 원근 회전 각도 (-20도 ~ +20도)
+    const rotateX = -(clampedDeltaBeta / 28) * 20;
+    const rotateY = (clampedGamma / 28) * 20;
+
+    // 홀로그램 및 빛 반사 하이라이트 좌표 (0% ~ 100%)
+    const percentX = Math.max(0, Math.min(100, Math.round(50 + (clampedGamma / 28) * 45)));
+    const percentY = Math.max(0, Math.min(100, Math.round(50 + (clampedDeltaBeta / 28) * 45)));
+
+    setTilt({
+      rotateX,
+      rotateY,
+      glareX: percentX,
+      glareY: percentY,
+      glareOpacity: 0.85,
+      bgX: 50 + (clampedGamma / 28) * 35,
+      bgY: 50 + (clampedDeltaBeta / 28) * 35
+    });
+  }, []);
+
+  // 기기 방향 센서 이벤트 리스너 등록
+  useEffect(() => {
+    let isListening = false;
+
+    if (typeof window !== 'undefined' && window.DeviceOrientationEvent) {
+      if (typeof window.DeviceOrientationEvent.requestPermission === 'function') {
+        // iOS 13+는 사용자 제스처 터치로 권한 승인 필요
+        setGyroPermissionRequired(true);
+      } else {
+        // 안드로이드 크롬 및 모바일 웹 즉시 연동
+        window.addEventListener('deviceorientation', handleOrientation, true);
+        isListening = true;
+      }
+    }
+
+    return () => {
+      if (isListening) {
+        window.removeEventListener('deviceorientation', handleOrientation, true);
+      }
+    };
+  }, [handleOrientation]);
+
+  // iOS Safari 등에서 자이로 권한 승인 요청
+  const enableGyroPermission = async () => {
+    if (typeof window.DeviceOrientationEvent !== 'undefined' && typeof window.DeviceOrientationEvent.requestPermission === 'function') {
+      try {
+        const permission = await window.DeviceOrientationEvent.requestPermission();
+        if (permission === 'granted') {
+          window.addEventListener('deviceorientation', handleOrientation, true);
+          setGyroPermissionRequired(false);
+          setGyroActive(true);
+        } else {
+          alert('기기 모션 권한이 거부되었습니다.');
+        }
+      } catch (err) {
+        console.error('Gyro request error:', err);
+      }
+    }
+  };
+
   // 마우스 / 터치 포인터 3D 틸트 추적 핸들러 (simeydotme/pokemon-cards-css 원리)
   const handlePointerMove = (e) => {
     if (!cardRef.current) return;
@@ -257,6 +338,7 @@ export default function SobimonHoloCardModal({ isOpen, onClose, monster }) {
 
   // 포인터가 벗어났을 때 원래 각도로 복귀
   const handlePointerLeave = () => {
+    if (gyroActive) return; // 자이로 활성 시 자이로가 계속 각도 유지
     setTilt({
       rotateX: 0,
       rotateY: 0,
@@ -291,10 +373,24 @@ export default function SobimonHoloCardModal({ isOpen, onClose, monster }) {
         <X size={22} />
       </button>
 
-      {/* 상단 힌트 배너 */}
+      {/* 상단 힌트 배너 및 자이로 상태 */}
       <div className="holo-modal-hint-bar" onClick={(e) => e.stopPropagation()}>
-        <Sparkles size={16} color="#FBBF24" />
-        <span>마우스를 움직이거나 터치하여 <strong>3D 홀로그램 호일 광택</strong>을 확인해보세요!</span>
+        <div className="holo-hint-left">
+          <Sparkles size={16} color="#FBBF24" />
+          <span>마우스나 <strong>폰을 기울여서</strong> 3D 홀로그램 호일 광택을 느껴보세요!</span>
+        </div>
+
+        {gyroActive ? (
+          <div className="holo-gyro-pill active">
+            <Smartphone size={12} className="holo-pulse-icon" />
+            <span>자이로 감지 중</span>
+          </div>
+        ) : gyroPermissionRequired ? (
+          <button className="holo-gyro-req-btn" onClick={enableGyroPermission}>
+            <Compass size={12} />
+            <span>📱 폰 기울기 센서 켜기</span>
+          </button>
+        ) : null}
       </div>
 
       {/* 3D 카드 스테이지 (원근감 컨테이너) */}
@@ -302,9 +398,13 @@ export default function SobimonHoloCardModal({ isOpen, onClose, monster }) {
         className="holo-card-stage"
         onClick={(e) => e.stopPropagation()}
         onMouseMove={handlePointerMove}
+        onTouchStart={() => { isTouchRef.current = true; }}
         onTouchMove={handlePointerMove}
+        onTouchEnd={() => { 
+          isTouchRef.current = false;
+          if (!gyroActive) handlePointerLeave();
+        }}
         onMouseLeave={handlePointerLeave}
-        onTouchEnd={handlePointerLeave}
       >
         <div 
           ref={cardRef}

@@ -1205,8 +1205,9 @@ body {
 .holo-modal-hint-bar {
   display: flex;
   align-items: center;
-  gap: 8px;
-  background: rgba(15, 23, 42, 0.75);
+  justify-content: space-between;
+  gap: 10px;
+  background: rgba(15, 23, 42, 0.82);
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: #F8FAFC;
   padding: 6px 14px;
@@ -1214,6 +1215,59 @@ body {
   font-size: 11px;
   margin-bottom: 16px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  max-width: 90vw;
+}
+
+.holo-hint-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.holo-gyro-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(16, 185, 129, 0.2);
+  border: 1px solid rgba(52, 211, 153, 0.45);
+  color: #6EE7B7;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  font-size: 10px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.holo-pulse-icon {
+  animation: holoPulse 1.5s ease-in-out infinite;
+  color: #34D399;
+}
+
+@keyframes holoPulse {
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.25); opacity: 1; }
+}
+
+.holo-gyro-req-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.25), rgba(99, 102, 241, 0.3));
+  border: 1px solid rgba(147, 197, 253, 0.5);
+  color: #BAE6FD;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  font-size: 10px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.holo-gyro-req-btn:hover {
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.4), rgba(99, 102, 241, 0.45));
+  color: #FFFFFF;
+  transform: translateY(-1px);
 }
 
 .holo-card-stage {
