@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Home, 
-  CreditCard,
-  Target,
-  BookOpen,
-  User,
-  Zap
+  CreditCard, 
+  Target, 
+  BookOpen, 
+  User, 
+  Zap 
 } from 'lucide-react';
 
 import HomeTab from './components/HomeTab';
@@ -20,22 +20,106 @@ import {
   INITIAL_BUDGET, 
   INITIAL_QUESTS, 
   INITIAL_BADGES, 
-  INITIAL_TRANSACTIONS,
-  INITIAL_SOBIMONS
+  INITIAL_TRANSACTIONS, 
+  INITIAL_SOBIMONS 
 } from './data/mockData';
+
+import { 
+  loadFromStorage, 
+  saveToStorage, 
+  clearAllSobimonStorage, 
+  STORAGE_KEYS 
+} from './utils/storage';
+
+import { authService } from './services/authService';
+import { syncService } from './services/syncService';
+import AuthModal from './components/common/AuthModal';
 
 import { parseCardSMS } from './utils/smsParser';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('home'); // 'home' | 'spending' | 'missions' | 'dex' | 'my'
 
-  // 앱 데이터 상태
-  const [user, setUser] = useState(INITIAL_USER);
-  const [budget, setBudget] = useState(INITIAL_BUDGET);
-  const [transactions, setTransactions] = useState(INITIAL_TRANSACTIONS);
-  const [quests, setQuests] = useState(INITIAL_QUESTS);
-  const [badges, setBadges] = useState(INITIAL_BADGES);
-  const [sobimons, setSobimons] = useState(INITIAL_SOBIMONS);
+  // 앱 데이터 상태 (Local-First: 로컬 저장소 우선 로드)
+  const [user, setUser] = useState(() => loadFromStorage(STORAGE_KEYS.USER, INITIAL_USER));
+  const [budget, setBudget] = useState(() => loadFromStorage(STORAGE_KEYS.BUDGET, INITIAL_BUDGET));
+  const [transactions, setTransactions] = useState(() => loadFromStorage(STORAGE_KEYS.TRANSACTIONS, INITIAL_TRANSACTIONS));
+  const [quests, setQuests] = useState(() => loadFromStorage(STORAGE_KEYS.QUESTS, INITIAL_QUESTS));
+  const [badges, setBadges] = useState(() => loadFromStorage(STORAGE_KEYS.BADGES, INITIAL_BADGES));
+  const [sobimons, setSobimons] = useState(() => loadFromStorage(STORAGE_KEYS.SOBIMONS, INITIAL_SOBIMONS));
+
+  // Supabase 클라우드 계정 및 동기화 상태
+  const [currentUser, setCurrentUser] = useState(null);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  // 상태 변경 시 로컬 스토리지에 실시간 영구 자동 동기화
+  useEffect(() => { saveToStorage(STORAGE_KEYS.USER, user); }, [user]);
+  useEffect(() => { saveToStorage(STORAGE_KEYS.BUDGET, budget); }, [budget]);
+  useEffect(() => { saveToStorage(STORAGE_KEYS.TRANSACTIONS, transactions); }, [transactions]);
+  useEffect(() => { saveToStorage(STORAGE_KEYS.QUESTS, quests); }, [quests]);
+  useEffect(() => { saveToStorage(STORAGE_KEYS.BADGES, badges); }, [badges]);
+  useEffect(() => { saveToStorage(STORAGE_KEYS.SOBIMONS, sobimons); }, [sobimons]);
+
+  // 앱 로딩 시 Supabase 세션 체크
+  useEffect(() => {
+    authService.getCurrentUser().then((u) => {
+      if (u) setCurrentUser(u);
+    });
+
+    const subscription = authService.onAuthStateChange((event, session) => {
+      setCurrentUser(session?.user || null);
+    });
+
+    return () => {
+      subscription?.unsubscribe?.();
+    };
+  }, []);
+
+  // 클라우드 동기화 (로컬 ➡️ Supabase 백업 & 동기화)
+  const handleSyncCloud = async () => {
+    if (!currentUser) {
+      setIsAuthModalOpen(true);
+      return;
+    }
+
+    setIsSyncing(true);
+    const res = await syncService.uploadLocalDataToCloud(currentUser.id, {
+      user,
+      budget,
+      transactions,
+      sobimons,
+      quests
+    });
+    setIsSyncing(false);
+
+    if (res.success) {
+      grantExp(40, '☁️ 클라우드 동기화 성공!', 20);
+    } else {
+      alert(`동기화 알림: ${res.message}`);
+    }
+  };
+
+  // 로그아웃
+  const handleSignOut = async () => {
+    await authService.signOut();
+    setCurrentUser(null);
+    alert('로그아웃되었습니다. (로컬 게스트 모드로 전환됩니다)');
+  };
+
+  // 데이터 전체 초기화 핸들러 (샘플 데이터 복원)
+  const handleResetData = () => {
+    if (window.confirm('정말로 모든 가계부 내역과 소비몬 데이터를 초기 샘플 데이터로 리셋하시겠습니까?')) {
+      clearAllSobimonStorage();
+      setUser(INITIAL_USER);
+      setBudget(INITIAL_BUDGET);
+      setTransactions(INITIAL_TRANSACTIONS);
+      setQuests(INITIAL_QUESTS);
+      setBadges(INITIAL_BADGES);
+      setSobimons(INITIAL_SOBIMONS);
+      alert('초기 데이터로 깔끔하게 리셋되었습니다.');
+    }
+  };
 
   // EXP & COIN 획득 플로팅 토스트 상태
   const [expToast, setExpToast] = useState(null);
@@ -257,7 +341,13 @@ export default function App() {
             <MyTab 
               user={user}
               badges={badges}
+              currentUser={currentUser}
+              isSyncing={isSyncing}
+              onOpenAuth={() => setIsAuthModalOpen(true)}
+              onSyncCloud={handleSyncCloud}
+              onSignOut={handleSignOut}
               onOpenTreasure={handleOpenTreasure}
+              onResetData={handleResetData}
             />
           )}
         </div>
@@ -321,6 +411,16 @@ export default function App() {
           onClose={() => setIsQuickAddOpen(false)}
           onSave={handleAddTransaction}
           defaultDate={quickAddDate}
+        />
+
+        {/* 클라우드 로그인 / 회원가입 모달 */}
+        <AuthModal 
+          isOpen={isAuthModalOpen}
+          onClose={() => setIsAuthModalOpen(false)}
+          onAuthSuccess={(u) => {
+            setCurrentUser(u);
+            handleSyncCloud();
+          }}
         />
 
       </div>

@@ -10,14 +10,26 @@ import {
   Coins, 
   Settings,
   Database,
-  ExternalLink
+  ExternalLink,
+  Cloud,
+  RotateCw
 } from 'lucide-react';
 import { INITIAL_ACCOUNTS } from '../data/mockData';
 import LevelBadge from './common/LevelBadge';
 import ExpBar from './common/ExpBar';
 import CoinBadge from './common/CoinBadge';
 
-export default function MyTab({ user, badges = [], onOpenTreasure }) {
+export default function MyTab({ 
+  user, 
+  badges = [], 
+  currentUser, 
+  isSyncing, 
+  onOpenAuth, 
+  onSyncCloud, 
+  onSignOut, 
+  onOpenTreasure, 
+  onResetData 
+}) {
   const [showChestModal, setShowChestModal] = useState(false);
   const [chestReward, setChestReward] = useState(null);
 
@@ -35,6 +47,110 @@ export default function MyTab({ user, badges = [], onOpenTreasure }) {
 
   return (
     <div className="my-screen">
+      {/* 0. 클라우드 계정 & 동기화 상태 배너 */}
+      {currentUser ? (
+        <div style={{
+          background: 'linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%)',
+          border: '1px solid #A7F3D0',
+          borderRadius: 'var(--radius-lg)',
+          padding: '12px 16px',
+          marginBottom: '16px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '10px'
+        }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: 800, color: '#065F46' }}>
+              <Cloud size={14} color="#059669" />
+              <span>클라우드 동기화 계정</span>
+            </div>
+            <div style={{ fontSize: '12px', fontWeight: 700, color: '#047857' }}>
+              {currentUser.email}
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: '6px' }}>
+            <button
+              onClick={onSyncCloud}
+              disabled={isSyncing}
+              style={{
+                background: '#059669',
+                color: '#FFFFFF',
+                border: 'none',
+                borderRadius: '8px',
+                padding: '6px 12px',
+                fontSize: '11px',
+                fontWeight: 800,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px'
+              }}
+            >
+              <RotateCw size={12} className={isSyncing ? 'animate-spin' : ''} />
+              <span>{isSyncing ? '동기화 중...' : '동기화'}</span>
+            </button>
+            <button
+              onClick={onSignOut}
+              style={{
+                background: '#FFFFFF',
+                color: '#64748B',
+                border: '1px solid #CBD5E1',
+                borderRadius: '8px',
+                padding: '6px 10px',
+                fontSize: '11px',
+                fontWeight: 700,
+                cursor: 'pointer'
+              }}
+            >
+              로그아웃
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div style={{
+          background: 'linear-gradient(135deg, #1E293B 0%, #0F172A 100%)',
+          borderRadius: 'var(--radius-lg)',
+          padding: '14px 16px',
+          marginBottom: '16px',
+          color: '#FFFFFF',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '12px',
+          boxShadow: '0 4px 14px rgba(15, 23, 42, 0.2)'
+        }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
+              <span style={{ fontSize: '14px' }}>☁️</span>
+              <span style={{ fontSize: '13px', fontWeight: 900, color: '#F8FAFC' }}>
+                클라우드 동기화 켜기
+              </span>
+            </div>
+            <p style={{ fontSize: '11px', color: '#94A3B8', margin: 0 }}>
+              기기 변경 시에도 내 소비몬과 장부를 안전하게 지키세요!
+            </p>
+          </div>
+          <button
+            onClick={onOpenAuth}
+            style={{
+              background: 'linear-gradient(135deg, #38BDF8, #3B82F6)',
+              color: '#FFFFFF',
+              border: 'none',
+              borderRadius: '9999px',
+              padding: '7px 13px',
+              fontSize: '11px',
+              fontWeight: 800,
+              cursor: 'pointer',
+              whiteSpace: 'nowrap',
+              boxShadow: '0 2px 8px rgba(56, 189, 248, 0.4)'
+            }}
+          >
+            로그인 / 가입 🔒
+          </button>
+        </div>
+      )}
+
       {/* 1. 프로필 카드 */}
       <div style={{
         background: 'linear-gradient(135deg, #EFF6FF 0%, #F5F3FF 100%)',
@@ -230,13 +346,41 @@ export default function MyTab({ user, badges = [], onOpenTreasure }) {
         boxShadow: 'var(--shadow-sm)'
       }}>
         <h4 style={{ fontSize: '13px', fontWeight: 800, color: 'var(--text-main)', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <Settings size={15} color="var(--text-muted)" /> <span>설정 및 데이터 관리</span>
+          <Settings size={15} color="var(--text-muted)" /> <span>설정 및 데이터 관리 (Local-First)</span>
         </h4>
-        <div style={{ fontSize: '11px', color: 'var(--text-muted)', lineHeight: '1.6' }}>
-          • 버전: SOBIMON v1.2.0 (소비몬 게임형 금융 엔진)<br />
-          • 저장소: Supabase & 로컬 캐시 안전 보관<br />
-          • 백업: CSV 내역서 다운로드 및 내보내기 지원
+        <div style={{ fontSize: '11px', color: 'var(--text-muted)', lineHeight: '1.7', marginBottom: '12px' }}>
+          • <strong>저장소 상태</strong>: <span style={{ color: '#059669', fontWeight: 800 }}>🟢 기기 내부 안전 보관 중 (오프라인 영구 보존)</span><br />
+          • <strong>클라우드 동기화</strong>: {currentUser ? (
+            <span style={{ color: '#059669', fontWeight: 800 }}>☁️ Supabase 연결 완료 ({currentUser.email})</span>
+          ) : (
+            <span style={{ color: '#F59E0B', fontWeight: 700 }}>⚪ 게스트 모드 (로그인 시 클라우드 자동 백업)</span>
+          )}<br />
+          • <strong>버전</strong>: SOBIMON v1.2.0 (Supabase 하이브리드 엔진)
         </div>
+
+        {onResetData && (
+          <button
+            onClick={onResetData}
+            style={{
+              width: '100%',
+              padding: '8px 12px',
+              fontSize: '11px',
+              fontWeight: 700,
+              color: '#DC2626',
+              background: '#FEF2F2',
+              border: '1px solid #FECACA',
+              borderRadius: 'var(--radius-md)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
+              transition: 'background 0.15s ease'
+            }}
+          >
+            🔄 모든 가계부 & 소비몬 데이터 초기화 (기본 샘플 복원)
+          </button>
+        )}
       </div>
 
       {/* 보물상자 오픈 모달 */}
