@@ -10,7 +10,10 @@ import {
   Home as HomeIcon,
   Gamepad2,
   Pill,
-  LayoutGrid
+  LayoutGrid,
+  Delete,
+  Calculator,
+  Check
 } from 'lucide-react';
 
 import { SobimonMascot } from './common/SobimonIllustrations';
@@ -39,14 +42,100 @@ export default function QuickAddModal({ isOpen, onClose, onSave, defaultDate }) 
   const [showDiscoveryPopup, setShowDiscoveryPopup] = useState(false);
   const [savedData, setSavedData] = useState(null);
 
-  // 금액 포맷팅
-  const handleAmountChange = (e) => {
-    const raw = e.target.value.replace(/[^0-9]/g, '');
-    setAmount(raw);
+  // 하단 슬라이딩 숫자 키패드 열림 여부
+  const [showKeypad, setShowKeypad] = useState(false);
+
+  // 계산기 모달 열림 여부 및 계산기 상태
+  const [showCalculator, setShowCalculator] = useState(false);
+  const [calcExpr, setCalcExpr] = useState('');
+  const [calcResult, setCalcResult] = useState('');
+
+  const handleClearAmount = (e) => {
+    if (e) e.stopPropagation();
+    setAmount('');
   };
 
-  const handleClearAmount = () => {
-    setAmount('');
+  // 슬라이딩 숫자 키패드 핸들러
+  const handleKeypadPress = (key) => {
+    if (key === 'backspace') {
+      setAmount((prev) => (prev.length > 1 ? prev.slice(0, -1) : ''));
+    } else if (key === 'clear') {
+      setAmount('');
+    } else if (key === '+1000') {
+      setAmount((prev) => (Number(prev || 0) + 1000).toString());
+    } else if (key === '+5000') {
+      setAmount((prev) => (Number(prev || 0) + 5000).toString());
+    } else if (key === '+10000') {
+      setAmount((prev) => (Number(prev || 0) + 10000).toString());
+    } else if (key === '+50000') {
+      setAmount((prev) => (Number(prev || 0) + 50000).toString());
+    } else if (key === '00') {
+      if (!amount || amount === '0') return;
+      if (amount.length < 10) setAmount((prev) => prev + '00');
+    } else {
+      if (amount.length >= 10) return;
+      if (amount === '0' || !amount) {
+        setAmount(key);
+      } else {
+        setAmount((prev) => prev + key);
+      }
+    }
+  };
+
+  // 계산기 열기
+  const handleOpenCalculator = (e) => {
+    if (e) e.stopPropagation();
+    setCalcExpr(amount || '');
+    setCalcResult(amount || '');
+    setShowCalculator(true);
+    setShowKeypad(false);
+  };
+
+  // 계산기 버튼 클릭 처리
+  const handleCalcBtn = (val) => {
+    if (val === 'C') {
+      setCalcExpr('');
+      setCalcResult('');
+    } else if (val === '⌫') {
+      const next = calcExpr.slice(0, -1);
+      setCalcExpr(next);
+      evalCalc(next);
+    } else if (val === '=') {
+      evalCalc(calcExpr, true);
+    } else {
+      const next = calcExpr + val;
+      setCalcExpr(next);
+      evalCalc(next);
+    }
+  };
+
+  // 계산기 수식 안전 계산
+  const evalCalc = (expr, isFinal = false) => {
+    try {
+      const sanitized = expr.replace(/×/g, '*').replace(/÷/g, '/');
+      if (!/^[\d+\-*/. ]+$/.test(sanitized)) return;
+      if (/[+\-*/.]$/.test(sanitized.trim())) return;
+      // eslint-disable-next-line no-new-func
+      const res = Function(`'use strict'; return (${sanitized})`)();
+      if (typeof res === 'number' && !isNaN(res) && isFinite(res)) {
+        const rounded = Math.round(res);
+        setCalcResult(rounded.toString());
+        if (isFinal) {
+          setCalcExpr(rounded.toString());
+        }
+      }
+    } catch {
+      // 무시
+    }
+  };
+
+  // 계산된 금액을 입력창에 적용
+  const handleApplyCalc = () => {
+    const finalVal = calcResult || calcExpr;
+    if (finalVal && Number(finalVal) > 0) {
+      setAmount(finalVal);
+    }
+    setShowCalculator(false);
   };
 
   const handleSubmit = (e) => {
@@ -72,7 +161,6 @@ export default function QuickAddModal({ isOpen, onClose, onSave, defaultDate }) 
 
     onSave(newItem);
     setSavedData(newItem);
-    // 시안의 "소비몬이 발견됐어요!" 피드백 팝업 띄우기
     setShowDiscoveryPopup(true);
   };
 
@@ -83,7 +171,7 @@ export default function QuickAddModal({ isOpen, onClose, onSave, defaultDate }) 
 
   return (
     <div className="fullscreen-sub-page">
-      {/* 상단 네비게이션 헤더 */}
+      {/* 1. 상단 네비게이션 헤더 */}
       <div className="sub-page-header">
         <button 
           onClick={onClose}
@@ -124,9 +212,13 @@ export default function QuickAddModal({ isOpen, onClose, onSave, defaultDate }) 
         </div>
       </div>
 
-      {/* 스크롤 가능한 본문 영역 */}
-      <div className="sub-page-body" style={{ padding: '20px 20px 24px' }}>
-        {/* 1. 지출 / 수입 / 이체 세그먼트 버튼 */}
+      {/* 2. 스크롤 가능한 본문 영역 (평소에는 키패드가 없어 극도로 깔끔함) */}
+      <div 
+        className="sub-page-body" 
+        style={{ padding: '20px 20px 24px' }}
+        onClick={() => setShowKeypad(false)} // 바깥 터치 시 키패드 닫기
+      >
+        {/* 지출 / 수입 / 이체 세그먼트 */}
         <div style={{
           display: 'flex',
           background: '#F1F5F9',
@@ -142,7 +234,7 @@ export default function QuickAddModal({ isOpen, onClose, onSave, defaultDate }) 
             <button
               key={item.id}
               type="button"
-              onClick={() => setType(item.id)}
+              onClick={(e) => { e.stopPropagation(); setType(item.id); }}
               style={{
                 flex: 1,
                 padding: '9px 0',
@@ -162,64 +254,72 @@ export default function QuickAddModal({ isOpen, onClose, onSave, defaultDate }) 
           ))}
         </div>
 
-        {/* 2. 금액 입력 (12,000 원 + 클리어 버튼) */}
+        {/* 금액 입력 디스플레이 카드 (터치 시 하단 키패드 슬라이드 업) */}
         <div style={{ marginBottom: '22px' }}>
-          <label style={{ fontSize: '12px', fontWeight: 700, color: '#64748B', display: 'block', marginBottom: '8px' }}>
-            금액
-          </label>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            background: '#F8FAFC',
-            border: '1.5px solid #E2E8F0',
-            borderRadius: '16px',
-            padding: '12px 16px'
-          }}>
-            <input
-              type="text"
-              value={amount ? Number(amount).toLocaleString() : ''}
-              onChange={handleAmountChange}
-              placeholder="0"
-              autoFocus
-              style={{
-                border: 'none',
-                background: 'transparent',
-                fontSize: '22px',
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+            <label style={{ fontSize: '12px', fontWeight: 700, color: '#64748B' }}>
+              금액
+            </label>
+            <span style={{ fontSize: '11px', color: '#2563EB', fontWeight: 700 }}>
+              터치하여 입력
+            </span>
+          </div>
+
+          <div 
+            onClick={(e) => { e.stopPropagation(); setShowKeypad(true); }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              background: '#FFFFFF',
+              border: showKeypad ? '2px solid #2563EB' : '1.5px solid #E2E8F0',
+              borderRadius: '16px',
+              padding: '14px 18px',
+              cursor: 'pointer',
+              boxShadow: showKeypad ? '0 4px 14px rgba(37, 99, 235, 0.15)' : '0 2px 6px rgba(0, 0, 0, 0.02)',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
+              <span style={{ fontSize: '18px', fontWeight: 800, color: '#2563EB' }}>₩</span>
+              <span style={{
+                fontSize: '26px',
                 fontWeight: 900,
-                color: '#0F172A',
-                width: '100%',
-                outline: 'none'
-              }}
-            />
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              {amount && (
-                <button
-                  type="button"
-                  onClick={handleClearAmount}
-                  style={{
-                    width: '20px',
-                    height: '20px',
-                    borderRadius: '50%',
-                    background: '#CBD5E1',
-                    border: 'none',
-                    color: '#FFF',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    cursor: 'pointer'
-                  }}
-                >
-                  <X size={12} strokeWidth={3} />
-                </button>
-              )}
-              <span style={{ fontSize: '16px', fontWeight: 800, color: '#64748B' }}>원</span>
+                color: amount ? '#0F172A' : '#94A3B8',
+                letterSpacing: '-0.5px'
+              }}>
+                {amount ? Number(amount).toLocaleString() : '0'}
+              </span>
             </div>
+
+            {amount && (
+              <button
+                type="button"
+                onClick={handleClearAmount}
+                title="금액 지우기"
+                style={{
+                  padding: '6px 10px',
+                  borderRadius: '8px',
+                  background: '#F1F5F9',
+                  border: 'none',
+                  color: '#64748B',
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  cursor: 'pointer'
+                }}
+              >
+                <X size={13} strokeWidth={2.5} />
+                <span>지우기</span>
+              </button>
+            )}
           </div>
         </div>
 
-        {/* 3. 카테고리 8개 그리드 (시안 반영) */}
-        <div style={{ marginBottom: '20px' }}>
+        {/* 카테고리 8개 그리드 */}
+        <div style={{ marginBottom: '22px' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
             <label style={{ fontSize: '12px', fontWeight: 700, color: '#64748B' }}>
               카테고리
@@ -238,7 +338,7 @@ export default function QuickAddModal({ isOpen, onClose, onSave, defaultDate }) 
                 <div
                   key={cat.id}
                   className={`sobimon-cat-btn ${isSelected ? 'active' : ''}`}
-                  onClick={() => setSelectedCat(cat.id)}
+                  onClick={(e) => { e.stopPropagation(); setSelectedCat(cat.id); }}
                 >
                   <div 
                     className="sobimon-cat-icon"
@@ -259,7 +359,7 @@ export default function QuickAddModal({ isOpen, onClose, onSave, defaultDate }) 
           </div>
         </div>
 
-        {/* 4. 날짜 선택 */}
+        {/* 날짜 선택 */}
         <div style={{ marginBottom: '18px' }}>
           <label style={{ fontSize: '12px', fontWeight: 700, color: '#64748B', display: 'block', marginBottom: '8px' }}>
             날짜
@@ -283,7 +383,7 @@ export default function QuickAddModal({ isOpen, onClose, onSave, defaultDate }) 
           />
         </div>
 
-        {/* 5. 메모 (선택) */}
+        {/* 메모 (선택) */}
         <div style={{ marginBottom: '10px' }}>
           <label style={{ fontSize: '12px', fontWeight: 700, color: '#64748B', display: 'block', marginBottom: '8px' }}>
             메모 (선택)
@@ -292,7 +392,7 @@ export default function QuickAddModal({ isOpen, onClose, onSave, defaultDate }) 
             type="text"
             value={memo}
             onChange={(e) => setMemo(e.target.value)}
-            placeholder="예) 점심 식사"
+            placeholder="예) 점심 식사, 장보기"
             style={{
               width: '100%',
               padding: '12px 14px',
@@ -308,7 +408,7 @@ export default function QuickAddModal({ isOpen, onClose, onSave, defaultDate }) 
         </div>
       </div>
 
-      {/* 하단 고정 액션 버튼 푸터 */}
+      {/* 3. 하단 고정 액션 버튼 푸터 */}
       <div className="sub-page-footer">
         <button
           type="button"
@@ -319,6 +419,315 @@ export default function QuickAddModal({ isOpen, onClose, onSave, defaultDate }) 
           소비 기록 완료 ✨
         </button>
       </div>
+
+      {/* =========================================================================
+          🌟 방법 2. 슬라이딩 바텀 숫자 키패드 (터치 시만 올라오는 미니멀 키패드)
+         ========================================================================= */}
+      {showKeypad && (
+        <div 
+          onClick={() => setShowKeypad(false)}
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(15, 23, 42, 0.3)',
+            zIndex: 1150,
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'flex-end',
+            animation: 'fadeIn 0.15s ease'
+          }}
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: '#FFFFFF',
+              borderTopLeftRadius: '24px',
+              borderTopRightRadius: '24px',
+              padding: '16px 18px 24px',
+              boxShadow: '0 -10px 30px rgba(0, 0, 0, 0.12)',
+              animation: 'slideUp 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
+            }}
+          >
+            {/* 키패드 상단 컨트롤 바 */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '12px',
+              paddingBottom: '8px',
+              borderBottom: '1px solid #F1F5F9'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '13px', color: '#64748B', fontWeight: 700 }}>입력 금액:</span>
+                <span style={{ fontSize: '16px', fontWeight: 900, color: '#0F172A' }}>
+                  ₩ {amount ? Number(amount).toLocaleString() : '0'}
+                </span>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <button
+                  type="button"
+                  onClick={handleOpenCalculator}
+                  style={{
+                    background: '#F1F5F9',
+                    border: 'none',
+                    borderRadius: '8px',
+                    padding: '5px 8px',
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    color: '#2563EB',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  <Calculator size={13} />
+                  <span>계산기</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setShowKeypad(false)}
+                  style={{
+                    background: '#2563EB',
+                    border: 'none',
+                    borderRadius: '8px',
+                    padding: '5px 12px',
+                    fontSize: '11px',
+                    fontWeight: 800,
+                    color: '#FFFFFF',
+                    cursor: 'pointer'
+                  }}
+                >
+                  완료 ✓
+                </button>
+              </div>
+            </div>
+
+            {/* 퀵 단위 칩 (1천, 5천, 1만, 5만) */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(4, 1fr)',
+              gap: '6px',
+              marginBottom: '10px'
+            }}>
+              {[
+                { label: '+1천', val: '+1000' },
+                { label: '+5천', val: '+5000' },
+                { label: '+1만', val: '+10000' },
+                { label: '+5만', val: '+50000' }
+              ].map((chip) => (
+                <button
+                  key={chip.val}
+                  type="button"
+                  onClick={() => handleKeypadPress(chip.val)}
+                  style={{
+                    padding: '7px 0',
+                    background: '#F8FAFC',
+                    border: '1px solid #E2E8F0',
+                    borderRadius: '8px',
+                    fontSize: '11px',
+                    fontWeight: 800,
+                    color: '#475569',
+                    cursor: 'pointer'
+                  }}
+                >
+                  {chip.label}
+                </button>
+              ))}
+            </div>
+
+            {/* 3x4 극도로 단순한 미니멀 숫자 그리드 */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: '6px'
+            }}>
+              {[
+                '1', '2', '3',
+                '4', '5', '6',
+                '7', '8', '9',
+                '00', '0', 'backspace'
+              ].map((k) => {
+                const isBackspace = k === 'backspace';
+                return (
+                  <button
+                    key={k}
+                    type="button"
+                    onClick={() => handleKeypadPress(k)}
+                    style={{
+                      height: '44px',
+                      background: isBackspace ? '#FEF2F2' : '#FFFFFF',
+                      border: '1px solid',
+                      borderColor: isBackspace ? '#FECACA' : '#F1F5F9',
+                      borderRadius: '10px',
+                      fontSize: isBackspace ? '13px' : '17px',
+                      fontWeight: 800,
+                      color: isBackspace ? '#DC2626' : '#0F172A',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer',
+                      boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)',
+                      userSelect: 'none'
+                    }}
+                  >
+                    {isBackspace ? <Delete size={18} /> : k}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* =========================================================================
+          🧮 편한가계부 스타일 간편 계산기 모달
+         ========================================================================= */}
+      {showCalculator && (
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(15, 23, 42, 0.45)',
+          backdropFilter: 'blur(3px)',
+          zIndex: 1300,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '20px'
+        }}>
+          <div style={{
+            background: '#FFFFFF',
+            borderRadius: '24px',
+            padding: '20px',
+            width: '100%',
+            maxWidth: '320px',
+            boxShadow: '0 20px 40px rgba(0, 0, 0, 0.2)',
+            animation: 'zoomInModal 0.2s ease-out'
+          }}>
+            {/* 계산기 헤더 */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Calculator size={18} color="#2563EB" />
+                <span style={{ fontSize: '15px', fontWeight: 900, color: '#0F172A' }}>
+                  간편 계산기
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowCalculator(false)}
+                style={{
+                  background: '#F1F5F9',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '26px',
+                  height: '26px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  color: '#64748B'
+                }}
+              >
+                <X size={14} />
+              </button>
+            </div>
+
+            {/* 수식 & 결과 디스플레이 */}
+            <div style={{
+              background: '#F8FAFC',
+              border: '1.5px solid #E2E8F0',
+              borderRadius: '14px',
+              padding: '12px 14px',
+              marginBottom: '14px',
+              textAlign: 'right'
+            }}>
+              <div style={{ fontSize: '12px', color: '#64748B', fontWeight: 600, minHeight: '16px' }}>
+                {calcExpr || '수식을 입력하세요'}
+              </div>
+              <div style={{ fontSize: '22px', fontWeight: 900, color: '#0F172A', marginTop: '4px' }}>
+                ₩ {calcResult ? Number(calcResult).toLocaleString() : '0'}
+              </div>
+            </div>
+
+            {/* 4x4 계산기 버튼 패드 */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(4, 1fr)',
+              gap: '6px',
+              marginBottom: '14px'
+            }}>
+              {[
+                { k: '7', t: 'num' }, { k: '8', t: 'num' }, { k: '9', t: 'num' }, { k: '÷', t: 'op' },
+                { k: '4', t: 'num' }, { k: '5', t: 'num' }, { k: '6', t: 'num' }, { k: '×', t: 'op' },
+                { k: '1', t: 'num' }, { k: '2', t: 'num' }, { k: '3', t: 'num' }, { k: '-', t: 'op' },
+                { k: 'C', t: 'clear' }, { k: '0', t: 'num' }, { k: '⌫', t: 'del' }, { k: '+', t: 'op' }
+              ].map(({ k, t }) => {
+                const isOp = t === 'op';
+                const isClear = t === 'clear';
+                const isDel = t === 'del';
+
+                return (
+                  <button
+                    key={k}
+                    type="button"
+                    onClick={() => handleCalcBtn(k)}
+                    style={{
+                      height: '42px',
+                      borderRadius: '10px',
+                      border: '1px solid',
+                      borderColor: isOp ? '#BFDBFE' : '#E2E8F0',
+                      background: isOp ? '#EFF6FF' : isClear ? '#FEE2E2' : '#FFFFFF',
+                      color: isOp ? '#1D4ED8' : isClear ? '#DC2626' : isDel ? '#DC2626' : '#0F172A',
+                      fontSize: '15px',
+                      fontWeight: 800,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      boxShadow: '0 1px 2px rgba(0,0,0,0.03)'
+                    }}
+                  >
+                    {k}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* 계산된 금액 적용 버튼 */}
+            <button
+              type="button"
+              onClick={handleApplyCalc}
+              style={{
+                width: '100%',
+                padding: '12px',
+                borderRadius: '12px',
+                border: 'none',
+                background: '#2563EB',
+                color: '#FFFFFF',
+                fontSize: '13px',
+                fontWeight: 800,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px',
+                boxShadow: '0 4px 10px rgba(37, 99, 235, 0.25)'
+              }}
+            >
+              <Check size={16} />
+              <span>이 금액으로 적용하기</span>
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* 시안의 '소비몬이 발견됐어요!' 축하 팝업/카드 피드백 */}
       {showDiscoveryPopup && (
