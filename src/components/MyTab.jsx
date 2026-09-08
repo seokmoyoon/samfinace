@@ -131,92 +131,93 @@ export default function MyTab({ user, badges = [], onOpenTreasure }) {
         </button>
       </div>
 
-      {/* 3. 결제수단 및 자산 계좌 현황 */}
-      <div style={{
-        background: '#FFFFFF',
-        border: '1px solid var(--border-subtle)',
-        borderRadius: 'var(--radius-lg)',
-        padding: '16px',
-        marginBottom: '16px',
-        boxShadow: 'var(--shadow-sm)'
-      }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-          <h4 style={{ fontSize: '13px', fontWeight: 800, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <CreditCard size={16} color="var(--primary)" /> <span>연동된 결제수단 및 통장 ({INITIAL_ACCOUNTS.length})</span>
-          </h4>
-        </div>
+      {/* 3 & 4. 결제수단 및 업적 뱃지 (태블릿 2열 그리드 반응형) */}
+      <div className="my-two-col-grid">
+        {/* 3. 결제수단 및 자산 계좌 현황 */}
+        <div style={{
+          background: '#FFFFFF',
+          border: '1px solid var(--border-subtle)',
+          borderRadius: 'var(--radius-lg)',
+          padding: '16px',
+          boxShadow: 'var(--shadow-sm)'
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+            <h4 style={{ fontSize: '13px', fontWeight: 800, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <CreditCard size={16} color="var(--primary)" /> <span>연동된 결제수단 및 통장 ({INITIAL_ACCOUNTS.length})</span>
+            </h4>
+          </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          {INITIAL_ACCOUNTS.map(acc => (
-            <div
-              key={acc.id}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '10px 12px',
-                background: '#F8FAFC',
-                borderRadius: 'var(--radius-md)',
-                border: '1px solid #F1F5F9'
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ fontSize: '16px' }}>{acc.icon}</span>
-                <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-main)' }}>
-                  {acc.name}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {INITIAL_ACCOUNTS.map(acc => (
+              <div
+                key={acc.id}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '10px 12px',
+                  background: '#F8FAFC',
+                  borderRadius: 'var(--radius-md)',
+                  border: '1px solid #F1F5F9'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ fontSize: '16px' }}>{acc.icon}</span>
+                  <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-main)' }}>
+                    {acc.name}
+                  </span>
+                </div>
+                <span style={{
+                  fontSize: '12px',
+                  fontWeight: 800,
+                  color: acc.balance < 0 ? '#EF4444' : '#2563EB'
+                }}>
+                  {acc.balance < 0 ? `-${Math.abs(acc.balance).toLocaleString()}원 (청구예정)` : `${acc.balance.toLocaleString()}원`}
                 </span>
               </div>
-              <span style={{
-                fontSize: '12px',
-                fontWeight: 800,
-                color: acc.balance < 0 ? '#EF4444' : '#2563EB'
-              }}>
-                {acc.balance < 0 ? `-${Math.abs(acc.balance).toLocaleString()}원 (청구예정)` : `${acc.balance.toLocaleString()}원`}
-              </span>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
 
-      {/* 4. 달성한 업적 뱃지 */}
-      <div style={{
-        background: '#FFFFFF',
-        border: '1px solid var(--border-subtle)',
-        borderRadius: 'var(--radius-lg)',
-        padding: '16px',
-        marginBottom: '16px',
-        boxShadow: 'var(--shadow-sm)'
-      }}>
-        <h4 style={{ fontSize: '13px', fontWeight: 800, color: 'var(--text-main)', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <Award size={16} color="var(--accent)" /> <span>달성한 업적 뱃지</span>
-        </h4>
+        {/* 4. 달성한 업적 뱃지 */}
+        <div style={{
+          background: '#FFFFFF',
+          border: '1px solid var(--border-subtle)',
+          borderRadius: 'var(--radius-lg)',
+          padding: '16px',
+          boxShadow: 'var(--shadow-sm)'
+        }}>
+          <h4 style={{ fontSize: '13px', fontWeight: 800, color: 'var(--text-main)', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <Award size={16} color="var(--accent)" /> <span>달성한 업적 뱃지</span>
+          </h4>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
-          {badges.map(b => (
-            <div
-              key={b.id}
-              style={{
-                background: b.unlocked ? '#F8FAFC' : '#F1F5F9',
-                border: b.unlocked ? '1px solid var(--border-subtle)' : '1px dashed #CBD5E1',
-                borderRadius: 'var(--radius-md)',
-                padding: '10px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                opacity: b.unlocked ? 1 : 0.5
-              }}
-            >
-              <div style={{ fontSize: '20px' }}>{b.icon}</div>
-              <div>
-                <div style={{ fontSize: '11px', fontWeight: 800, color: b.unlocked ? 'var(--text-main)' : '#94A3B8' }}>
-                  {b.name}
-                </div>
-                <div style={{ fontSize: '9px', color: 'var(--text-muted)' }}>
-                  {b.desc}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
+            {badges.map(b => (
+              <div
+                key={b.id}
+                style={{
+                  background: b.unlocked ? '#F8FAFC' : '#F1F5F9',
+                  border: b.unlocked ? '1px solid var(--border-subtle)' : '1px dashed #CBD5E1',
+                  borderRadius: 'var(--radius-md)',
+                  padding: '10px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  opacity: b.unlocked ? 1 : 0.5
+                }}
+              >
+                <div style={{ fontSize: '20px' }}>{b.icon}</div>
+                <div>
+                  <div style={{ fontSize: '11px', fontWeight: 800, color: b.unlocked ? 'var(--text-main)' : '#94A3B8' }}>
+                    {b.name}
+                  </div>
+                  <div style={{ fontSize: '9px', color: 'var(--text-muted)' }}>
+                    {b.desc}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
 

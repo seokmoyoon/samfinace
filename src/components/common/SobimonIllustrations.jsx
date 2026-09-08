@@ -149,17 +149,7 @@ export function FairytaleHeroBackground({
   const [useImgBg, setUseImgBg] = React.useState(true);
 
   return (
-    <div className="fairytale-hero-container" style={{
-      position: 'relative',
-      width: 'calc(100% + 36px)',
-      margin: '-20px -18px 12px -18px',
-      height: '315px',
-      overflow: 'hidden',
-      borderBottomLeftRadius: '28px',
-      borderBottomRightRadius: '28px',
-      background: 'linear-gradient(180deg, #38BDF8 0%, #7DD3FC 35%, #BAE6FD 60%, #BBF7D0 85%, #86EFAC 100%)',
-      boxShadow: '0 10px 28px rgba(56, 189, 248, 0.25)'
-    }}>
+    <div className="fairytale-hero-container">
 
       {/* 1. 실물 hero-bg.png 배경 이미지 (있을 경우 꽉 채움) */}
       {useImgBg && (
@@ -172,7 +162,7 @@ export function FairytaleHeroBackground({
             top: 0,
             left: 0,
             width: '100%',
-            // height: '100%',
+            height: '100%',
             objectFit: 'cover',
             zIndex: 1
           }}
@@ -411,58 +401,23 @@ export function FairytaleHeroBackground({
         </div>
       </div>
 
-      {/* 4. 좌측 말풍선 ("이번 달도 잘하고 있어요!") */}
-      <div style={{
-        position: 'absolute',
-        bottom: '100px',
-        left: '60px',
-        background: '#FFFFFF',
-        padding: '9px 14px',
-        borderRadius: '18px',
-        boxShadow: '0 6px 16px rgba(15, 23, 42, 0.12)',
-        border: '1.5px solid #BAE6FD',
-        zIndex: 10,
-        animation: 'floatSpeech 3s ease-in-out infinite'
-      }}>
-        <div style={{
-          fontSize: '12px',
-          fontWeight: 800,
-          color: '#0369A1',
-          lineHeight: '1.35',
-          textAlign: 'center'
-        }}>
-          이번 달도<br />잘하고 있어요!
+      {/* 4 & 5. 중앙 마스코트와 말풍선 스테이지 (반응형 중앙 정렬) */}
+      <div className="hero-stage-center">
+        {/* 말풍선 */}
+        <div className="hero-speech-bubble">
+          <div className="hero-speech-bubble-text">
+            {speech || '이번 달도 잘하고 있어요!'}
+          </div>
+          <div className="hero-speech-tail" />
         </div>
-        {/* 말풍선 우측 꼬리 (캐릭터를 향함) */}
-        <div style={{
-          position: 'absolute',
-          top: '50%',
-          right: '-7px',
-          transform: 'translateY(-50%)',
-          width: 0,
-          height: 0,
-          borderTop: '6px solid transparent',
-          borderBottom: '6px solid transparent',
-          borderLeft: '8px solid #FFFFFF'
-        }} />
-      </div>
 
-      {/* 5. 2번 캐릭터: 바위 위에 앉아 있는 메인 백곰 마스코트 */}
-      <div
-        onClick={onMascotClick}
-        style={{
-          position: 'absolute',
-          bottom: '25px',
-          left: '60%',
-          transform: 'translateX(-50%)',
-          cursor: 'pointer',
-          zIndex: 12,
-          transition: 'transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)'
-        }}
-        onMouseEnter={(e) => e.currentTarget.style.transform = 'translateX(-50%) scale(1.06)'}
-        onMouseLeave={(e) => e.currentTarget.style.transform = 'translateX(-50%) scale(1)'}
-      >
-        <SobimonMascot size={160} emotion="joy" />
+        {/* 백곰 캐릭터 */}
+        <div
+          className="hero-mascot-wrap"
+          onClick={onMascotClick}
+        >
+          <SobimonMascot size={160} emotion="joy" />
+        </div>
       </div>
 
     </div>

@@ -134,8 +134,8 @@ export default function MissionTab({ user, quests = [], onClaimReward }) {
         ))}
       </div>
 
-      {/* 2. 미션 카드 목록 (시안 반영) */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '18px' }}>
+      {/* 2. 미션 카드 목록 (모바일 1열, 태블릿 2열 반응형) */}
+      <div className="mission-list-grid">
         {currentList.map((m) => {
           const isCompleted = m.status === 'completed';
           const percent = m.target > 0 ? Math.min(100, Math.round((m.current / m.target) * 100)) : 100;

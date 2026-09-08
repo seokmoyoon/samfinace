@@ -173,106 +173,109 @@ export default function ReportTab({ transactions = [], budget }) {
         </div>
       </div>
 
-      {/* 3. 가장 강력한 소비몬 카드 (시안 반영) */}
-      <div className="sobimon-card">
-        <div className="sobimon-card-header" style={{ marginBottom: '8px' }}>
-          <div className="sobimon-card-title">
-            <span style={{ color: '#8B5CF6', fontSize: '14px' }}>👾</span>
-            <span>가장 강력한 소비몬</span>
+      {/* 3 & 4. 하단 소비 분석 세부 카드 (태블릿 2열 그리드 반응형) */}
+      <div className="report-sub-grid">
+        {/* 3. 가장 강력한 소비몬 카드 (시안 반영) */}
+        <div className="sobimon-card">
+          <div className="sobimon-card-header" style={{ marginBottom: '8px' }}>
+            <div className="sobimon-card-title">
+              <span style={{ color: '#8B5CF6', fontSize: '14px' }}>👾</span>
+              <span>가장 강력한 소비몬</span>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+              <div style={{
+                width: '56px',
+                height: '56px',
+                borderRadius: '16px',
+                background: '#EFF6FF',
+                border: '1px solid #BFDBFE',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <CafeMonsterIllustration size={50} />
+              </div>
+
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                  <span style={{ fontSize: '14px', fontWeight: 900, color: '#0F172A' }}>카페몬</span>
+                  <span style={{
+                    fontSize: '10px',
+                    fontWeight: 800,
+                    background: '#F3E8FF',
+                    color: '#7E22CE',
+                    padding: '2px 6px',
+                    borderRadius: '9999px'
+                  }}>
+                    Lv.3
+                  </span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ fontSize: '16px', fontWeight: 900, color: '#0F172A' }}>
+                    ₩ 184,000
+                  </span>
+                  <span style={{
+                    fontSize: '11px',
+                    fontWeight: 800,
+                    color: '#EF4444',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '1px'
+                  }}>
+                    ▲ 23%
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-            <div style={{
-              width: '56px',
-              height: '56px',
-              borderRadius: '16px',
-              background: '#EFF6FF',
-              border: '1px solid #BFDBFE',
+        {/* 4. 최근 소비 패턴 카드 (시안 하단 막대 차트) */}
+        <div className="sobimon-card">
+          <div className="sobimon-card-header" style={{ marginBottom: '12px' }}>
+            <div className="sobimon-card-title">
+              <span>최근 소비 패턴</span>
+            </div>
+            <button style={{
+              background: 'transparent',
+              border: 'none',
+              fontSize: '11px',
+              color: '#94A3B8',
+              fontWeight: 700,
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center'
+              cursor: 'pointer'
             }}>
-              <CafeMonsterIllustration size={50} />
-            </div>
-
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
-                <span style={{ fontSize: '14px', fontWeight: 900, color: '#0F172A' }}>카페몬</span>
-                <span style={{
-                  fontSize: '10px',
-                  fontWeight: 800,
-                  background: '#F3E8FF',
-                  color: '#7E22CE',
-                  padding: '2px 6px',
-                  borderRadius: '9999px'
-                }}>
-                  Lv.3
-                </span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ fontSize: '16px', fontWeight: 900, color: '#0F172A' }}>
-                  ₩ 184,000
-                </span>
-                <span style={{
-                  fontSize: '11px',
-                  fontWeight: 800,
-                  color: '#EF4444',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '1px'
-                }}>
-                  ▲ 23%
-                </span>
-              </div>
-            </div>
+              더보기 &gt;
+            </button>
           </div>
-        </div>
-      </div>
 
-      {/* 4. 최근 소비 패턴 카드 (시안 하단 막대 차트) */}
-      <div className="sobimon-card">
-        <div className="sobimon-card-header" style={{ marginBottom: '12px' }}>
-          <div className="sobimon-card-title">
-            <span>최근 소비 패턴</span>
-          </div>
-          <button style={{
-            background: 'transparent',
-            border: 'none',
-            fontSize: '11px',
-            color: '#94A3B8',
-            fontWeight: 700,
+          {/* 막대 차트 영역 */}
+          <div style={{
             display: 'flex',
-            alignItems: 'center',
-            cursor: 'pointer'
+            alignItems: 'flex-end',
+            justifyContent: 'space-between',
+            height: '80px',
+            padding: '0 10px',
+            borderBottom: '1px solid #F1F5F9',
+            paddingBottom: '8px'
           }}>
-            더보기 &gt;
-          </button>
-        </div>
-
-        {/* 막대 차트 영역 */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'flex-end',
-          justifyContent: 'space-between',
-          height: '80px',
-          padding: '0 10px',
-          borderBottom: '1px solid #F1F5F9',
-          paddingBottom: '8px'
-        }}>
-          {weeklyPattern.map((item, idx) => (
-            <div key={idx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
-              <div style={{
-                width: '18px',
-                height: `${item.value}px`,
-                background: item.color,
-                borderRadius: '6px 6px 2px 2px',
-                transition: 'height 0.3s ease'
-              }} />
-              <span style={{ fontSize: '10px', color: '#94A3B8', fontWeight: 600 }}>{item.day}</span>
-            </div>
-          ))}
+            {weeklyPattern.map((item, idx) => (
+              <div key={idx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
+                <div style={{
+                  width: '18px',
+                  height: `${item.value}px`,
+                  background: item.color,
+                  borderRadius: '6px 6px 2px 2px',
+                  transition: 'height 0.3s ease'
+                }} />
+                <span style={{ fontSize: '10px', color: '#94A3B8', fontWeight: 600 }}>{item.day}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 

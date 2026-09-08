@@ -7,9 +7,11 @@ import {
   ShopMonsterIllustration, 
   SaverMonsterIllustration 
 } from './common/SobimonIllustrations';
+import SobimonHoloCardModal from './common/SobimonHoloCardModal';
 
 export default function SobimonDexTab({ user, sobimons = [] }) {
   const [filterRarity, setFilterRarity] = useState('all'); // 'all' | 'normal' | 'rare' | 'epic' | 'legend'
+  const [selectedHoloMonster, setSelectedHoloMonster] = useState(null);
 
   // 시안 기준의 대표 소비몬 그리드 데이터
   const dexList = [
@@ -142,16 +144,18 @@ export default function SobimonDexTab({ user, sobimons = [] }) {
         ))}
       </div>
 
-      {/* 2. 소비몬 그리드 카드 (3열 그리드) */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(3, 1fr)',
-        gap: '10px',
-        marginBottom: '20px'
-      }}>
+      {/* 2. 소비몬 그리드 카드 (모바일 3열, 아이패드 태블릿 반응형 확장) */}
+      <div className="sobimon-dex-grid">
         {filteredList.map((mon) => (
           <div
             key={mon.id}
+            onClick={() => {
+              if (mon.discovered) {
+                setSelectedHoloMonster(mon);
+              } else {
+                alert('아직 발견되지 않은 미스터리 소비몬입니다! 지출을 기록하여 발견해보세요 🔍');
+              }
+            }}
             style={{
               background: mon.bg,
               border: `1.5px solid ${mon.border}`,
@@ -205,17 +209,21 @@ export default function SobimonDexTab({ user, sobimons = [] }) {
       </div>
 
       {/* 3. 하단 CTA 다크 배너: "더 많은 소비몬을 만나보세요! >" */}
-      <div style={{
-        background: '#0F172A',
-        color: '#FFFFFF',
-        borderRadius: '16px',
-        padding: '12px 16px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        cursor: 'pointer',
-        boxShadow: '0 4px 16px rgba(15, 23, 42, 0.25)'
-      }}>
+      <div 
+        className="sobimon-card-banner"
+        onClick={() => setSelectedHoloMonster(dexList[1])} // 카페몬 홀로 카드 미리보기
+        style={{
+          background: '#0F172A',
+          color: '#FFFFFF',
+          borderRadius: '16px',
+          padding: '12px 16px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          cursor: 'pointer',
+          boxShadow: '0 4px 16px rgba(15, 23, 42, 0.25)'
+        }}
+      >
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <div style={{
             width: '28px',
@@ -227,14 +235,21 @@ export default function SobimonDexTab({ user, sobimons = [] }) {
             justifyContent: 'center',
             overflow: 'hidden'
           }}>
-            <SobimonMascot size={26} emotion="happy" />
+            <SobimonMascot size={26} emotion="joy" />
           </div>
           <span style={{ fontSize: '12px', fontWeight: 800 }}>
-            더 많은 소비몬을 만나보세요!
+            카드 터치하여 3D 홀로그램 포켓몬 카드 보기 ✨
           </span>
         </div>
         <ChevronRight size={16} color="#94A3B8" />
       </div>
+
+      {/* 4. 3D 인터랙티브 홀로그램 포켓몬 TCG 카드 모달 */}
+      <SobimonHoloCardModal 
+        isOpen={!!selectedHoloMonster}
+        onClose={() => setSelectedHoloMonster(null)}
+        monster={selectedHoloMonster}
+      />
 
     </div>
   );

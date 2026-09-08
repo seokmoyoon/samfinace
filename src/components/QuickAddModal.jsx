@@ -82,31 +82,8 @@ export default function QuickAddModal({ isOpen, onClose, onSave, defaultDate }) 
   };
 
   return (
-    <div style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      background: 'rgba(15, 23, 42, 0.65)',
-      backdropFilter: 'blur(5px)',
-      display: 'flex',
-      alignItems: 'flex-end',
-      justifyContent: 'center',
-      zIndex: 2000
-    }}>
-      <div style={{
-        background: '#FFFFFF',
-        borderTopLeftRadius: '28px',
-        borderTopRightRadius: '28px',
-        width: '100%',
-        maxWidth: '430px',
-        maxHeight: '92vh',
-        overflowY: 'auto',
-        padding: '20px 20px 32px',
-        boxShadow: '0 -10px 40px rgba(0, 0, 0, 0.15)',
-        animation: 'slideUp 0.25s ease-out'
-      }}>
+    <div className="quick-add-modal-overlay">
+      <div className="quick-add-modal-card">
         {/* 상단 헤더: < 소비 기록     우측: 캐릭터 아바타 */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
           <button 

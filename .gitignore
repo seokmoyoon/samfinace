@@ -27,3 +27,6 @@ dist-ssr
 .env
 .env.local
 .env.*.local
+
+# User reference images
+참고이미지/
