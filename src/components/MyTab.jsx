@@ -12,7 +12,8 @@ import {
   Database,
   ExternalLink,
   Cloud,
-  RotateCw
+  RotateCw,
+  Crown
 } from 'lucide-react';
 import { INITIAL_ACCOUNTS } from '../data/mockData';
 import LevelBadge from './common/LevelBadge';
@@ -28,7 +29,8 @@ export default function MyTab({
   onSyncCloud, 
   onSignOut, 
   onOpenTreasure, 
-  onResetData 
+  onResetData,
+  onOpenAdminHQ
 }) {
   const [showChestModal, setShowChestModal] = useState(false);
   const [chestReward, setChestReward] = useState(null);

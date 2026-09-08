@@ -12,6 +12,7 @@ import {
 const HOLO_CARD_SPECS = {
   cafe: {
     name: '카페몬',
+    cardImage: '/images/sobimon/sobicard-cafemon.png',
     subtitle: '달콤한 유혹의 정령',
     stage: '기본 (Basic)',
     hp: 140,
@@ -44,6 +45,7 @@ const HOLO_CARD_SPECS = {
   },
   food: {
     name: '식비몬',
+    cardImage: '/images/sobimon/sobicard-foodmon.png',
     subtitle: '새벽 배달의 망령',
     stage: '1진화 (Stage 1)',
     hp: 180,
@@ -76,6 +78,7 @@ const HOLO_CARD_SPECS = {
   },
   shop: {
     name: '쇼핑몬',
+    cardImage: '/images/sobimon/sobicard-shopmon.png',
     subtitle: '장바구니 폭주마왕',
     stage: '2진화 (Stage 2 - VMAX)',
     hp: 220,
@@ -108,6 +111,7 @@ const HOLO_CARD_SPECS = {
   },
   saving: {
     name: '저축몬',
+    cardImage: '/images/sobimon/sobicard-savingmon.png',
     subtitle: '황금빛 자산 수호신',
     stage: '전설 (Legend / Secret)',
     hp: 250,
@@ -140,6 +144,7 @@ const HOLO_CARD_SPECS = {
   },
   saver: {
     name: '절약몬',
+    cardImage: '/images/sobimon/sobicard-savermon.png',
     subtitle: '무지출 데이의 수호신',
     stage: '특수 (Special Holo)',
     hp: 160,
@@ -414,8 +419,115 @@ export default function SobimonHoloCardModal({ isOpen, onClose, monster }) {
           }}
         >
           {/* ===================== [카드 앞면] ===================== */}
-          <div className="holo-card-face holo-card-front" style={{ background: spec.gradientBg }}>
+          <div className="holo-card-face holo-card-front" style={{ background: spec.gradientBg, padding: 0 }}>
             
+            {/* 0. 실물 포켓몬 TCG 완성형 카드 이미지 (sobicard-cafemon.png 스타일) */}
+            {spec.cardImage ? (
+              <div style={{ width: '100%', height: '100%', position: 'relative', overflow: 'hidden', borderRadius: '16px' }}>
+                <img 
+                  src={spec.cardImage} 
+                  alt={spec.name}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'fill',
+                    display: 'block',
+                    borderRadius: '16px'
+                  }}
+                />
+              </div>
+            ) : (
+              <div className="holo-card-inner-frame" style={{ borderImage: `${spec.borderGradient} 1` }}>
+                {/* 상단: 이름 + HP + 속성 아이콘 */}
+                <div className="holo-card-header">
+                  <div className="holo-header-left">
+                    <span className="holo-card-stage-tag">{spec.stage}</span>
+                    <h3 className="holo-card-name">{spec.name}</h3>
+                  </div>
+                  <div className="holo-header-right">
+                    <span className="holo-card-hp-label">HP</span>
+                    <span className="holo-card-hp-val">{spec.hp}</span>
+                    <div className="holo-element-badge" style={{ background: spec.elementColor }}>
+                      <span>{spec.elementIcon}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 중앙: 캐릭터 일러스트 창 (입체 박스) */}
+                <div className="holo-art-window">
+                  <div className="holo-art-bg-aura" />
+                  <div className="holo-art-sprite">
+                    {monster.id === 'cafe' && <CafeMonsterIllustration size={92} />}
+                    {monster.id === 'food' && <FoodMonsterIllustration size={92} />}
+                    {monster.id === 'shop' && <ShopMonsterIllustration size={92} />}
+                    {monster.id === 'saving' && <span style={{ fontSize: '72px', filter: 'drop-shadow(0 6px 12px rgba(245, 158, 11, 0.4))' }}>🪙</span>}
+                    {monster.id === 'saver' && <SaverMonsterIllustration size={92} />}
+                    {!['cafe', 'food', 'shop', 'saving', 'saver'].includes(monster.id) && <SobimonMascot size={92} emotion="happy" />}
+                  </div>
+                  {/* 일러스트 하단 자막 */}
+                  <div className="holo-art-caption">
+                    <span>{spec.cardNo} | {spec.subtitle}</span>
+                  </div>
+                </div>
+
+                {/* 특성 (Ability) 박스 */}
+                {spec.ability && (
+                  <div className="holo-ability-box">
+                    <div className="holo-ability-title">
+                      <span className="holo-ability-badge">{spec.ability.type}</span>
+                      <strong>{spec.ability.name}</strong>
+                    </div>
+                    <p className="holo-ability-desc">{spec.ability.desc}</p>
+                  </div>
+                )}
+
+                {/* 공격기 (Attack) 리스트 */}
+                <div className="holo-attack-list">
+                  {spec.attacks.map((atk, idx) => (
+                    <div key={idx} className="holo-attack-item">
+                      <div className="holo-attack-cost">
+                        {atk.cost.map((c, cIdx) => (
+                          <span key={cIdx} className="holo-cost-orb">{c}</span>
+                        ))}
+                      </div>
+                      <div className="holo-attack-info">
+                        <div className="holo-attack-name-row">
+                          <strong>{atk.name}</strong>
+                          <span className="holo-attack-damage">{atk.damage}</span>
+                        </div>
+                        <p className="holo-attack-desc">{atk.desc}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* 약점 / 저항력 / 후퇴 비용 바 */}
+                <div className="holo-weakness-bar">
+                  <div className="holo-rule-col">
+                    <span>약점 (Weakness)</span>
+                    <strong>{spec.weakness}</strong>
+                  </div>
+                  <div className="holo-rule-col">
+                    <span>저항력 (Resistance)</span>
+                    <strong>{spec.resistance}</strong>
+                  </div>
+                  <div className="holo-rule-col">
+                    <span>후퇴 비용</span>
+                    <strong>{'⭐'.repeat(spec.retreatCost)}</strong>
+                  </div>
+                </div>
+
+                {/* 하단 희귀도 및 플레이버 텍스트 */}
+                <div className="holo-card-footer">
+                  <p className="holo-quote-text">{spec.quote}</p>
+                  <div className="holo-footer-meta">
+                    <span>Illus. {spec.illustrator}</span>
+                    <span className="holo-rarity-stamp">{spec.rarityText}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* 1. 반사 글레어 오버레이 (마우스 추적 하이라이트) */}
             <div 
               className="holo-layer-glare"
@@ -440,99 +552,6 @@ export default function SobimonHoloCardModal({ isOpen, onClose, monster }) {
                 backgroundPosition: `${tilt.bgX * 1.5}% ${tilt.bgY * 1.5}%`
               }}
             />
-
-            {/* 4. 카드 외곽 금빛/은빛 메탈릭 보더 프레임 */}
-            <div className="holo-card-inner-frame" style={{ borderImage: `${spec.borderGradient} 1` }}>
-
-              {/* 상단: 이름 + HP + 속성 아이콘 */}
-              <div className="holo-card-header">
-                <div className="holo-header-left">
-                  <span className="holo-card-stage-tag">{spec.stage}</span>
-                  <h3 className="holo-card-name">{spec.name}</h3>
-                </div>
-                <div className="holo-header-right">
-                  <span className="holo-card-hp-label">HP</span>
-                  <span className="holo-card-hp-val">{spec.hp}</span>
-                  <div className="holo-element-badge" style={{ background: spec.elementColor }}>
-                    <span>{spec.elementIcon}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* 중앙: 캐릭터 일러스트 창 (입체 박스) */}
-              <div className="holo-art-window">
-                <div className="holo-art-bg-aura" />
-                <div className="holo-art-sprite">
-                  {monster.id === 'cafe' && <CafeMonsterIllustration size={92} />}
-                  {monster.id === 'food' && <FoodMonsterIllustration size={92} />}
-                  {monster.id === 'shop' && <ShopMonsterIllustration size={92} />}
-                  {monster.id === 'saving' && <span style={{ fontSize: '72px', filter: 'drop-shadow(0 6px 12px rgba(245, 158, 11, 0.4))' }}>🪙</span>}
-                  {monster.id === 'saver' && <SaverMonsterIllustration size={92} />}
-                  {!['cafe', 'food', 'shop', 'saving', 'saver'].includes(monster.id) && <SobimonMascot size={92} emotion="happy" />}
-                </div>
-                {/* 일러스트 하단 자막 */}
-                <div className="holo-art-caption">
-                  <span>{spec.cardNo} | {spec.subtitle}</span>
-                </div>
-              </div>
-
-              {/* 특성 (Ability) 박스 */}
-              {spec.ability && (
-                <div className="holo-ability-box">
-                  <div className="holo-ability-title">
-                    <span className="holo-ability-badge">{spec.ability.type}</span>
-                    <strong>{spec.ability.name}</strong>
-                  </div>
-                  <p className="holo-ability-desc">{spec.ability.desc}</p>
-                </div>
-              )}
-
-              {/* 공격기 (Attack) 리스트 */}
-              <div className="holo-attack-list">
-                {spec.attacks.map((atk, idx) => (
-                  <div key={idx} className="holo-attack-item">
-                    <div className="holo-attack-cost">
-                      {atk.cost.map((c, cIdx) => (
-                        <span key={cIdx} className="holo-cost-orb">{c}</span>
-                      ))}
-                    </div>
-                    <div className="holo-attack-info">
-                      <div className="holo-attack-name-row">
-                        <strong>{atk.name}</strong>
-                        <span className="holo-attack-damage">{atk.damage}</span>
-                      </div>
-                      <p className="holo-attack-desc">{atk.desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* 약점 / 저항력 / 후퇴 비용 바 */}
-              <div className="holo-weakness-bar">
-                <div className="holo-rule-col">
-                  <span>약점 (Weakness)</span>
-                  <strong>{spec.weakness}</strong>
-                </div>
-                <div className="holo-rule-col">
-                  <span>저항력 (Resistance)</span>
-                  <strong>{spec.resistance}</strong>
-                </div>
-                <div className="holo-rule-col">
-                  <span>후퇴 비용</span>
-                  <strong>{'⭐'.repeat(spec.retreatCost)}</strong>
-                </div>
-              </div>
-
-              {/* 하단 희귀도 및 플레이버 텍스트 */}
-              <div className="holo-card-footer">
-                <p className="holo-quote-text">{spec.quote}</p>
-                <div className="holo-footer-meta">
-                  <span>Illus. {spec.illustrator}</span>
-                  <span className="holo-rarity-stamp">{spec.rarityText}</span>
-                </div>
-              </div>
-
-            </div>
           </div>
 
           {/* ===================== [카드 뒷면] ===================== */}

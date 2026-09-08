@@ -1719,3 +1719,53 @@ body {
   transform: translateY(-2px);
 }
 
+/* PC 대화면 전용 체육관 & GM 스위처 바 */
+.pc-mode-switcher-bar {
+  display: none;
+}
+
+@media (min-width: 1200px) {
+  .pc-mode-switcher-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    z-index: 50;
+  }
+
+  .pc-switcher-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(15, 23, 42, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: #F8FAFC;
+    padding: 8px 18px;
+    border-radius: 9999px;
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(8px);
+    transition: all 0.15s ease;
+  }
+
+  .pc-switcher-btn:hover {
+    transform: translateY(-2px);
+    background: rgba(30, 41, 59, 0.95);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  }
+
+  .pc-switcher-btn.gm-gold {
+    background: linear-gradient(135deg, #F59E0B, #D97706);
+    color: #000000;
+    border: 1px solid #FDE68A;
+    box-shadow: 0 4px 16px rgba(245, 158, 11, 0.4);
+  }
+
+  .pc-switcher-btn.gm-gold:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 22px rgba(245, 158, 11, 0.6);
+  }
+}
+

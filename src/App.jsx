@@ -5,7 +5,10 @@ import {
   Target, 
   BookOpen, 
   User, 
-  Zap 
+  Zap,
+  Crown,
+  Monitor,
+  Trophy
 } from 'lucide-react';
 
 import HomeTab from './components/HomeTab';
@@ -14,6 +17,9 @@ import MissionTab from './components/MissionTab';
 import SobimonDexTab from './components/SobimonDexTab';
 import MyTab from './components/MyTab';
 import QuickAddModal from './components/QuickAddModal';
+import GymArenaModal from './components/common/GymArenaModal';
+import GymLeaderDashboard from './components/pc/admin/GymLeaderDashboard';
+import GymModePC from './components/pc/GymModePC';
 
 import { 
   INITIAL_USER, 
@@ -52,6 +58,12 @@ export default function App() {
   const [currentUser, setCurrentUser] = useState(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
+
+  // 체육관(Gym) 및 체육관장(Admin) 모드 상태
+  const [isGymArenaOpen, setIsGymArenaOpen] = useState(false);
+  const [isGymLeaderDashboardOpen, setIsGymLeaderDashboardOpen] = useState(false);
+  const [isGymPCMode, setIsGymPCMode] = useState(false);
+  const [pendingGymTarget, setPendingGymTarget] = useState(null); // 'pc' | 'arena' | null
 
   // 상태 변경 시 로컬 스토리지에 실시간 영구 자동 동기화
   useEffect(() => { saveToStorage(STORAGE_KEYS.USER, user); }, [user]);
@@ -231,8 +243,57 @@ export default function App() {
     setIsQuickAddOpen(true);
   };
 
+  // 체육관 PC 모드 진입 (로그인 필수 인증 가드)
+  const handleOpenGymPCMode = () => {
+    if (!currentUser) {
+      setPendingGymTarget('pc');
+      alert('소비몬 체육관(PC 와이드 모드)은 로그인한 트레이너만 입장하실 수 있습니다. 🥊\n계정으로 로그인하거나 무료 회원가입을 진행해 주세요!');
+      setIsAuthModalOpen(true);
+      return;
+    }
+    setIsGymPCMode(true);
+  };
+
+  // 체육관 모바일 아레나 진입 (로그인 필수 인증 가드)
+  const handleOpenGymArena = () => {
+    if (!currentUser) {
+      setPendingGymTarget('arena');
+      alert('소비몬 체육관 아레나는 로그인한 트레이너만 입장하실 수 있습니다. 🥊\n계정으로 로그인하거나 무료 회원가입을 진행해 주세요!');
+      setIsAuthModalOpen(true);
+      return;
+    }
+    setIsGymArenaOpen(true);
+  };
+
+  // 1. 체육관장 GM 스튜디오 대시보드 (Admin 전용 모드)
+  if (isGymLeaderDashboardOpen) {
+    return (
+      <GymLeaderDashboard 
+        currentUser={currentUser} 
+        onBackToGame={() => setIsGymLeaderDashboardOpen(false)} 
+      />
+    );
+  }
+
+  // 2. PC 대화면 체육관 3단 모드 (Gym Mode)
+  if (isGymPCMode) {
+    return (
+      <GymModePC
+        user={user}
+        budget={budget}
+        transactions={transactions}
+        sobimons={sobimons}
+        currentUser={currentUser}
+        onSwitchToPhoneView={() => setIsGymPCMode(false)}
+        onOpenAdminHQ={() => setIsGymLeaderDashboardOpen(true)}
+        onOpenQuickAdd={() => handleOpenQuickAdd('2026-09-07')}
+      />
+    );
+  }
+
   return (
     <div className="app-wrapper">
+
       {/* EXP & COIN 획득 플로팅 토스트 */}
       {expToast && (
         <div className="exp-gain-toast">
@@ -308,6 +369,7 @@ export default function App() {
               onNavigateTab={(tab) => setActiveTab(tab)}
               onOpenQuickAdd={() => handleOpenQuickAdd('2026-09-07')}
               onClaimReward={handleClaimReward}
+              onOpenGymArena={handleOpenGymArena}
             />
           )}
 
@@ -315,10 +377,12 @@ export default function App() {
             <SpendingTab 
               transactions={transactions}
               budget={budget}
+              currentUser={currentUser}
               onAddTransaction={handleAddTransaction}
               onAddMultipleTransactions={handleAddMultipleTransactions}
               onTriggerPushSimulation={handleTriggerPushSimulation}
               onOpenQuickAdd={handleOpenQuickAdd}
+              onSwitchToPCMode={handleOpenGymPCMode}
             />
           )}
 
@@ -348,6 +412,7 @@ export default function App() {
               onSignOut={handleSignOut}
               onOpenTreasure={handleOpenTreasure}
               onResetData={handleResetData}
+              onOpenAdminHQ={() => setIsGymLeaderDashboardOpen(true)}
             />
           )}
         </div>
@@ -416,13 +481,30 @@ export default function App() {
         {/* 클라우드 로그인 / 회원가입 모달 */}
         <AuthModal 
           isOpen={isAuthModalOpen}
-          onClose={() => setIsAuthModalOpen(false)}
+          onClose={() => {
+            setIsAuthModalOpen(false);
+            setPendingGymTarget(null);
+          }}
           onAuthSuccess={(u) => {
             setCurrentUser(u);
             handleSyncCloud();
+            if (pendingGymTarget === 'pc') {
+              setIsGymPCMode(true);
+            } else if (pendingGymTarget === 'arena') {
+              setIsGymArenaOpen(true);
+            }
+            setPendingGymTarget(null);
           }}
         />
 
+        {/* 체육관 관장 배틀 아레나 모달 (모바일/태블릿) */}
+        <GymArenaModal 
+          isOpen={isGymArenaOpen}
+          onClose={() => setIsGymArenaOpen(false)}
+          budget={budget}
+          user={user}
+          onSwitchToPCMode={handleOpenGymPCMode}
+        />
       </div>
     </div>
   );

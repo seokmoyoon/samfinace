@@ -25,7 +25,8 @@ export default function HomeTab({
   sobimons = [],
   onNavigateTab,
   onOpenQuickAdd,
-  onClaimReward
+  onClaimReward,
+  onOpenGymArena
 }) {
   // 이번 달 소비 총액 계산 (수입 제외)
   const totalSpent = transactions

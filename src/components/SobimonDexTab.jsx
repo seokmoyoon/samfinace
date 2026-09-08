@@ -13,75 +13,172 @@ export default function SobimonDexTab({ user, sobimons = [] }) {
   const [filterRarity, setFilterRarity] = useState('all'); // 'all' | 'normal' | 'rare' | 'epic' | 'legend'
   const [selectedHoloMonster, setSelectedHoloMonster] = useState(null);
 
-  // 시안 기준의 대표 소비몬 그리드 데이터
+  // 공식 10종 소비몬 + 미스터리 도감 데이터
   const dexList = [
     {
-      id: 'food',
-      name: '식비몬',
-      level: 5,
+      id: 'saver',
+      name: '절약몬',
+      typeName: '절약 속성',
+      level: 1,
       rarity: 'normal',
       discovered: true,
-      component: <FoodMonsterIllustration size={44} />,
-      bg: '#FFF7ED',
-      border: '#FED7AA'
+      characterImage: '/images/sobimon/characters/savermon.png',
+      cardImage: '/images/sobimon/sobicard-savermon.png',
+      bg: '#FEF9C3',
+      border: '#FDE047',
+      typeBg: '#FEF08A',
+      typeColor: '#854D0E',
+      condition: '한 달 동안 불필요한 소비 0원'
     },
     {
       id: 'cafe',
       name: '카페몬',
+      typeName: '카페 속성',
       level: 3,
       rarity: 'normal',
       discovered: true,
-      component: <CafeMonsterIllustration size={44} />,
+      characterImage: '/images/sobimon/characters/cafemon.png',
+      cardImage: '/images/sobimon/sobicard-cafemon.png',
+      bg: '#FFFBEB',
+      border: '#FDE68A',
+      typeBg: '#FEF3C7',
+      typeColor: '#92400E',
+      condition: '이번 달 카페 소비 10만원 이상'
+    },
+    {
+      id: 'card',
+      name: '카드몬',
+      typeName: '카드 속성',
+      level: 3,
+      rarity: 'rare',
+      discovered: true,
+      characterImage: '/images/sobimon/characters/cardmon.png',
+      cardImage: '/images/sobimon/sobicard-savermon.png',
+      bg: '#F5F3FF',
+      border: '#DDD6FE',
+      typeBg: '#EDE9FE',
+      typeColor: '#6D28D9',
+      condition: '이번 달 카드 사용 20만원 이상'
+    },
+    {
+      id: 'traffic',
+      name: '교통몬',
+      typeName: '교통 속성',
+      level: 4,
+      rarity: 'normal',
+      discovered: true,
+      characterImage: '/images/sobimon/characters/trafficmon.png',
+      cardImage: '/images/sobimon/sobicard-cafemon.png',
+      bg: '#F0F9FF',
+      border: '#BAE6FD',
+      typeBg: '#E0F2FE',
+      typeColor: '#0369A1',
+      condition: '이번 달 교통비 10만원 이상'
+    },
+    {
+      id: 'delivery',
+      name: '배달몬',
+      typeName: '배달 속성',
+      level: 4,
+      rarity: 'rare',
+      discovered: true,
+      characterImage: '/images/sobimon/characters/deliverymon.png',
+      cardImage: '/images/sobimon/sobicard-cafemon.png',
       bg: '#EFF6FF',
-      border: '#BFDBFE'
+      border: '#BFDBFE',
+      typeBg: '#DBEAFE',
+      typeColor: '#1D4ED8',
+      condition: '이번 달 배달비 5만원 이상'
+    },
+    {
+      id: 'food',
+      name: '식비몬',
+      typeName: '식비 속성',
+      level: 5,
+      rarity: 'normal',
+      discovered: true,
+      characterImage: '/images/sobimon/characters/foodmon.png',
+      cardImage: '/images/sobimon/sobicard-foodmon.png',
+      bg: '#FFF7ED',
+      border: '#FED7AA',
+      typeBg: '#FFEDD5',
+      typeColor: '#C2410C',
+      condition: '이번 달 식비 20만원 이상'
     },
     {
       id: 'shop',
       name: '쇼핑몬',
-      level: 6,
+      typeName: '쇼핑 속성',
+      level: 5,
       rarity: 'rare',
       discovered: true,
-      component: <ShopMonsterIllustration size={44} />,
-      bg: '#FDF2F8',
-      border: '#FBCFE8'
+      characterImage: '/images/sobimon/characters/shopmon.png',
+      cardImage: '/images/sobimon/sobicard-shopmon.png',
+      bg: '#FEF2F2',
+      border: '#FECACA',
+      typeBg: '#FEE2E2',
+      typeColor: '#B91C1C',
+      condition: '이번 달 쇼핑 소비 15만원 이상'
     },
     {
       id: 'saving',
       name: '저축몬',
+      typeName: '저축 속성',
       level: 6,
       rarity: 'epic',
       discovered: true,
-      component: (
-        <div style={{ fontSize: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          🪙
-        </div>
-      ),
-      bg: '#FEFCE8',
-      border: '#FEF08A'
+      characterImage: '/images/sobimon/characters/savingmon.png',
+      cardImage: '/images/sobimon/sobicard-savingmon.png',
+      bg: '#F0FDF4',
+      border: '#BBF7D0',
+      typeBg: '#DCFCE7',
+      typeColor: '#15803D',
+      condition: '저축 목표 달성'
     },
     {
-      id: 'saver',
-      name: '절약몬',
-      level: 4,
+      id: 'impulse',
+      name: '충동소비몬',
+      typeName: '충동 속성',
+      level: 7,
       rarity: 'epic',
       discovered: true,
-      component: <SaverMonsterIllustration size={44} />,
-      bg: '#ECFDF5',
-      border: '#A7F3D0'
+      characterImage: '/images/sobimon/characters/impulsemon.png',
+      cardImage: '/images/sobimon/sobicard-shopmon.png',
+      bg: '#FAF5FF',
+      border: '#E9D5FF',
+      typeBg: '#F3E8FF',
+      typeColor: '#7E22CE',
+      condition: '하루 3건 이상 소비 기록'
+    },
+    {
+      id: 'growth',
+      name: '성장몬',
+      typeName: '성장 속성',
+      level: 10,
+      rarity: 'legend',
+      discovered: true,
+      characterImage: '/images/sobimon/characters/growthmon.png',
+      cardImage: '/images/sobimon/sobicard-savingmon.png',
+      bg: '#F0FDFA',
+      border: '#99F6E4',
+      typeBg: '#CCFBF1',
+      typeColor: '#0F766E',
+      condition: '모든 미션 클리어'
     },
     {
       id: 'hidden_1',
       name: '???',
+      typeName: '미스터리',
       level: null,
       rarity: 'legend',
       discovered: false,
-      component: (
-        <div style={{ color: '#94A3B8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <HelpCircle size={32} />
-        </div>
-      ),
+      characterImage: null,
+      cardImage: null,
       bg: '#F8FAFC',
-      border: '#E2E8F0'
+      border: '#E2E8F0',
+      typeBg: '#F1F5F9',
+      typeColor: '#94A3B8',
+      condition: '숨겨진 특별 조건 달성'
     }
   ];
 
@@ -144,8 +241,13 @@ export default function SobimonDexTab({ user, sobimons = [] }) {
         ))}
       </div>
 
-      {/* 2. 소비몬 그리드 카드 (모바일 3열, 아이패드 태블릿 반응형 확장) */}
-      <div className="sobimon-dex-grid">
+      {/* 2. 소비몬 그리드 카드 (포켓몬 도감 스타일 - 캐릭터 단독 썸네일) */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(3, 1fr)',
+        gap: '10px',
+        marginBottom: '20px'
+      }}>
         {filteredList.map((mon) => (
           <div
             key={mon.id}
@@ -160,50 +262,97 @@ export default function SobimonDexTab({ user, sobimons = [] }) {
               background: mon.bg,
               border: `1.5px solid ${mon.border}`,
               borderRadius: '18px',
-              padding: '14px 8px',
+              padding: '12px 6px 10px',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: '6px',
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.03)',
-              transition: 'transform 0.15s ease',
-              cursor: 'pointer'
+              gap: '8px',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
+              transition: 'all 0.15s ease',
+              cursor: 'pointer',
+              position: 'relative',
+              overflow: 'hidden'
             }}
             onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
             onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
           >
-            {/* 캐릭터 이미지 / 실루엣 */}
-            <div style={{
-              width: '50px',
-              height: '50px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              opacity: mon.discovered ? 1 : 0.4
-            }}>
-              {mon.component}
-            </div>
-
-            {/* 소비몬 이름 */}
-            <span style={{
-              fontSize: '12px',
-              fontWeight: 800,
-              color: mon.discovered ? '#0F172A' : '#94A3B8'
-            }}>
-              {mon.name}
-            </span>
-
-            {/* 레벨 뱃지 */}
-            {mon.discovered && mon.level && (
-              <span style={{
-                fontSize: '10px',
-                color: '#64748B',
-                fontWeight: 700
+            {/* 캐릭터 단독 썸네일 (카드 프레임 대신 순수 캐릭터 일러스트) */}
+            {mon.discovered && mon.characterImage ? (
+              <div style={{
+                width: '74px',
+                height: '74px',
+                borderRadius: '18px',
+                background: '#FFFFFF',
+                border: '1.5px solid rgba(255, 255, 255, 0.95)',
+                boxShadow: '0 4px 10px rgba(0, 0, 0, 0.05)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                overflow: 'hidden',
+                position: 'relative'
               }}>
-                Lv.{mon.level}
-              </span>
+                <img 
+                  src={mon.characterImage} 
+                  alt={mon.name}
+                  style={{ 
+                    width: '100%', 
+                    height: '100%', 
+                    objectFit: 'contain',
+                    transform: 'scale(1.05)'
+                  }} 
+                />
+              </div>
+            ) : (
+              <div style={{
+                width: '74px',
+                height: '74px',
+                borderRadius: '18px',
+                background: '#F1F5F9',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                opacity: 0.4
+              }}>
+                <HelpCircle size={28} color="#94A3B8" />
+              </div>
             )}
+
+            {/* 소비몬 이름 및 속성/레벨 정보 */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px', width: '100%' }}>
+              <span style={{
+                fontSize: '12px',
+                fontWeight: 900,
+                color: mon.discovered ? '#0F172A' : '#94A3B8'
+              }}>
+                {mon.name}
+              </span>
+
+              {mon.discovered ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+                  <span style={{
+                    fontSize: '9px',
+                    fontWeight: 800,
+                    background: mon.typeBg,
+                    color: mon.typeColor,
+                    padding: '1px 5px',
+                    borderRadius: '9999px',
+                    whiteSpace: 'nowrap'
+                  }}>
+                    {mon.typeName}
+                  </span>
+                  <span style={{
+                    fontSize: '9px',
+                    fontWeight: 700,
+                    color: '#64748B'
+                  }}>
+                    Lv.{mon.level}
+                  </span>
+                </div>
+              ) : (
+                <span style={{ fontSize: '9px', color: '#94A3B8', fontWeight: 600 }}>미발견</span>
+              )}
+            </div>
           </div>
         ))}
       </div>

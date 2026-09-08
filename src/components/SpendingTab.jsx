@@ -12,10 +12,12 @@ import ReportTab from './ReportTab';
 export default function SpendingTab({ 
   transactions, 
   budget, 
+  currentUser,
   onAddTransaction, 
   onAddMultipleTransactions, 
   onTriggerPushSimulation,
-  onOpenQuickAdd 
+  onOpenQuickAdd,
+  onSwitchToPCMode 
 }) {
   const [subTab, setSubTab] = useState('report'); // 시안의 소비 분석을 우선 확인 가능하게 지원
 
@@ -104,6 +106,8 @@ export default function SpendingTab({
         <ReportTab 
           transactions={transactions}
           budget={budget}
+          currentUser={currentUser}
+          onSwitchToPCMode={onSwitchToPCMode}
         />
       )}
 

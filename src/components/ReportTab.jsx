@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight, TrendingUp, Sparkles } from 'lucide-react';
 import { CafeMonsterIllustration } from './common/SobimonIllustrations';
 
-export default function ReportTab({ transactions = [], budget }) {
+export default function ReportTab({ transactions = [], budget, currentUser, onSwitchToPCMode }) {
   const [period, setPeriod] = useState('current'); // 'current' (이번 달) | 'last' (지난 달)
 
   // 소비(수입 제외)만 필터링
@@ -170,6 +170,109 @@ export default function ReportTab({ transactions = [], budget }) {
             ))}
           </div>
 
+        </div>
+      </div>
+
+      {/* 🌟 체육관 PC버전 이동 배너 (참고 디자인 시안 A 반영) */}
+      <div 
+        onClick={onSwitchToPCMode}
+        role="button"
+        tabIndex={0}
+        style={{
+          marginTop: '14px',
+          marginBottom: '16px',
+          position: 'relative',
+          borderRadius: '20px',
+          overflow: 'hidden',
+          cursor: 'pointer',
+          border: '1.5px solid #FDE68A',
+          boxShadow: '0 4px 16px rgba(245, 158, 11, 0.12)',
+          backgroundImage: 'url(/images/banner_gym_pc.jpg)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center right',
+          minHeight: '130px',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          padding: '16px 18px',
+          transition: 'transform 0.2s ease, box-shadow 0.2s ease'
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.transform = 'translateY(-2px)';
+          e.currentTarget.style.boxShadow = '0 6px 20px rgba(245, 158, 11, 0.22)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = 'translateY(0)';
+          e.currentTarget.style.boxShadow = '0 4px 16px rgba(245, 158, 11, 0.12)';
+        }}
+      >
+        {/* 왼쪽 텍스트 오버레이 영역 (가독성을 위한 반투명 소프트 그라데이션) */}
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '65%',
+          height: '100%',
+          background: 'linear-gradient(to right, rgba(254, 252, 246, 0.96) 0%, rgba(254, 252, 246, 0.85) 65%, rgba(254, 252, 246, 0) 100%)',
+          zIndex: 1,
+          pointerEvents: 'none'
+        }} />
+
+        {/* 텍스트 컨텐츠 */}
+        <div style={{ position: 'relative', zIndex: 2, maxWidth: '62%' }}>
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '4px',
+            background: currentUser ? '#FEF3C7' : '#EFF6FF',
+            color: currentUser ? '#B45309' : '#1D4ED8',
+            fontSize: '10px',
+            fontWeight: 800,
+            padding: '2px 8px',
+            borderRadius: '9999px',
+            marginBottom: '6px'
+          }}>
+            <span>{currentUser ? '⚡ PC 와이드 아레나' : '🔒 로그인 회원 전용'}</span>
+          </div>
+
+          <h4 style={{
+            fontSize: '16px',
+            fontWeight: 900,
+            color: '#0F172A',
+            margin: '0 0 4px 0',
+            letterSpacing: '-0.3px',
+            lineHeight: 1.25
+          }}>
+            소비 체육관 가기
+          </h4>
+
+          <p style={{
+            fontSize: '11px',
+            color: '#64748B',
+            fontWeight: 600,
+            margin: '0 0 10px 0',
+            lineHeight: 1.3
+          }}>
+            {currentUser 
+              ? '소비몬을 훈련하고 3단 분석 대시보드로 배틀!' 
+              : '로그인하고 PC 3단 아레나 체육관에 입장하세요!'}
+          </p>
+
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            background: '#2563EB',
+            color: '#FFFFFF',
+            fontSize: '11px',
+            fontWeight: 800,
+            padding: '5px 12px',
+            borderRadius: '9999px',
+            boxShadow: '0 2px 8px rgba(37, 99, 235, 0.35)'
+          }}>
+            <span>{currentUser ? 'PC ver 바로가기' : '로그인 후 입장하기'}</span>
+            <span style={{ fontSize: '10px' }}>➔</span>
+          </div>
         </div>
       </div>
 
