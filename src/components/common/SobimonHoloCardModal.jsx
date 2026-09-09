@@ -8,6 +8,12 @@ import {
   SobimonMascot 
 } from './SobimonIllustrations';
 
+// simeydotme/pokemon-cards-css 원본 포인터 트래킹 수식 (clamp / round / adjust)
+const clamp = (value, min = 0, max = 100) => Math.min(Math.max(value, min), max);
+const round = (value, precision = 3) => parseFloat(value.toFixed(precision));
+const adjust = (value, fromMin, fromMax, toMin, toMax) =>
+  round(toMin + ((toMax - toMin) * (value - fromMin)) / (fromMax - fromMin));
+
 // 소비몬 카드별 스킬 및 포켓몬 TCG 스타일 세부 스펙 데이터
 const HOLO_CARD_SPECS = {
   cafe: {
@@ -186,15 +192,17 @@ export default function SobimonHoloCardModal({ isOpen, onClose, monster }) {
 
   const cardRef = useRef(null);
   const isTouchRef = useRef(false);
+  const gyroBaseRef = useRef(null);
   const [isFlipped, setIsFlipped] = useState(false);
   const [gyroActive, setGyroActive] = useState(false);
   const [gyroPermissionRequired, setGyroPermissionRequired] = useState(false);
+  // --rotate-x/--rotate-y/--pointer-x/--pointer-y/--background-x/--background-y/--card-opacity 와 1:1 대응
   const [tilt, setTilt] = useState({
     rotateX: 0,
     rotateY: 0,
-    glareX: 50,
-    glareY: 50,
-    glareOpacity: 0,
+    pointerX: 50,
+    pointerY: 50,
+    cardOpacity: 0,
     bgX: 50,
     bgY: 50
   });
@@ -232,41 +240,38 @@ export default function SobimonHoloCardModal({ isOpen, onClose, monster }) {
     illustrator: 'SOBIMON'
   };
 
-  // 모바일 자이로스코프(스마트폰 기울기) 이벤트 핸들러
+  // 모바일 자이로스코프(스마트폰 기울기) 이벤트 핸들러 (원본의 상대 기준각 보정 방식과 동일)
   const handleOrientation = useCallback((e) => {
     // 사용자가 손가락으로 화면을 직접 터치 드래그 중이면 터치 우선
     if (isTouchRef.current) return;
 
-    const gamma = e.gamma; // 좌우 회전각 (-90 ~ 90)
-    const beta = e.beta;   // 전후 회전각 (-180 ~ 180)
+    const gamma = e.gamma; // 좌우 회전각
+    const beta = e.beta;   // 전후 회전각
 
     if (gamma === null || beta === null) return;
 
+    // 처음 감지된 기울기를 기준각(0)으로 삼아, 이후 상대 변화량만 사용
+    if (!gyroBaseRef.current) {
+      gyroBaseRef.current = { gamma, beta };
+    }
+    const relGamma = gamma - gyroBaseRef.current.gamma;
+    const relBeta = beta - gyroBaseRef.current.beta;
+
     setGyroActive(true);
 
-    // 사용자가 스마트폰을 손에 들고 편안히 바라보는 평균 기울기 각도 (약 45도 기준)
-    const deltaBeta = beta - 45;
-
-    // 안전 각도 범위 클램핑 (-28도 ~ +28도)
-    const clampedGamma = Math.max(-28, Math.min(28, gamma));
-    const clampedDeltaBeta = Math.max(-28, Math.min(28, deltaBeta));
-
-    // 3D 원근 회전 각도 (-20도 ~ +20도)
-    const rotateX = -(clampedDeltaBeta / 28) * 20;
-    const rotateY = (clampedGamma / 28) * 20;
-
-    // 홀로그램 및 빛 반사 하이라이트 좌표 (0% ~ 100%)
-    const percentX = Math.max(0, Math.min(100, Math.round(50 + (clampedGamma / 28) * 45)));
-    const percentY = Math.max(0, Math.min(100, Math.round(50 + (clampedDeltaBeta / 28) * 45)));
+    const limX = 16;
+    const limY = 18;
+    const zx = clamp(relGamma, -limX, limX);
+    const zy = clamp(relBeta, -limY, limY);
 
     setTilt({
-      rotateX,
-      rotateY,
-      glareX: percentX,
-      glareY: percentY,
-      glareOpacity: 0.85,
-      bgX: 50 + (clampedGamma / 28) * 35,
-      bgY: 50 + (clampedDeltaBeta / 28) * 35
+      rotateX: round(zx * -1),
+      rotateY: round(zy),
+      pointerX: adjust(zx, -limX, limX, 0, 100),
+      pointerY: adjust(zy, -limY, limY, 0, 100),
+      cardOpacity: 1,
+      bgX: adjust(zx, -limX, limX, 37, 63),
+      bgY: adjust(zy, -limY, limY, 33, 67)
     });
   }, []);
 
@@ -310,7 +315,7 @@ export default function SobimonHoloCardModal({ isOpen, onClose, monster }) {
     }
   };
 
-  // 마우스 / 터치 포인터 3D 틸트 추적 핸들러 (simeydotme/pokemon-cards-css 원리)
+  // 마우스 / 터치 포인터 3D 틸트 추적 핸들러 (simeydotme/pokemon-cards-css 원본 수식 그대로)
   const handlePointerMove = (e) => {
     if (!cardRef.current) return;
     const rect = cardRef.current.getBoundingClientRect();
@@ -320,24 +325,20 @@ export default function SobimonHoloCardModal({ isOpen, onClose, monster }) {
     const x = clientX - rect.left;
     const y = clientY - rect.top;
 
-    const percentX = Math.max(0, Math.min(100, Math.round((x / rect.width) * 100)));
-    const percentY = Math.max(0, Math.min(100, Math.round((y / rect.height) * 100)));
+    const percentX = clamp(round((100 / rect.width) * x));
+    const percentY = clamp(round((100 / rect.height) * y));
 
     const centerX = percentX - 50;
     const centerY = percentY - 50;
 
-    // Y축 이동 -> X축 회전(상하 틸트), X축 이동 -> Y축 회전(좌우 틸트)
-    const rotateX = -(centerY / 50) * 18;
-    const rotateY = (centerX / 50) * 18;
-
     setTilt({
-      rotateX,
-      rotateY,
-      glareX: percentX,
-      glareY: percentY,
-      glareOpacity: 0.85,
-      bgX: 50 + centerX * 0.8,
-      bgY: 50 + centerY * 0.8
+      rotateX: round(-(centerX / 3.5)),
+      rotateY: round(centerY / 2),
+      pointerX: round(percentX),
+      pointerY: round(percentY),
+      cardOpacity: 1,
+      bgX: adjust(percentX, 0, 100, 37, 63),
+      bgY: adjust(percentY, 0, 100, 33, 67)
     });
   };
 
@@ -347,9 +348,9 @@ export default function SobimonHoloCardModal({ isOpen, onClose, monster }) {
     setTilt({
       rotateX: 0,
       rotateY: 0,
-      glareX: 50,
-      glareY: 50,
-      glareOpacity: 0,
+      pointerX: 50,
+      pointerY: 50,
+      cardOpacity: 0,
       bgX: 50,
       bgY: 50
     });
@@ -411,11 +412,19 @@ export default function SobimonHoloCardModal({ isOpen, onClose, monster }) {
         }}
         onMouseLeave={handlePointerLeave}
       >
-        <div 
+        <div
           ref={cardRef}
           className={`holo-card-3d ${isFlipped ? 'flipped' : ''}`}
           style={{
-            transform: `perspective(1000px) rotateX(${tilt.rotateX}deg) rotateY(${tilt.rotateY + (isFlipped ? 180 : 0)}deg) scale3d(1.02, 1.02, 1.02)`
+            '--rotate-x': `${tilt.rotateX}deg`,
+            '--rotate-y': `${tilt.rotateY}deg`,
+            '--pointer-x': `${tilt.pointerX}%`,
+            '--pointer-y': `${tilt.pointerY}%`,
+            '--background-x': `${tilt.bgX}%`,
+            '--background-y': `${tilt.bgY}%`,
+            '--card-opacity': tilt.cardOpacity,
+            '--card-glow': spec.elementColor,
+            transform: `perspective(1000px) rotateY(${tilt.rotateX + (isFlipped ? 180 : 0)}deg) rotateX(${tilt.rotateY}deg)`
           }}
         >
           {/* ===================== [카드 앞면] ===================== */}
@@ -528,30 +537,11 @@ export default function SobimonHoloCardModal({ isOpen, onClose, monster }) {
               </div>
             )}
 
-            {/* 1. 반사 글레어 오버레이 (마우스 추적 하이라이트) */}
-            <div 
-              className="holo-layer-glare"
-              style={{
-                background: `radial-gradient(circle at ${tilt.glareX}% ${tilt.glareY}%, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.4) 22%, rgba(255, 255, 255, 0) 65%)`,
-                opacity: tilt.glareOpacity
-              }}
-            />
+            {/* 1. Rare Holo 무지개 회절광 + 포일 스캔라인 (card__shine) */}
+            <div className="holo-card-shine" />
 
-            {/* 2. 무지개빛 회절광 호일 (Rainbow Diffraction Foil Layer) */}
-            <div 
-              className="holo-layer-rainbow"
-              style={{
-                backgroundPosition: `${tilt.bgX}% ${tilt.bgY}%`
-              }}
-            />
-
-            {/* 3. 코스믹 글리터 별빛 스파클 오버레이 */}
-            <div 
-              className="holo-layer-sparkles"
-              style={{
-                backgroundPosition: `${tilt.bgX * 1.5}% ${tilt.bgY * 1.5}%`
-              }}
-            />
+            {/* 2. 포인터를 따라다니는 글레어 반사광 (card__glare) */}
+            <div className="holo-card-glare" />
           </div>
 
           {/* ===================== [카드 뒷면] ===================== */}

@@ -23,6 +23,12 @@ import {
   SobimonMascot 
 } from '../../common/SobimonIllustrations';
 
+// simeydotme/pokemon-cards-css 원본 포인터 트래킹 수식 (clamp / round / adjust)
+const clamp = (value, min = 0, max = 100) => Math.min(Math.max(value, min), max);
+const round = (value, precision = 3) => parseFloat(value.toFixed(precision));
+const adjust = (value, fromMin, fromMax, toMin, toMax) =>
+  round(toMin + ((toMax - toMin) * (value - fromMin)) / (fromMax - fromMin));
+
 const CATEGORY_OPTIONS = [
   { value: 'cafe', label: '카페 / 음료', icon: '☕', defaultColor: '#0284C7' },
   { value: 'food', label: '식비 / 외식 / 배달', icon: '🍖', defaultColor: '#EA580C' },
@@ -98,9 +104,9 @@ export default function MonsterCreatorStudio() {
   const [tilt, setTilt] = useState({
     rotateX: 0,
     rotateY: 0,
-    glareX: 50,
-    glareY: 50,
-    glareOpacity: 0.6,
+    pointerX: 50,
+    pointerY: 50,
+    cardOpacity: 0.6,
     bgX: 50,
     bgY: 50
   });
@@ -124,23 +130,19 @@ export default function MonsterCreatorStudio() {
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
 
-    const percentX = Math.max(0, Math.min(100, Math.round((x / rect.width) * 100)));
-    const percentY = Math.max(0, Math.min(100, Math.round((y / rect.height) * 100)));
+    const percentX = clamp(round((100 / rect.width) * x));
+    const percentY = clamp(round((100 / rect.height) * y));
 
     const centerX = percentX - 50;
-    const centerY = percentY - 50;
-
-    const rotateX = -(centerY / 50) * 18;
-    const rotateY = (centerX / 50) * 18;
 
     setTilt({
-      rotateX,
-      rotateY,
-      glareX: percentX,
-      glareY: percentY,
-      glareOpacity: 0.85,
-      bgX: 50 + centerX * 0.8,
-      bgY: 50 + centerY * 0.8
+      rotateX: round(-(centerX / 3.5)),
+      rotateY: round((percentY - 50) / 2),
+      pointerX: round(percentX),
+      pointerY: round(percentY),
+      cardOpacity: 1,
+      bgX: adjust(percentX, 0, 100, 37, 63),
+      bgY: adjust(percentY, 0, 100, 33, 67)
     });
   };
 
@@ -148,9 +150,9 @@ export default function MonsterCreatorStudio() {
     setTilt({
       rotateX: 0,
       rotateY: 0,
-      glareX: 50,
-      glareY: 50,
-      glareOpacity: 0.3,
+      pointerX: 50,
+      pointerY: 50,
+      cardOpacity: 0.3,
       bgX: 50,
       bgY: 50
     });
@@ -691,30 +693,26 @@ export default function MonsterCreatorStudio() {
               ref={previewRef}
               className={`holo-card-3d ${isFlipped ? 'flipped' : ''}`}
               style={{
-                transform: `perspective(1000px) rotateX(${tilt.rotateX}deg) rotateY(${tilt.rotateY + (isFlipped ? 180 : 0)}deg) scale3d(1.02, 1.02, 1.02)`
+                '--rotate-x': `${tilt.rotateX}deg`,
+                '--rotate-y': `${tilt.rotateY}deg`,
+                '--pointer-x': `${tilt.pointerX}%`,
+                '--pointer-y': `${tilt.pointerY}%`,
+                '--background-x': `${tilt.bgX}%`,
+                '--background-y': `${tilt.bgY}%`,
+                '--card-opacity': tilt.cardOpacity,
+                '--card-glow': formData.theme_color,
+                transform: `perspective(1000px) rotateY(${tilt.rotateX + (isFlipped ? 180 : 0)}deg) rotateX(${tilt.rotateY}deg)`
               }}
             >
               {/* 앞면 */}
-              <div 
+              <div
                 className="holo-card-face holo-card-front"
                 style={{
                   background: `linear-gradient(135deg, #FFFFFF 0%, ${formData.theme_color}33 100%)`
                 }}
               >
-                <div 
-                  className="holo-layer-glare"
-                  style={{
-                    background: `radial-gradient(circle at ${tilt.glareX}% ${tilt.glareY}%, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.25) 30%, transparent 65%)`,
-                    opacity: tilt.glareOpacity
-                  }}
-                />
-                <div 
-                  className="holo-layer-rainbow"
-                  style={{
-                    backgroundPosition: `${tilt.bgX}% ${tilt.bgY}%`
-                  }}
-                />
-                <div className="holo-layer-sparkles" />
+                <div className="holo-card-shine" />
+                <div className="holo-card-glare" />
 
                 {/* 카드 내부 프레임 */}
                 <div className="holo-card-inner-frame" style={{ borderColor: formData.theme_color }}>

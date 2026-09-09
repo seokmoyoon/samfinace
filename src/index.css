@@ -1215,6 +1215,18 @@ body {
    3D 인터랙티브 홀로그램 포켓몬 TCG 소비몬 카드 (pokemon-cards-css)
    ========================================================================== */
 
+/* ===================== 홀로그램 카드 - simeydotme/pokemon-cards-css 원본 레시피 ===================== */
+:root {
+  --sunpillar-1: hsl(2, 100%, 73%);
+  --sunpillar-2: hsl(53, 100%, 69%);
+  --sunpillar-3: hsl(93, 100%, 69%);
+  --sunpillar-4: hsl(176, 100%, 76%);
+  --sunpillar-5: hsl(228, 100%, 74%);
+  --sunpillar-6: hsl(283, 100%, 73%);
+  --holo: var(--sunpillar-1), var(--sunpillar-2), var(--sunpillar-3), var(--sunpillar-4), var(--sunpillar-5), var(--sunpillar-6), var(--sunpillar-1);
+  --card-edge: hsl(47, 100%, 78%);
+}
+
 .holo-modal-backdrop {
   position: fixed;
   inset: 0;
@@ -1356,8 +1368,14 @@ body {
   position: relative;
   transform-style: preserve-3d;
   border-radius: 18px;
-  box-shadow: 0 25px 60px -10px rgba(0, 0, 0, 0.65), 0 0 40px rgba(56, 189, 248, 0.25);
-  transition: transform 0.12s cubic-bezier(0.25, 1, 0.5, 1);
+  box-shadow:
+    0 0 3px -1px white,
+    0 0 3px 1px var(--card-edge),
+    0 0 12px 2px var(--card-glow, hsl(192, 97%, 60%)),
+    0 25px 60px -10px rgba(0, 0, 0, 0.65),
+    0 0 40px -30px var(--card-glow, hsl(192, 97%, 60%)),
+    0 0 50px -20px var(--card-glow, hsl(192, 97%, 60%));
+  transition: transform 0.15s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.4s ease;
 }
 
 .holo-card-face {
@@ -1373,54 +1391,166 @@ body {
 
 .holo-card-front {
   border: 3px solid rgba(255, 255, 255, 0.4);
+  /* preserve-3d 컨텍스트 안에서 겹쳐진 레이어들의 Z축 순서를 GPU 컴포지터에 명시적으로 알려주기
+     위한 미세 오프셋. 값 없이 z=0 평면에 여러 레이어가 겹치면 하드웨어 가속 브라우저가
+     블렌드 대상(배경)을 잘못 인식해 mix-blend-mode가 검은 배경 위에서처럼 렌더링되는 문제가 있다. */
+  transform: translateZ(0.01px);
 }
 
-/* 1. 글레어 레이어 (광택 반사) */
-.holo-layer-glare {
+.holo-card-front > img,
+.holo-card-front > div > img {
+  transform: translateZ(0.01px);
+}
+
+/*
+  실물 기기(GPU 하드웨어 가속)에서 3D perspective/preserve-3d 컨텍스트 안에 있는
+  mix-blend-mode 레이어는, 부모(backface-visibility: hidden)와 자식(기본값 visible)의
+  backface-visibility 값이 서로 다르면 별도의 컴포지팅 레이어로 분리되어 블렌드 대상(배경)을
+  카드 이미지가 아닌 검은 배경으로 인식하는 크로미움/파이어폭스 렌더링 버그가 있다.
+  원본 pokemon-cards-css도 `.card__front, .card__front * { backface-visibility: hidden; }`로
+  자손 전체에 동일하게 적용해 이를 회피하므로, 동일하게 카드 앞면의 모든 자손에 적용한다.
+*/
+.holo-card-front,
+.holo-card-front * {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* ============ Rare Holo 쉐인 레이어 (simeydotme/pokemon-cards-css 원본 레시피 그대로 이식) ============ */
+
+/* 1. 메인 무지개 회절광 (repeating-linear-gradient sunpillar) */
+.holo-card-shine {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  z-index: 25;
-  mix-blend-mode: color-dodge;
-  transition: opacity 0.15s ease;
-}
+  z-index: 21;
+  border-radius: 16px;
+  overflow: hidden;
+  transform: translateZ(1px);
 
-/* 2. 무지개빛 회절광 호일 레이어 (simeydotme/pokemon-cards-css 핵심 원리) */
-.holo-layer-rainbow {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 20;
-  mix-blend-mode: color-dodge;
-  opacity: 0.65;
-  background: linear-gradient(
-    115deg,
-    transparent 0%,
-    rgba(255, 0, 128, 0.4) 15%,
-    rgba(0, 255, 255, 0.55) 32%,
-    rgba(255, 255, 0, 0.6) 48%,
-    rgba(0, 255, 128, 0.55) 64%,
-    rgba(147, 51, 234, 0.5) 80%,
-    transparent 100%
+  background-image: repeating-linear-gradient(
+    10deg,
+    var(--holo),
+    var(--holo),
+    var(--holo),
+    var(--holo),
+    var(--holo),
+    var(--holo),
+    var(--holo)
   );
-  background-size: 250% 250%;
-  transition: background-position 0.1s ease;
+  background-position: calc(((50% - var(--background-x, 50%))) + 50%) calc(((50% - var(--background-y, 50%))) + 50%);
+  background-size: 400% 400%;
+  background-blend-mode: overlay;
+
+  filter: brightness(1.25) contrast(3) saturate(0.75);
+  mix-blend-mode: overlay;
+  opacity: var(--card-opacity, 0);
+  transition: opacity 0.2s ease;
 }
 
-/* 3. 코스믹 글리터 별빛 스파클 */
-.holo-layer-sparkles {
+/* 2. 포일 스캔라인 바 (틸트 각도에 반응하는 금속 결) */
+.holo-card-shine::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  transform: translateZ(1px);
+
+  --bars: 5%;
+  --bar-color: hsla(0, 0%, 70%, 1);
+  --bar-bg: hsla(0, 0%, 0%, 1);
+
+  background-image:
+    repeating-linear-gradient(
+      calc(var(--rotate-x, 0deg) * 0.25),
+      var(--bar-bg) calc(var(--bars) * 2.5),
+      var(--bar-color) calc(var(--bars) * 3.25),
+      hsla(0, 0%, 75%, 0.5) calc(var(--bars) * 3.5),
+      var(--bar-color) calc(var(--bars) * 3.75),
+      var(--bar-bg) calc(var(--bars) * 4.5),
+      var(--bar-bg) calc(var(--bars) * 8)
+    ),
+    repeating-linear-gradient(
+      calc(var(--rotate-x, 0deg) * -0.25),
+      var(--bar-bg) calc(var(--bars) * 2.5),
+      var(--bar-color) calc(var(--bars) * 3.25),
+      hsla(0, 0%, 75%, 0.5) calc(var(--bars) * 3.5),
+      var(--bar-color) calc(var(--bars) * 3.75),
+      var(--bar-bg) calc(var(--bars) * 4.5),
+      var(--bar-bg) calc(var(--bars) * 8)
+    );
+
+  background-position:
+    50% calc(var(--background-y, 50%) * 1.2),
+    50% calc(var(--background-y, 50%) * -1.2);
+  background-size: 200% 200%, 200% 200%;
+  background-blend-mode: screen;
+
+  filter: brightness(1) contrast(2) saturate(0.75);
+  mix-blend-mode: multiply;
+  opacity: var(--card-opacity, 0);
+}
+
+/* 3. 포인터 위치 기반 광원 감쇠 (입체 조명) */
+.holo-card-shine::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  transform: translateZ(1.2px);
+
+  background-image: radial-gradient(
+    farthest-corner circle at var(--pointer-x, 50%) var(--pointer-y, 50%),
+    hsla(0, 0%, 90%, 0.8) 0%,
+    hsla(0, 0%, 78%, 0.1) 25%,
+    hsl(0, 0%, 35%) 90%
+  );
+  background-position: center center;
+  background-size: cover;
+
+  mix-blend-mode: luminosity;
+  filter: brightness(1) contrast(3);
+  opacity: var(--card-opacity, 0);
+}
+
+/* 4. 글레어 레이어 (포인터를 따라다니는 하이라이트 반사광) */
+.holo-card-glare {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  z-index: 22;
-  mix-blend-mode: color-dodge;
-  opacity: 0.55;
-  background-image: 
-    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.95) 1px, transparent 2px),
-    radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.8) 1.5px, transparent 2.5px),
-    radial-gradient(circle at 80% 70%, rgba(255, 255, 255, 0.9) 1.5px, transparent 2.5px),
-    radial-gradient(circle at 35% 85%, rgba(255, 255, 255, 0.75) 1px, transparent 2px);
-  background-size: 80px 80px, 120px 120px, 90px 90px, 110px 110px;
+  z-index: 23;
+  border-radius: 16px;
+  overflow: hidden;
+  transform: translateZ(1.41px);
+
+  background-image: radial-gradient(
+    farthest-corner circle at var(--pointer-x, 50%) var(--pointer-y, 50%),
+    hsla(0, 0%, 100%, 0.8) 10%,
+    hsla(0, 0%, 100%, 0.65) 20%,
+    hsla(0, 0%, 0%, 0.5) 120%
+  );
+
+  opacity: calc(var(--card-opacity, 0) * 0.8);
+  mix-blend-mode: overlay;
+  transition: opacity 0.2s ease;
+}
+
+.holo-card-glare::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+
+  background-image: radial-gradient(
+    farthest-corner circle at var(--pointer-x, 50%) var(--pointer-y, 50%),
+    hsl(180, 100%, 95%) 5%,
+    hsla(0, 0%, 39%, 0.25) 55%,
+    hsla(205.6, 50%, 90%, 0.5) 110%
+  );
+
+  mix-blend-mode: overlay;
+  filter: brightness(0.6) contrast(3);
+  opacity: var(--card-opacity, 0);
 }
 
 /* 4. 카드 내부 프레임 */
@@ -1695,7 +1825,7 @@ body {
 .holo-card-back {
   background: #0F172A;
   border: 3px solid #F59E0B;
-  transform: rotateY(180deg);
+  transform: rotateY(180deg) translateZ(1px);
   display: flex;
   align-items: center;
   justify-content: center;
