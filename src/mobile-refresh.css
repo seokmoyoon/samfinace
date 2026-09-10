@@ -1,0 +1,118 @@
+/* Final mobile polish layer for SOBIMON. Keeps the existing component structure intact. */
+:root {
+  --mobile-gutter: clamp(14px, 4vw, 20px);
+  --tap-size: 44px;
+}
+
+html, body, #root { min-height: 100%; }
+body { overscroll-behavior-y: none; }
+button, input, select, textarea { font: inherit; }
+button { -webkit-tap-highlight-color: transparent; }
+
+.screen-content {
+  flex: 1;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  scrollbar-width: none;
+  padding-bottom: calc(92px + env(safe-area-inset-bottom));
+}
+.screen-content::-webkit-scrollbar { display: none; }
+
+.bottom-nav {
+  position: absolute;
+  z-index: 80;
+  left: 10px;
+  right: 10px;
+  bottom: max(8px, env(safe-area-inset-bottom));
+  min-height: 66px;
+  padding: 7px 5px;
+  border: 1px solid rgba(226, 232, 240, .9);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, .94);
+  box-shadow: 0 12px 34px rgba(15, 23, 42, .13);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.nav-item {
+  min-width: 0;
+  min-height: 52px;
+  border-radius: 16px;
+  transition: transform .16s ease, background .16s ease, color .16s ease;
+}
+.nav-item:active { transform: scale(.94); }
+.nav-item.active { background: var(--primary-pastel); }
+.nav-item.active .nav-icon-wrap { transform: translateY(-1px); }
+
+.sobimon-card,
+.game-card,
+.mission-card {
+  border: 1px solid rgba(226, 232, 240, .9);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, .055);
+}
+
+.btn-primary,
+button.btn-primary {
+  min-height: var(--tap-size);
+  border-radius: 14px;
+  box-shadow: 0 8px 18px rgba(37, 99, 235, .18);
+}
+
+input, select, textarea { min-height: var(--tap-size); }
+
+.push-simulation-banner {
+  top: max(10px, env(safe-area-inset-top));
+  left: 12px;
+  right: 12px;
+  width: auto;
+  border-radius: 16px;
+  box-shadow: 0 14px 36px rgba(15, 23, 42, .18);
+}
+
+.exp-gain-toast {
+  top: max(14px, env(safe-area-inset-top));
+  max-width: calc(100vw - 28px);
+  border-radius: 999px;
+}
+
+.fullscreen-sub-page {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+@media (max-width: 430px) {
+  .home-dashboard-grid { gap: 12px; }
+  .home-grid-left, .home-grid-right { gap: 12px; }
+  .sobimon-card { border-radius: 18px; }
+  .home-spending-card { margin-left: 12px; margin-right: 12px; }
+  .bottom-nav { left: 8px; right: 8px; border-radius: 20px; }
+  .nav-item span { font-size: 10px; }
+}
+
+@media (max-width: 370px) {
+  .bottom-nav { padding-left: 2px; padding-right: 2px; }
+  .nav-item { padding-left: 2px; padding-right: 2px; }
+  .nav-icon-wrap svg { width: 17px; height: 17px; }
+  .home-spending-card { margin-left: 10px; margin-right: 10px; }
+}
+
+@media (min-width: 1200px) {
+  .mobile-frame:not(.gym-pc-mode) {
+    max-width: 430px;
+    height: min(900px, calc(100dvh - 40px));
+    margin: 20px auto;
+    border-radius: 30px;
+    box-shadow: 0 24px 70px rgba(15, 23, 42, .18);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
