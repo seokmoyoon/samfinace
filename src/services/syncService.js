@@ -1,21 +1,31 @@
 import { supabase } from '../utils/supabaseClient';
 
-/**
- * SOBIMON 클라우드 동기화 서비스
- * - 로컬(Local-First) 데이터와 Supabase 클라우드 데이터베이스 간의 양방향 동기화
- */
+const monthKey = () => new Date().toISOString().slice(0, 7);
+
+const txCloudId = (userId, tx) => {
+  if (tx.cloudId) return tx.cloudId;
+  const raw = [userId, tx.id || '', tx.date || '', tx.time || '', tx.amount || 0, tx.title || tx.memo || ''].join('|');
+  let hash = 2166136261;
+  for (let i = 0; i < raw.length; i += 1) {
+    hash ^= raw.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  return `local-${(hash >>> 0).toString(16)}`;
+};
+
+const ensure = (error) => {
+  if (error) throw error;
+};
 
 export const syncService = {
-  // 1. 로컬에 쌓인 데이터를 클라우드로 일괄 업로드 (백업 / 회원 전환 시)
   uploadLocalDataToCloud: async (userId, localData) => {
     if (!supabase || !userId) return { success: false, message: '로그인이 필요합니다.' };
 
     try {
-      const { user, budget, transactions, sobimons, quests } = localData;
+      const { user, budget, transactions = [], sobimons = [], quests = [] } = localData;
 
-      // 1) 프로필 동기화
       if (user) {
-        await supabase.from('profiles').upsert({
+        const { error } = await supabase.from('profiles').upsert({
           id: userId,
           name: user.name,
           level: user.level,
@@ -26,63 +36,62 @@ export const syncService = {
           streak_days: user.streakDays,
           updated_at: new Date().toISOString()
         });
+        ensure(error);
       }
 
-      // 2) 예산 동기화
       if (budget) {
-        const monthKey = new Date().toISOString().slice(0, 7);
-        await supabase.from('budgets').upsert({
+        const { error } = await supabase.from('budgets').upsert({
           user_id: userId,
-          month_key: monthKey,
+          month_key: monthKey(),
           total_income: budget.totalIncome,
           fixed_expenses: budget.fixedExpenses,
           monthly_budget: budget.monthlyBudget,
           target_savings: budget.targetSavings,
           updated_at: new Date().toISOString()
         }, { onConflict: 'user_id,month_key' });
+        ensure(error);
       }
 
-      // 3) 거래내역 동기화 (기존 클라우드 내역과 중복 방지)
-      if (transactions && transactions.length > 0) {
-        const rows = transactions.map(tx => ({
+      if (transactions.length) {
+        const rows = transactions.map((tx) => ({
           user_id: userId,
+          client_id: txCloudId(userId, tx),
           date: tx.date || new Date().toISOString().slice(0, 10),
           time: tx.time || '12:00:00',
           type: tx.type || 'expense',
           category: tx.category || '기타',
           amount: Number(tx.amount) || 0,
           title: tx.title || tx.memo || '지출',
-          payment_method: tx.paymentMethod || '신용카드'
+          payment_method: tx.paymentMethod || tx.payment_method || '기타',
+          updated_at: new Date().toISOString()
         }));
-
-        // 배치로 업로드
-        await supabase.from('transactions').insert(rows);
+        const { error } = await supabase.from('transactions').upsert(rows, { onConflict: 'user_id,client_id' });
+        ensure(error);
       }
 
-      // 4) 소비몬 도감 상태 동기화
-      if (sobimons && sobimons.length > 0) {
-        const monRows = sobimons.map(m => ({
+      if (sobimons.length) {
+        const rows = sobimons.map((m) => ({
           user_id: userId,
-          sobimon_id: m.id,
+          sobimon_id: String(m.id),
           discovered: Boolean(m.discovered),
           level: Number(m.level) || 1,
-          unlocked_at: new Date().toISOString()
+          unlocked_at: m.unlockedAt || m.unlocked_at || new Date().toISOString(),
+          updated_at: new Date().toISOString()
         }));
-
-        await supabase.from('user_sobimons').upsert(monRows, { onConflict: 'user_id,sobimon_id' });
+        const { error } = await supabase.from('user_sobimons').upsert(rows, { onConflict: 'user_id,sobimon_id' });
+        ensure(error);
       }
 
-      // 5) 퀘스트 상태 동기화
-      if (quests && quests.length > 0) {
-        const questRows = quests.map(q => ({
+      if (quests.length) {
+        const rows = quests.map((q) => ({
           user_id: userId,
-          quest_id: q.id,
-          current_amount: q.current || 0,
+          quest_id: String(q.id),
+          current_amount: Number(q.current) || 0,
           status: q.status || 'progress',
           updated_at: new Date().toISOString()
         }));
-
-        await supabase.from('user_quests').upsert(questRows, { onConflict: 'user_id,quest_id' });
+        const { error } = await supabase.from('user_quests').upsert(rows, { onConflict: 'user_id,quest_id' });
+        ensure(error);
       }
 
       return { success: true, message: '클라우드 동기화 완료!' };
@@ -92,56 +101,85 @@ export const syncService = {
     }
   },
 
-  // 2. 클라우드에서 최신 데이터를 내려받아 로컬 장부로 복원
   downloadCloudData: async (userId) => {
     if (!supabase || !userId) return null;
 
     try {
-      // 1) 프로필 가져오기
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
+      const [profileRes, budgetRes, txRes, monRes, questRes] = await Promise.all([
+        supabase.from('profiles').select('*').eq('id', userId).maybeSingle(),
+        supabase.from('budgets').select('*').eq('user_id', userId).eq('month_key', monthKey()).maybeSingle(),
+        supabase.from('transactions').select('*').eq('user_id', userId).order('date', { ascending: false }).order('time', { ascending: false }),
+        supabase.from('user_sobimons').select('*').eq('user_id', userId),
+        supabase.from('user_quests').select('*').eq('user_id', userId)
+      ]);
 
-      // 2) 예산 가져오기
-      const monthKey = new Date().toISOString().slice(0, 7);
-      const { data: budget } = await supabase
-        .from('budgets')
-        .select('*')
-        .eq('user_id', userId)
-        .eq('month_key', monthKey)
-        .maybeSingle();
-
-      // 3) 거래내역 가져오기
-      const { data: transactions } = await supabase
-        .from('transactions')
-        .select('*')
-        .eq('user_id', userId)
-        .order('date', { ascending: false });
-
-      // 4) 소비몬 도감 가져오기
-      const { data: sobimons } = await supabase
-        .from('user_sobimons')
-        .select('*')
-        .eq('user_id', userId);
-
-      // 5) 퀘스트 가져오기
-      const { data: quests } = await supabase
-        .from('user_quests')
-        .select('*')
-        .eq('user_id', userId);
+      [profileRes, budgetRes, txRes, monRes, questRes].forEach((res) => ensure(res.error));
 
       return {
-        profile,
-        budget,
-        transactions,
-        sobimons,
-        quests
+        profile: profileRes.data,
+        budget: budgetRes.data,
+        transactions: txRes.data || [],
+        sobimons: monRes.data || [],
+        quests: questRes.data || []
       };
     } catch (err) {
       console.error('[SOBIMON Download Error]:', err);
       return null;
     }
+  },
+
+  mergeCloudIntoLocal: (cloud, local) => {
+    if (!cloud) return local;
+
+    const cloudTx = (cloud.transactions || []).map((tx) => ({
+      id: tx.client_id || tx.id,
+      cloudId: tx.client_id,
+      date: tx.date,
+      time: tx.time,
+      type: tx.type,
+      category: tx.category,
+      amount: Number(tx.amount) || 0,
+      title: tx.title,
+      memo: tx.title,
+      paymentMethod: tx.payment_method
+    }));
+
+    const localTxMap = new Map((local.transactions || []).map((tx) => [txCloudId(local.currentUserId || '', tx), tx]));
+    cloudTx.forEach((tx) => localTxMap.set(tx.cloudId || tx.id, tx));
+
+    const monMap = new Map((local.sobimons || []).map((m) => [String(m.id), m]));
+    (cloud.sobimons || []).forEach((row) => {
+      const base = monMap.get(String(row.sobimon_id)) || { id: row.sobimon_id };
+      monMap.set(String(row.sobimon_id), { ...base, discovered: row.discovered, level: row.level, unlockedAt: row.unlocked_at });
+    });
+
+    const questMap = new Map((local.quests || []).map((q) => [String(q.id), q]));
+    (cloud.quests || []).forEach((row) => {
+      const base = questMap.get(String(row.quest_id)) || { id: row.quest_id };
+      questMap.set(String(row.quest_id), { ...base, current: row.current_amount, status: row.status });
+    });
+
+    return {
+      user: cloud.profile ? {
+        ...local.user,
+        name: cloud.profile.name ?? local.user?.name,
+        level: cloud.profile.level ?? local.user?.level,
+        title: cloud.profile.title ?? local.user?.title,
+        exp: cloud.profile.exp ?? local.user?.exp,
+        maxExp: cloud.profile.max_exp ?? local.user?.maxExp,
+        coins: cloud.profile.coins ?? local.user?.coins,
+        streakDays: cloud.profile.streak_days ?? local.user?.streakDays
+      } : local.user,
+      budget: cloud.budget ? {
+        ...local.budget,
+        totalIncome: cloud.budget.total_income,
+        fixedExpenses: cloud.budget.fixed_expenses,
+        monthlyBudget: cloud.budget.monthly_budget,
+        targetSavings: cloud.budget.target_savings
+      } : local.budget,
+      transactions: Array.from(localTxMap.values()).sort((a, b) => `${b.date || ''} ${b.time || ''}`.localeCompare(`${a.date || ''} ${a.time || ''}`)),
+      sobimons: Array.from(monMap.values()),
+      quests: Array.from(questMap.values())
+    };
   }
 };
