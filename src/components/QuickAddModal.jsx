@@ -23,7 +23,7 @@ export default function QuickAddModal({ isOpen, onClose, onSave, defaultDate }) 
   const [selectedCat, setSelectedCat] = useState(CATEGORIES[0].id);
   const [memo, setMemo] = useState('');
   const [date, setDate] = useState(todayKey());
-  const [showKeypad, setShowKeypad] = useState(true);
+  const [showKeypad, setShowKeypad] = useState(false);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -32,7 +32,7 @@ export default function QuickAddModal({ isOpen, onClose, onSave, defaultDate }) 
     setAmount('');
     setMemo('');
     setDate(defaultDate || todayKey());
-    setShowKeypad(true);
+    setShowKeypad(false);
     setSaving(false);
     try {
       const recent = localStorage.getItem(RECENT_CATEGORY_KEY);
@@ -92,7 +92,7 @@ export default function QuickAddModal({ isOpen, onClose, onSave, defaultDate }) 
         <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#EFF6FF', border: '1.5px solid #3B82F6', overflow: 'hidden', display: 'grid', placeItems: 'center' }}><SobimonMascot size={30} emotion="happy" /></div>
       </div>
 
-      <form className="sub-page-body" onSubmit={submit} style={{ padding: '18px 20px 180px' }}>
+      <form className="sub-page-body" onSubmit={submit} style={{ padding: showKeypad ? '18px 20px 180px' : '18px 20px 24px' }}>
         <div style={{ display: 'flex', background: '#F1F5F9', padding: 4, borderRadius: 999, marginBottom: 18 }}>
           {[['expense','지출'],['income','수입'],['transfer','이체']].map(([id,label]) => <button key={id} type="button" onClick={() => setType(id)} style={{ flex: 1, padding: '9px 0', border: 0, borderRadius: 999, fontSize: 13, fontWeight: 800, background: type === id ? '#2563EB' : 'transparent', color: type === id ? '#fff' : '#64748B' }}>{label}</button>)}
         </div>
