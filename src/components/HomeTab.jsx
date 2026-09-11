@@ -42,8 +42,8 @@ export default function HomeTab({
     speechText = '이번 달도 잘하고 있어요!';
   }
 
-  const discoveredMonsters = sobimons.filter((m) => m?.discovered).slice(0, 3);
   const discoveredCount = sobimons.filter((m) => m?.discovered).length;
+  const visibleMonsterCount = Math.min(3, discoveredCount);
   const cafeMission = quests.find((q) => q?.category?.includes('카페') || q?.title?.includes('카페')) || quests[0] || null;
   const missionTarget = Number(cafeMission?.target || 0);
   const missionCurrent = Number(cafeMission?.current || 0);
@@ -181,30 +181,44 @@ export default function HomeTab({
             <div className="sobimon-card-header">
               <div className="sobimon-card-title">
                 <div style={{
-                  width: '24px', height: '24px', borderRadius: '50%', background: '#EFF6FF',
-                  border: '1.5px solid #3B82F6', display: 'flex', alignItems: 'center',
-                  justifyContent: 'center', overflow: 'hidden'
+                  width: '24px',
+                  height: '24px',
+                  borderRadius: '50%',
+                  background: '#EFF6FF',
+                  border: '1.5px solid #3B82F6',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  overflow: 'hidden'
                 }}>
                   <SobimonMascot size={22} emotion="joy" />
                 </div>
-                <span>발견한 소비몬 <strong style={{ color: '#2563EB' }}>{discoveredCount}마리</strong></span>
+                <span>이번 달에 발견한 소비몬 <strong style={{ color: '#2563EB' }}>{discoveredCount}마리</strong></span>
               </div>
               <ChevronRight size={16} color="#94A3B8" />
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                {discoveredMonsters.length > 0 ? monsterSlots.slice(0, discoveredMonsters.length).map((slot) => (
-                  <div key={slot.key} style={{
-                    width: '46px', height: '46px', borderRadius: '14px', background: slot.bg,
-                    border: `1px solid ${slot.border}`, display: 'flex', alignItems: 'center',
-                    justifyContent: 'center', boxShadow: `0 2px 6px ${slot.shadow}`
-                  }}>
+                {monsterSlots.map((slot, index) => (
+                  <div
+                    key={slot.key}
+                    style={{
+                      width: '46px',
+                      height: '46px',
+                      borderRadius: '14px',
+                      background: index < visibleMonsterCount ? slot.bg : '#F8FAFC',
+                      border: `1px solid ${index < visibleMonsterCount ? slot.border : '#E2E8F0'}`,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      boxShadow: index < visibleMonsterCount ? `0 2px 6px ${slot.shadow}` : 'none',
+                      opacity: index < visibleMonsterCount ? 1 : 0.32
+                    }}
+                  >
                     {slot.node}
                   </div>
-                )) : (
-                  <span style={{ fontSize: '12px', color: '#94A3B8', fontWeight: 700 }}>아직 발견한 소비몬이 없어요.</span>
-                )}
+                ))}
               </div>
 
               <button
@@ -213,8 +227,15 @@ export default function HomeTab({
                   onNavigateTab && onNavigateTab('dex');
                 }}
                 style={{
-                  padding: '8px 14px', background: '#EFF6FF', color: '#2563EB', border: '1px solid #BFDBFE',
-                  borderRadius: '10px', fontSize: '12px', fontWeight: 800, cursor: 'pointer'
+                  padding: '8px 14px',
+                  background: '#EFF6FF',
+                  color: '#2563EB',
+                  border: '1px solid #BFDBFE',
+                  borderRadius: '10px',
+                  fontSize: '12px',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease'
                 }}
               >
                 도감 보기
@@ -231,51 +252,93 @@ export default function HomeTab({
               <button
                 onClick={() => onNavigateTab && onNavigateTab('missions')}
                 style={{
-                  background: 'transparent', border: 'none', fontSize: '11px', color: '#94A3B8',
-                  fontWeight: 700, display: 'flex', alignItems: 'center', gap: '2px', cursor: 'pointer'
+                  background: 'transparent',
+                  border: 'none',
+                  fontSize: '11px',
+                  color: '#94A3B8',
+                  fontWeight: 700,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '2px',
+                  cursor: 'pointer'
                 }}
               >
                 더보기 <ChevronRight size={14} />
               </button>
             </div>
 
-            {cafeMission ? (
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: '13px', fontWeight: 800, color: '#1E293B', marginBottom: '8px' }}>
-                    {cafeMission.title}
-                  </div>
-
-                  <div style={{ width: '100%', height: '7px', background: '#F1F5F9', borderRadius: '9999px', overflow: 'hidden', marginBottom: '6px' }}>
-                    <div style={{
-                      width: `${missionPercent}%`, height: '100%', background: 'linear-gradient(90deg, #F59E0B, #FBBF24)',
-                      borderRadius: '9999px'
-                    }} />
-                  </div>
-
-                  <div style={{ fontSize: '11px', color: '#64748B', fontWeight: 700, marginBottom: '8px' }}>
-                    ₩ {missionCurrent.toLocaleString()} / {missionTarget.toLocaleString()}
-                  </div>
-
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <span style={{ display: 'inline-flex', background: '#FEF3C7', color: '#B45309', fontSize: '10px', fontWeight: 800, padding: '2px 7px', borderRadius: '9999px' }}>
-                      ⭐ +{Number(cafeMission.rewardExp || 0)} EXP
-                    </span>
-                    <span style={{ display: 'inline-flex', background: '#FEF3C7', color: '#B45309', fontSize: '10px', fontWeight: 800, padding: '2px 7px', borderRadius: '9999px' }}>
-                      🪙 +{Number(cafeMission.rewardCoin || 0)} COIN
-                    </span>
-                  </div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', minHeight: '92px' }}>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: '13px', fontWeight: 800, color: '#1E293B', marginBottom: '8px' }}>
+                  {cafeMission ? cafeMission.title : '진행 중인 미션이 없어요'}
                 </div>
 
-                <div style={{ width: '64px', height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <CafeMonsterIllustration size={60} />
+                <div style={{
+                  width: '100%',
+                  height: '7px',
+                  background: '#F1F5F9',
+                  borderRadius: '9999px',
+                  overflow: 'hidden',
+                  marginBottom: '6px'
+                }}>
+                  <div style={{
+                    width: `${missionPercent}%`,
+                    height: '100%',
+                    background: 'linear-gradient(90deg, #F59E0B, #FBBF24)',
+                    borderRadius: '9999px'
+                  }} />
+                </div>
+
+                <div style={{ fontSize: '11px', color: '#64748B', fontWeight: 700, marginBottom: '8px' }}>
+                  {cafeMission ? `₩ ${missionCurrent.toLocaleString()} / ${missionTarget.toLocaleString()}` : '미션을 추가하면 진행 상황이 표시돼요.'}
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minHeight: '19px' }}>
+                  {cafeMission && (
+                    <>
+                      <span style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '3px',
+                        background: '#FEF3C7',
+                        color: '#B45309',
+                        fontSize: '10px',
+                        fontWeight: 800,
+                        padding: '2px 7px',
+                        borderRadius: '9999px'
+                      }}>
+                        ⭐ +{Number(cafeMission.rewardExp || 0)} EXP
+                      </span>
+                      <span style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '3px',
+                        background: '#FEF3C7',
+                        color: '#B45309',
+                        fontSize: '10px',
+                        fontWeight: 800,
+                        padding: '2px 7px',
+                        borderRadius: '9999px'
+                      }}>
+                        🪙 +{Number(cafeMission.rewardCoin || 0)} COIN
+                      </span>
+                    </>
+                  )}
                 </div>
               </div>
-            ) : (
-              <div style={{ padding: '10px 0 4px', fontSize: '12px', color: '#94A3B8', fontWeight: 700 }}>
-                아직 진행 중인 미션이 없어요.
+
+              <div style={{
+                width: '64px',
+                height: '64px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+                opacity: cafeMission ? 1 : 0.3
+              }}>
+                <CafeMonsterIllustration size={60} />
               </div>
-            )}
+            </div>
           </div>
 
           <button
