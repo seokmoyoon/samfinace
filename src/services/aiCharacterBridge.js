@@ -30,7 +30,9 @@ const normalizeMood = (mood) => MOOD_MAP[String(mood || '').toLowerCase()] || 'i
 
 const applyInsightToOriginalHero = (insight) => {
   const speech = document.querySelector('.hero-speech-bubble-text');
-  if (speech && insight?.message) speech.textContent = insight.message;
+  if (speech && insight?.message && speech.textContent !== insight.message) {
+    speech.textContent = insight.message;
+  }
 
   const hero = document.querySelector('.fairytale-hero-container');
   if (hero) {
@@ -53,13 +55,17 @@ export function initAICharacterBridge() {
   if (typeof window === 'undefined') return () => {};
 
   let timer;
+  let heroWasMounted = false;
+
   const schedule = () => {
     window.clearTimeout(timer);
     timer = window.setTimeout(refreshInsight, 250);
   };
 
   const observer = new MutationObserver(() => {
-    if (document.querySelector('.hero-speech-bubble-text')) schedule();
+    const heroIsMounted = Boolean(document.querySelector('.hero-speech-bubble-text'));
+    if (heroIsMounted && !heroWasMounted) schedule();
+    heroWasMounted = heroIsMounted;
   });
 
   observer.observe(document.body, { childList: true, subtree: true });
