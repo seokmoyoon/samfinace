@@ -1,3 +1,6 @@
+const CACHE_PREFIX = 'sobimon.ai.insight.';
+const CACHE_TTL = 6 * 60 * 60 * 1000;
+
 const categoryLabel = (category = '') => {
   if (category.includes('카페')) return '카페';
   if (category.includes('쇼핑') || category.includes('마트')) return '쇼핑';
@@ -77,17 +80,55 @@ function localCharacterInsight(summary) {
   };
 }
 
+function cacheKey(summary, user) {
+  return `${CACHE_PREFIX}${btoa(unescape(encodeURIComponent(JSON.stringify({
+    summary,
+    level: user?.level || 1,
+    title: user?.title || ''
+  })))).slice(0, 180)}`;
+}
+
+function readCache(key) {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed?.savedAt || Date.now() - parsed.savedAt > CACHE_TTL) {
+      localStorage.removeItem(key);
+      return null;
+    }
+    return parsed.data || null;
+  } catch {
+    return null;
+  }
+}
+
+function writeCache(key, data) {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(key, JSON.stringify({ savedAt: Date.now(), data }));
+  } catch {
+    // Storage quota/private mode failures should never break the app.
+  }
+}
+
 export const aiService = {
   buildSummary,
 
   async getCharacterInsight({ transactions = [], budget = {}, user = null }) {
     const summary = buildSummary(transactions, budget);
     const fallback = localCharacterInsight(summary);
-    const endpoint = import.meta.env.VITE_SOBIMON_AI_ENDPOINT?.trim();
+    const endpoint = import.meta.env.VITE_SOBIMON_AI_ENDPOINT?.trim() || '/api/sobimon-ai';
+    const key = cacheKey(summary, user);
+    const cached = readCache(key);
 
-    if (!endpoint) return { ...fallback, summary };
+    if (cached) return { ...cached, source: 'remote-cache', summary };
 
     try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 8500);
+
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -95,21 +136,24 @@ export const aiService = {
           type: 'sobimon_character_insight',
           user: user ? { level: user.level, title: user.title } : null,
           summary
-        })
+        }),
+        signal: controller.signal
       });
 
+      clearTimeout(timeout);
       if (!response.ok) throw new Error(`AI endpoint ${response.status}`);
-      const data = await response.json();
 
-      return {
+      const data = await response.json();
+      const result = {
         headline: data.headline || fallback.headline,
         message: data.message || fallback.message,
         missionTitle: data.missionTitle || fallback.missionTitle,
         missionReason: data.missionReason || fallback.missionReason,
-        mood: data.mood || fallback.mood,
-        source: 'remote',
-        summary
+        mood: data.mood || fallback.mood
       };
+
+      writeCache(key, result);
+      return { ...result, source: 'remote', summary };
     } catch (error) {
       console.warn('[SOBIMON AI] remote insight failed, using local fallback.', error);
       return { ...fallback, summary };
