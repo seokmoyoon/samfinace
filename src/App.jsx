@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Home, 
   CreditCard, 
-  Target, 
+  Plus, 
   BookOpen, 
   User, 
   Zap,
@@ -20,6 +20,7 @@ import QuickAddModal from './components/QuickAddModal';
 import GymArenaModal from './components/common/GymArenaModal';
 import GymLeaderDashboard from './components/pc/admin/GymLeaderDashboard';
 import GymModePC from './components/pc/GymModePC';
+import SobimonAIChatModal from './components/common/SobimonAIChatModal';
 
 import { 
   INITIAL_USER, 
@@ -39,17 +40,25 @@ import {
 
 import { authService } from './services/authService';
 import { syncService } from './services/syncService';
+import { transactionService } from './services/transactionService';
+import { budgetService } from './services/budgetService';
+import { profileService } from './services/profileService';
+import { geminiAiService } from './services/geminiAiService';
 import AuthModal from './components/common/AuthModal';
 
 import { parseCardSMS } from './utils/smsParser';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('home'); // 'home' | 'spending' | 'missions' | 'dex' | 'my'
+  const [activeTab, setActiveTab] = useState('home'); // 'home' | 'spending' | 'dex' | 'my'
 
-  // 앱 데이터 상태 (Local-First: 로컬 저장소 우선 로드)
+  // 앱 데이터 상태 (가짜 데이터 t_* 필터링 및 로컬/DB 연동)
   const [user, setUser] = useState(() => loadFromStorage(STORAGE_KEYS.USER, INITIAL_USER));
   const [budget, setBudget] = useState(() => loadFromStorage(STORAGE_KEYS.BUDGET, INITIAL_BUDGET));
-  const [transactions, setTransactions] = useState(() => loadFromStorage(STORAGE_KEYS.TRANSACTIONS, INITIAL_TRANSACTIONS));
+  const [transactions, setTransactions] = useState(() => {
+    const loaded = loadFromStorage(STORAGE_KEYS.TRANSACTIONS, INITIAL_TRANSACTIONS);
+    // 기존 mock 데이터(id가 t_로 시작하는 모의 데이터)는 필터링하여 깨끗하게 제거
+    return Array.isArray(loaded) ? loaded.filter(t => !t.id?.toString().startsWith('t_')) : [];
+  });
   const [quests, setQuests] = useState(() => loadFromStorage(STORAGE_KEYS.QUESTS, INITIAL_QUESTS));
   const [badges, setBadges] = useState(() => loadFromStorage(STORAGE_KEYS.BADGES, INITIAL_BADGES));
   const [sobimons, setSobimons] = useState(() => loadFromStorage(STORAGE_KEYS.SOBIMONS, INITIAL_SOBIMONS));
@@ -58,6 +67,10 @@ export default function App() {
   const [currentUser, setCurrentUser] = useState(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
+
+  // 캐릭터 AI 코칭 대화 모달 상태
+  const [isAIChatOpen, setIsAIChatOpen] = useState(false);
+
 
   // 체육관(Gym) 및 체육관장(Admin) 모드 상태
   const [isGymArenaOpen, setIsGymArenaOpen] = useState(false);
@@ -87,6 +100,28 @@ export default function App() {
       subscription?.unsubscribe?.();
     };
   }, []);
+
+  // 로그인된 사용자 변경 시 Supabase DB에서 데이터 불러오기 (가짜 데이터 대신 실제 DB 연동)
+  useEffect(() => {
+    if (currentUser?.id) {
+      // 1. 프로필 보장 및 로드
+      profileService.ensureProfile(currentUser).then((p) => {
+        if (p) setUser(prev => ({ ...prev, ...p }));
+      });
+
+      // 2. 예산 로드
+      budgetService.fetchBudget(currentUser.id).then((b) => {
+        if (b) setBudget(b);
+      });
+
+      // 3. 거래내역 로드 (가짜 데이터 없이 DB 데이터만)
+      transactionService.fetchTransactions(currentUser.id).then((res) => {
+        if (res.success) {
+          setTransactions(res.data);
+        }
+      });
+    }
+  }, [currentUser]);
 
   // 클라우드 동기화 (로컬 ➡️ Supabase 백업 & 동기화)
   const handleSyncCloud = async () => {
@@ -119,17 +154,17 @@ export default function App() {
     alert('로그아웃되었습니다. (로컬 게스트 모드로 전환됩니다)');
   };
 
-  // 데이터 전체 초기화 핸들러 (샘플 데이터 복원)
+  // 데이터 전체 초기화 핸들러
   const handleResetData = () => {
-    if (window.confirm('정말로 모든 가계부 내역과 소비몬 데이터를 초기 샘플 데이터로 리셋하시겠습니까?')) {
+    if (window.confirm('정말로 모든 가계부 내역과 소비몬 데이터를 초기화하시겠습니까?')) {
       clearAllSobimonStorage();
       setUser(INITIAL_USER);
       setBudget(INITIAL_BUDGET);
-      setTransactions(INITIAL_TRANSACTIONS);
+      setTransactions([]);
       setQuests(INITIAL_QUESTS);
       setBadges(INITIAL_BADGES);
       setSobimons(INITIAL_SOBIMONS);
-      alert('초기 데이터로 깔끔하게 리셋되었습니다.');
+      alert('데이터가 깨끗하게 초기화되었습니다.');
     }
   };
 
@@ -144,7 +179,7 @@ export default function App() {
 
   // 직접 추가(Quick Add) 모달 상태
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
-  const [quickAddDate, setQuickAddDate] = useState('2026-09-07');
+  const [quickAddDate, setQuickAddDate] = useState(() => new Date().toISOString().slice(0, 10));
 
   // 경험치 추가 및 레벨업 체크
   const grantExp = (amount, reason = '소비 기록 완료', coinBonus = 3) => {
@@ -153,7 +188,7 @@ export default function App() {
 
     setUser((prev) => {
       const nextExp = prev.exp + amount;
-      const nextCoins = (prev.coins || 3250) + coinBonus;
+      const nextCoins = (prev.coins || 0) + coinBonus;
 
       if (nextExp >= prev.maxExp) {
         const nextLevel = prev.level + 1;
@@ -163,7 +198,7 @@ export default function App() {
           title: nextLevel >= 4 ? '황금 자산 수호자' : prev.title
         });
 
-        return {
+        const updated = {
           ...prev,
           level: nextLevel,
           exp: nextExp - prev.maxExp,
@@ -171,24 +206,60 @@ export default function App() {
           coins: nextCoins,
           title: nextLevel >= 4 ? '황금 자산 수호자' : prev.title
         };
+
+        if (currentUser?.id) {
+          profileService.saveProfile(currentUser.id, updated);
+        }
+
+        return updated;
       }
-      return { ...prev, exp: nextExp, coins: nextCoins };
+
+      const updated = { ...prev, exp: nextExp, coins: nextCoins };
+      if (currentUser?.id) {
+        profileService.saveProfile(currentUser.id, updated);
+      }
+      return updated;
     });
   };
 
-  // 단일 거래 내역 추가 (지출/수입/SMS 등)
+  // 단일 거래 내역 추가 (지출/수입/SMS 등) - Supabase DB 연동 및 AI 반응
   const handleAddTransaction = (newTx) => {
     setTransactions((prev) => [newTx, ...prev]);
 
-    // 소비 기록 완료 시 +10 EXP & +5 COIN 피드백
+    // 소비 기록 완료 시 기본 피드백
     grantExp(10, '👾 소비몬 출현 감지!', 5);
+
+    // Supabase DB에 직접 영구 저장
+    if (currentUser?.id) {
+      transactionService.createTransaction(currentUser.id, newTx).then((res) => {
+        if (res.success && res.data?.id) {
+          setTransactions((prev) =>
+            prev.map((t) => (t === newTx ? res.data : t))
+          );
+        }
+      });
+    }
+
+    // Gemini AI 실시간 반응 코멘트
+    geminiAiService.evaluateExpenseReaction(newTx, budget).then((aiReaction) => {
+      if (aiReaction) {
+        setTimeout(() => {
+          setExpToast({
+            amount: 5,
+            coins: 2,
+            reason: `🐻 소비몬: "${aiReaction}"`
+          });
+          setTimeout(() => setExpToast(null), 3500);
+        }, 1200);
+      }
+    });
 
     // 소비인 경우 퀘스트 진행도 체크
     if (newTx.type !== 'income') {
       setQuests((prevQuests) =>
         prevQuests.map((q) => {
           if (q.category === newTx.category) {
-            const nextVal = q.current + newTx.amount;
+            const nextVal = (Number(q.current) || 0) + (Number(newTx.amount) || 0);
             return {
               ...q,
               current: nextVal,
@@ -205,6 +276,10 @@ export default function App() {
   const handleAddMultipleTransactions = (items) => {
     setTransactions((prev) => [...items, ...prev]);
     grantExp(50, '📜 카드 명세서 분석 완료!', 20);
+
+    if (currentUser?.id && items.length > 0) {
+      transactionService.createMultipleTransactions(currentUser.id, items);
+    }
 
     setBadges((prev) =>
       prev.map((b) => (b.id === 'b4' ? { ...b, unlocked: true } : b))
@@ -239,9 +314,10 @@ export default function App() {
   };
 
   const handleOpenQuickAdd = (targetDate) => {
-    setQuickAddDate(targetDate || '2026-09-07');
+    setQuickAddDate(targetDate || new Date().toISOString().slice(0, 10));
     setIsQuickAddOpen(true);
   };
+
 
   // 체육관 PC 모드 진입 (로그인 필수 인증 가드)
   const handleOpenGymPCMode = () => {
@@ -357,7 +433,7 @@ export default function App() {
           </div>
         )}
 
-        {/* 본문 스크린 (5대 탭) */}
+        {/* 본문 스크린 (4대 탭) */}
         <div className="screen-content">
           {activeTab === 'home' && (
             <HomeTab 
@@ -367,9 +443,10 @@ export default function App() {
               quests={quests}
               sobimons={sobimons}
               onNavigateTab={(tab) => setActiveTab(tab)}
-              onOpenQuickAdd={() => handleOpenQuickAdd('2026-09-07')}
+              onOpenQuickAdd={() => handleOpenQuickAdd(new Date().toISOString().slice(0, 10))}
               onClaimReward={handleClaimReward}
               onOpenGymArena={handleOpenGymArena}
+              onOpenAIChat={() => setIsAIChatOpen(true)}
             />
           )}
 
@@ -383,14 +460,6 @@ export default function App() {
               onTriggerPushSimulation={handleTriggerPushSimulation}
               onOpenQuickAdd={handleOpenQuickAdd}
               onSwitchToPCMode={handleOpenGymPCMode}
-            />
-          )}
-
-          {activeTab === 'missions' && (
-            <MissionTab 
-              user={user}
-              quests={quests}
-              onClaimReward={handleClaimReward}
             />
           )}
 
@@ -417,7 +486,7 @@ export default function App() {
           )}
         </div>
 
-        {/* 5대 탭 하단 내비게이션 바: 홈 / 소비 / 미션 / 도감 / MY */}
+        {/* 하단 고정 내비게이션 바: 홈 / 소비 / + (소비입력 FAB) / 도감 / MY */}
         <div className="bottom-nav">
           <button 
             className={`nav-item ${activeTab === 'home' ? 'active' : ''}`}
@@ -439,14 +508,16 @@ export default function App() {
             <span>소비</span>
           </button>
 
+          {/* 중앙 + 플로팅 소비입력 버튼 */}
           <button 
-            className={`nav-item ${activeTab === 'missions' ? 'active' : ''}`}
-            onClick={() => setActiveTab('missions')}
+            className="nav-item nav-add-fab"
+            onClick={() => handleOpenQuickAdd(new Date().toISOString().slice(0, 10))}
+            title="소비 내역 빠른 추가"
           >
-            <div className="nav-icon-wrap">
-              <Target size={18} />
+            <div className="nav-fab-btn">
+              <Plus size={24} strokeWidth={2.8} />
             </div>
-            <span>미션</span>
+            <span>소비입력</span>
           </button>
 
           <button 
@@ -476,6 +547,15 @@ export default function App() {
           onClose={() => setIsQuickAddOpen(false)}
           onSave={handleAddTransaction}
           defaultDate={quickAddDate}
+        />
+
+        {/* 캐릭터 AI 재정 코칭 대화 모달 */}
+        <SobimonAIChatModal 
+          isOpen={isAIChatOpen}
+          onClose={() => setIsAIChatOpen(false)}
+          user={user}
+          budget={budget}
+          transactions={transactions}
         />
 
         {/* 클라우드 로그인 / 회원가입 모달 */}
@@ -509,3 +589,4 @@ export default function App() {
     </div>
   );
 }
+

@@ -16,6 +16,8 @@ import {
   ShopMonsterIllustration,
   SaverMonsterIllustration
 } from './common/SobimonIllustrations';
+import { geminiAiService } from '../services/geminiAiService';
+
 
 export default function HomeTab({ 
   user, 
@@ -26,26 +28,35 @@ export default function HomeTab({
   onNavigateTab,
   onOpenQuickAdd,
   onClaimReward,
-  onOpenGymArena
+  onOpenGymArena,
+  onOpenAIChat
 }) {
-  // 이번 달 소비 총액 계산 (수입 제외)
   const totalSpent = transactions
     .filter(t => t.type !== 'income')
-    .reduce((acc, cur) => acc + cur.amount, 0);
+    .reduce((acc, cur) => acc + (Number(cur.amount) || 0), 0);
 
-  // 시안 기준 기본값 매핑 (데이터가 비어있거나 초기일 때 시안 값 지원)
-  const displaySpent = totalSpent > 0 ? totalSpent : 1284000;
-  const targetBudget = budget?.monthlyBudget > 0 ? budget.monthlyBudget : 1800000;
-  const spentPercent = Math.min(100, Math.round((displaySpent / targetBudget) * 100));
+  // 실제 DB 기반 실시간 소비액 및 예산
+  const displaySpent = totalSpent;
+  const targetBudget = budget?.monthlyBudget > 0 ? budget.monthlyBudget : 1000000;
+  const spentPercent = targetBudget > 0 ? Math.min(100, Math.round((displaySpent / targetBudget) * 100)) : 0;
   const remainingBudget = Math.max(0, targetBudget - displaySpent);
 
-  // 캐릭터 동적 말풍선 대사 생성 (소비 상태에 스마트 반응)
-  let speechText = '이번 달도 잘하고 있어요!';
-  if (spentPercent > 80) {
-    speechText = '예산의 80%를 넘었어요! 절약 모드 가동!';
-  } else if (spentPercent < 50) {
-    speechText = '이번 달도 잘하고 있어요!';
-  }
+  // 캐릭터 AI 동적 말풍선 대사 (Gemini 비동기 생성)
+  const [speechText, setSpeechText] = useState('소비몬을 터치해 AI 재정 코칭을 받아보세요! 💬');
+
+
+  React.useEffect(() => {
+    let isMounted = true;
+    geminiAiService.generateCharacterSpeech({
+      user,
+      budget,
+      totalSpent,
+      recentTransactions: transactions
+    }).then((res) => {
+      if (isMounted && res) setSpeechText(res);
+    });
+    return () => { isMounted = false; };
+  }, [totalSpent, budget?.monthlyBudget, user?.name]);
 
   // 이번 달 발견한 소비몬들 (최대 3마리)
   const discoveredMonsters = sobimons.filter(m => m.discovered).slice(0, 3);
@@ -54,14 +65,14 @@ export default function HomeTab({
   const cafeMission = quests.find(q => q.category?.includes('카페') || q.title?.includes('카페')) || quests[0] || {
     id: 'm_cafe_demo',
     title: '카페 소비 10,000원 이하',
-    current: 7000,
+    current: 0,
     target: 10000,
     rewardExp: 50,
     rewardCoin: 10,
     status: 'progress'
   };
 
-  const missionPercent = Math.min(100, Math.round((cafeMission.current / cafeMission.target) * 100));
+  const missionPercent = cafeMission.target > 0 ? Math.min(100, Math.round((cafeMission.current / cafeMission.target) * 100)) : 0;
 
   return (
     <div className="home-screen-sobimon" style={{ paddingBottom: '16px' }}>
@@ -70,7 +81,7 @@ export default function HomeTab({
       <FairytaleHeroBackground 
         user={user}
         speech={speechText}
-        onMascotClick={() => {}}
+        onMascotClick={onOpenAIChat}
       />
 
       {/* 2~7. 메인 대시보드 카드 영역 (모바일/PC폰목업: 1열 스택 / 아이패드 태블릿: 2열 대시보드) */}

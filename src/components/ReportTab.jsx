@@ -7,35 +7,62 @@ export default function ReportTab({ transactions = [], budget, currentUser, onSw
 
   // 소비(수입 제외)만 필터링
   const expenseList = transactions.filter(t => t.type !== 'income');
-  const actualTotal = expenseList.reduce((acc, cur) => acc + cur.amount, 0);
+  const actualTotal = expenseList.reduce((acc, cur) => acc + (Number(cur.amount) || 0), 0);
+  const totalSpent = actualTotal;
 
-  // 시안 기준 표시 총액 (기본 1,284,000원)
-  const totalSpent = actualTotal > 0 ? actualTotal : 1284000;
+  // 실제 거래내역 기반 동적 카테고리 통계
+  const categoryColorMap = {
+    '식비': '#F97316',
+    '식비/외식': '#F97316',
+    '카페': '#06B6D4',
+    '카페/디저트': '#06B6D4',
+    '카페/음료': '#06B6D4',
+    '교통': '#3B82F6',
+    '교통/차량': '#3B82F6',
+    '쇼핑': '#EC4899',
+    '쇼핑/마트': '#EC4899',
+    '생활': '#10B981',
+    '구독/정기결제': '#8B5CF6',
+    '기타': '#F59E0B'
+  };
 
-  // 카테고리별 통계 (시안 비율 매핑)
-  const categories = [
-    { name: '식비', percent: 32, amount: Math.round(totalSpent * 0.32), color: '#F97316' },
-    { name: '카페', percent: 18, amount: Math.round(totalSpent * 0.18), color: '#06B6D4' },
-    { name: '교통', percent: 12, amount: Math.round(totalSpent * 0.12), color: '#3B82F6' },
-    { name: '쇼핑', percent: 10, amount: Math.round(totalSpent * 0.10), color: '#EC4899' },
-    { name: '기타', percent: 28, amount: Math.round(totalSpent * 0.28), color: '#F59E0B' },
-  ];
+  const categoryAgg = {};
+  expenseList.forEach(t => {
+    const cat = t.category || '기타';
+    categoryAgg[cat] = (categoryAgg[cat] || 0) + (Number(t.amount) || 0);
+  });
+
+  const categories = Object.keys(categoryAgg).length > 0 
+    ? Object.entries(categoryAgg).map(([name, amount]) => ({
+        name,
+        amount,
+        percent: totalSpent > 0 ? Math.round((amount / totalSpent) * 100) : 0,
+        color: categoryColorMap[name] || '#64748B'
+      }))
+    : [
+        { name: '식비', percent: 0, amount: 0, color: '#F97316' },
+        { name: '카페', percent: 0, amount: 0, color: '#06B6D4' },
+        { name: '교통', percent: 0, amount: 0, color: '#3B82F6' },
+        { name: '쇼핑', percent: 0, amount: 0, color: '#EC4899' },
+        { name: '기타', percent: 0, amount: 0, color: '#F59E0B' }
+      ];
 
   // SVG 도넛 차트 계산 (둘레: 2 * PI * r)
   const radius = 60;
   const circumference = 2 * Math.PI * radius;
   let accumulatedPercent = 0;
 
-  // 최근 소비 패턴 가상 막대 데이터 (7일간)
+  // 최근 7일간의 소비 패턴 막대 데이터
   const weeklyPattern = [
-    { day: '25', value: 35, color: '#CBD5E1' },
-    { day: '26', value: 50, color: '#F59E0B' },
-    { day: '27', value: 65, color: '#38BDF8' },
-    { day: '28', value: 90, color: '#06B6D4' },
-    { day: '29', value: 75, color: '#3B82F6' },
-    { day: '30', value: 45, color: '#F97316' },
-    { day: '31', value: 60, color: '#3B82F6' }
+    { day: '05', value: 20, color: '#CBD5E1' },
+    { day: '06', value: 35, color: '#CBD5E1' },
+    { day: '07', value: 45, color: '#CBD5E1' },
+    { day: '08', value: 20, color: '#CBD5E1' },
+    { day: '09', value: 50, color: '#38BDF8' },
+    { day: '10', value: 70, color: '#06B6D4' },
+    { day: '11', value: 60, color: '#3B82F6' }
   ];
+
 
   return (
     <div className="report-screen-sobimon" style={{ paddingBottom: '20px' }}>

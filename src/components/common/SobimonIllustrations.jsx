@@ -403,22 +403,49 @@ export function FairytaleHeroBackground({
 
       {/* 4 & 5. 중앙 마스코트와 말풍선 스테이지 (반응형 중앙 정렬) */}
       <div className="hero-stage-center">
-        {/* 말풍선 */}
-        <div className="hero-speech-bubble">
+        {/* 말풍선 (클릭 시 AI 대화 오픈) */}
+        <div 
+          className="hero-speech-bubble"
+          onClick={onMascotClick}
+          style={{ cursor: 'pointer', position: 'relative' }}
+          title="터치하여 AI 소비몬과 대화하기"
+        >
+          <div style={{
+            position: 'absolute',
+            top: '-8px',
+            right: '12px',
+            background: 'linear-gradient(135deg, #2563EB 0%, #7C3AED 100%)',
+            color: '#FFFFFF',
+            fontSize: '9px',
+            fontWeight: 800,
+            padding: '2px 6px',
+            borderRadius: '9999px',
+            boxShadow: '0 2px 6px rgba(37, 99, 235, 0.3)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '3px'
+          }}>
+            <span>✨ AI</span>
+          </div>
           <div className="hero-speech-bubble-text">
             {speech || '이번 달도 잘하고 있어요!'}
           </div>
           <div className="hero-speech-tail" />
         </div>
 
-        {/* 백곰 캐릭터 */}
+        {/* 백곰 캐릭터 (클릭 시 AI 대화 오픈) */}
         <div
           className="hero-mascot-wrap"
           onClick={onMascotClick}
+          style={{ cursor: 'pointer', transition: 'transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)' }}
+          title="터치하여 AI 소비몬과 대화하기"
+          onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.06)'}
+          onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
         >
           <SobimonMascot size={160} emotion="joy" />
         </div>
       </div>
+
 
     </div>
   );
