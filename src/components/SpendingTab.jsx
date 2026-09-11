@@ -1,130 +1,95 @@
 import React, { useState } from 'react';
-import { 
-  Calendar as CalendarIcon, 
-  UploadCloud, 
-  PieChart
+import {
+  CalendarDays,
+  CloudDownload,
+  Plus,
+  PieChart,
+  Sparkles
 } from 'lucide-react';
 
 import CalendarTab from './CalendarTab';
 import SmartInputTab from './SmartInputTab';
 import ReportTab from './ReportTab';
 
-export default function SpendingTab({ 
-  transactions, 
-  budget, 
+export default function SpendingTab({
+  transactions,
+  budget,
   currentUser,
-  onAddTransaction, 
-  onAddMultipleTransactions, 
+  onAddTransaction,
+  onAddMultipleTransactions,
   onTriggerPushSimulation,
   onOpenQuickAdd,
-  onSwitchToPCMode 
+  onSwitchToPCMode
 }) {
-  const [subTab, setSubTab] = useState('report'); // 시안의 소비 분석을 우선 확인 가능하게 지원
+  const [subTab, setSubTab] = useState('report');
+
+  const totalExpense = transactions
+    .filter((tx) => tx.type !== 'income')
+    .reduce((sum, tx) => sum + Number(tx.amount || 0), 0);
+
+  const tabs = [
+    { id: 'report', label: '분석', icon: PieChart },
+    { id: 'calendar', label: '내역', icon: CalendarDays },
+    { id: 'smart', label: '가져오기', icon: CloudDownload }
+  ];
 
   return (
-    <div className="spending-screen" style={{ paddingBottom: '16px' }}>
-      {/* 3단 서브 탭 스위처 (시안 감성 알약 버튼) */}
-      <div style={{
-        display: 'flex',
-        background: '#F1F5F9',
-        padding: '4px',
-        borderRadius: '9999px',
-        marginBottom: '16px'
-      }}>
-        <button
-          onClick={() => setSubTab('report')}
-          style={{
-            flex: 1,
-            padding: '8px 4px',
-            border: 'none',
-            borderRadius: '9999px',
-            fontSize: '12px',
-            fontWeight: 800,
-            cursor: 'pointer',
-            background: subTab === 'report' ? '#2563EB' : 'transparent',
-            color: subTab === 'report' ? '#FFFFFF' : '#64748B',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '5px',
-            boxShadow: subTab === 'report' ? '0 2px 6px rgba(37, 99, 235, 0.3)' : 'none',
-            transition: 'all 0.15s ease'
-          }}
-        >
-          <PieChart size={14} /> 소비 분석
+    <div className="spending-screen spending-refresh" style={{ paddingBottom: '16px' }}>
+      <section className="spending-hero">
+        <div>
+          <div className="spending-eyebrow">
+            <Sparkles size={13} /> 이번 달 소비
+          </div>
+          <strong className="spending-total">₩ {totalExpense.toLocaleString()}</strong>
+          <p>기록은 가볍게, 분석은 소비몬이 정리해드려요.</p>
+        </div>
+        <button className="spending-add-button" onClick={() => onOpenQuickAdd && onOpenQuickAdd()}>
+          <Plus size={18} strokeWidth={2.7} />
+          <span>소비 기록</span>
         </button>
+      </section>
 
-        <button
-          onClick={() => setSubTab('calendar')}
-          style={{
-            flex: 1,
-            padding: '8px 4px',
-            border: 'none',
-            borderRadius: '9999px',
-            fontSize: '12px',
-            fontWeight: 800,
-            cursor: 'pointer',
-            background: subTab === 'calendar' ? '#2563EB' : 'transparent',
-            color: subTab === 'calendar' ? '#FFFFFF' : '#64748B',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '5px',
-            boxShadow: subTab === 'calendar' ? '0 2px 6px rgba(37, 99, 235, 0.3)' : 'none',
-            transition: 'all 0.15s ease'
-          }}
-        >
-          <CalendarIcon size={14} /> 일별 달력
-        </button>
-
-        <button
-          onClick={() => setSubTab('smart')}
-          style={{
-            flex: 1,
-            padding: '8px 4px',
-            border: 'none',
-            borderRadius: '9999px',
-            fontSize: '12px',
-            fontWeight: 800,
-            cursor: 'pointer',
-            background: subTab === 'smart' ? '#2563EB' : 'transparent',
-            color: subTab === 'smart' ? '#FFFFFF' : '#64748B',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '5px',
-            boxShadow: subTab === 'smart' ? '0 2px 6px rgba(37, 99, 235, 0.3)' : 'none',
-            transition: 'all 0.15s ease'
-          }}
-        >
-          <UploadCloud size={14} /> 스마트 수집
-        </button>
+      <div className="spending-segment" role="tablist" aria-label="소비 메뉴">
+        {tabs.map(({ id, label, icon: Icon }) => (
+          <button
+            key={id}
+            type="button"
+            role="tab"
+            aria-selected={subTab === id}
+            className={subTab === id ? 'active' : ''}
+            onClick={() => setSubTab(id)}
+          >
+            <Icon size={15} />
+            <span>{label}</span>
+          </button>
+        ))}
       </div>
 
-      {/* 서브 탭 컨텐츠 */}
-      {subTab === 'report' && (
-        <ReportTab 
-          transactions={transactions}
-          budget={budget}
-          currentUser={currentUser}
-          onSwitchToPCMode={onSwitchToPCMode}
-        />
-      )}
+      <div className="spending-panel">
+        {subTab === 'report' && (
+          <ReportTab
+            transactions={transactions}
+            budget={budget}
+            currentUser={currentUser}
+            onSwitchToPCMode={onSwitchToPCMode}
+          />
+        )}
 
-      {subTab === 'calendar' && (
-        <CalendarTab 
-          transactions={transactions}
-          onOpenQuickAdd={onOpenQuickAdd}
-        />
-      )}
+        {subTab === 'calendar' && (
+          <CalendarTab
+            transactions={transactions}
+            onOpenQuickAdd={onOpenQuickAdd}
+          />
+        )}
 
-      {subTab === 'smart' && (
-        <SmartInputTab 
-          onAddTransaction={onAddTransaction}
-          onAddMultipleTransactions={onAddMultipleTransactions}
-          onTriggerPushSimulation={onTriggerPushSimulation}
-        />
-      )}
+        {subTab === 'smart' && (
+          <SmartInputTab
+            onAddTransaction={onAddTransaction}
+            onAddMultipleTransactions={onAddMultipleTransactions}
+            onTriggerPushSimulation={onTriggerPushSimulation}
+          />
+        )}
+      </div>
     </div>
   );
 }
