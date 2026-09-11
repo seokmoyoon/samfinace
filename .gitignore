@@ -30,3 +30,7 @@ dist-ssr
 
 # User reference images
 참고이미지/
+
+# Scratch & test scripts
+scratch*
+

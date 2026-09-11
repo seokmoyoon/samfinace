@@ -16,13 +16,13 @@ async function callGemini(prompt, systemInstruction = '', model = DEFAULT_MODEL)
     return null;
   }
 
-  // 폴백 모델 목록
-  const candidateModels = [model, 'gemini-2.5-flash', 'gemini-1.5-flash'];
+  // 폴백 모델 목록 (2.5-flash -> 1.5-flash -> flash-latest)
+  const candidateModels = [model, 'gemini-2.5-flash', 'gemini-1.5-flash', 'gemini-flash-latest'].filter((v, i, a) => a.indexOf(v) === i);
 
   for (const targetModel of candidateModels) {
     try {
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${targetModel}:generateContent?key=${GEMINI_API_KEY}`;
-      
+
       const bodyPayload = {
         contents: [
           {

@@ -404,10 +404,10 @@ export function FairytaleHeroBackground({
       {/* 4 & 5. 중앙 마스코트와 말풍선 스테이지 (반응형 중앙 정렬) */}
       <div className="hero-stage-center">
         {/* 말풍선 (클릭 시 AI 대화 오픈) */}
-        <div 
+        <div
           className="hero-speech-bubble"
           onClick={onMascotClick}
-          style={{ cursor: 'pointer', position: 'relative' }}
+          style={{ cursor: 'pointer' }}
           title="터치하여 AI 소비몬과 대화하기"
         >
           <div style={{
@@ -450,6 +450,91 @@ export function FairytaleHeroBackground({
     </div>
   );
 }
+
+/**
+ * SOBIMON 시안 하단 풍경 배경 (FairytaleBottomBackground)
+ * - 상단 FairytaleHeroBackground와 동일한 구조의 하단 이미지 컨테이너
+ * - public/images/sobimon/bottom-bridge.png 실물 이미지를 우선 로드하고, 에러 시 고화질 SVG fallback 렌더링
+ */
+export function FairytaleBottomBackground({ className = '' }) {
+  const [useImgBg, setUseImgBg] = React.useState(true);
+
+  return (
+    <div className={`fairytale-bottom-container home-scenery-deco ${className}`}>
+      {/* 1. 실물 bottom-bridge.png 배경 이미지 (있을 경우 꽉 채움) */}
+      {useImgBg && (
+        <img
+          src="/images/sobimon/bottom-bridge.png"
+          alt="하단 돌다리 풍경"
+          onError={() => setUseImgBg(false)}
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            objectPosition: 'center top',
+            zIndex: 1
+          }}
+        />
+      )}
+
+      {/* 2. 이미지가 없을 때 렌더링되는 시안 1:1 고화질 SVG 돌다리 풍경 */}
+      {!useImgBg && (
+        <svg
+          viewBox="0 0 400 130"
+          preserveAspectRatio="none"
+          style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 1 }}
+        >
+          <defs>
+            <linearGradient id="bottomSkyGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#BAE6FD" />
+              <stop offset="35%" stopColor="#BBF7D0" />
+              <stop offset="100%" stopColor="#86EFAC" />
+            </linearGradient>
+            <linearGradient id="bottomRiverGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#7DD3FC" />
+              <stop offset="100%" stopColor="#0284C7" />
+            </linearGradient>
+            <linearGradient id="bridgeGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#F8FAFC" />
+              <stop offset="100%" stopColor="#94A3B8" />
+            </linearGradient>
+          </defs>
+
+          {/* 배경 그라디언트 */}
+          <rect width="400" height="130" fill="url(#bottomSkyGrad)" />
+
+          {/* 푸른 언덕 수풀 */}
+          <path d="M-10 65 Q80 25 180 55 T410 45 L410 130 L-10 130 Z" fill="#4ADE80" />
+          <path d="M-10 85 Q120 45 240 75 T410 65 L410 130 L-10 130 Z" fill="#22C55E" />
+
+          {/* 시원하게 흐르는 맑은 강물 */}
+          <path d="M0 90 Q110 60 220 80 T400 70 L400 130 L0 130 Z" fill="url(#bottomRiverGrad)" opacity="0.85" />
+
+          {/* 아치형 돌다리 (Stone Bridge) */}
+          <g transform="translate(130, 48)">
+            <path d="M0 45 Q70 10 140 45 L135 60 Q70 30 5 60 Z" fill="url(#bridgeGrad)" stroke="#475569" strokeWidth="2" />
+            <line x1="28" y1="36" x2="28" y2="48" stroke="#64748B" strokeWidth="1.5" />
+            <line x1="56" y1="28" x2="56" y2="42" stroke="#64748B" strokeWidth="1.5" />
+            <line x1="84" y1="28" x2="84" y2="42" stroke="#64748B" strokeWidth="1.5" />
+            <line x1="112" y1="36" x2="112" y2="48" stroke="#64748B" strokeWidth="1.5" />
+          </g>
+
+          {/* 아기자기한 들꽃 장식 */}
+          <circle cx="40" cy="60" r="3.5" fill="#F43F5E" />
+          <circle cx="65" cy="75" r="3" fill="#F59E0B" />
+          <circle cx="95" cy="55" r="2.5" fill="#FFFFFF" />
+          <circle cx="310" cy="50" r="3.5" fill="#EC4899" />
+          <circle cx="345" cy="62" r="3" fill="#FEF08A" />
+          <circle cx="370" cy="55" r="2.5" fill="#FFFFFF" />
+        </svg>
+      )}
+    </div>
+  );
+}
+
 
 /**
  * 카페몬 (public/images/sobimon/monster-cafe.png 매칭)
