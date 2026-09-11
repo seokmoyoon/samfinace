@@ -135,11 +135,6 @@ export function SobimonMascot({ size = 120, emotion = 'happy', className = '' })
 
 /**
  * 첨부 이미지의 1번 전체 배경 (Full-bleed Hero Banner)
- * - 상단: 프로필 (아바타, Lv.12, EXP 바, 코인 3,250, 알림 벨)
- * - 우측 뒤편: 절벽 언덕 위의 성채
- * - 중앙 살짝 우측: 바위/그루터기 위에 앉아 있는 2번 캐릭터
- * - 좌측: "이번 달도 잘하고 있어요!" 둥근 말풍선
- * - 하단: 푸른 잔디와 흙 언덕이 아래쪽 카드로 자연스럽게 연결
  */
 export function FairytaleHeroBackground({
   user,
@@ -150,8 +145,6 @@ export function FairytaleHeroBackground({
 
   return (
     <div className="fairytale-hero-container">
-
-      {/* 1. 실물 hero-bg.png 배경 이미지 (있을 경우 꽉 채움) */}
       {useImgBg && (
         <img
           src="/images/sobimon/hero-bg.png"
@@ -159,17 +152,16 @@ export function FairytaleHeroBackground({
           onError={() => setUseImgBg(false)}
           style={{
             position: 'absolute',
-            top: 0,
-            left: 0,
+            inset: 0,
             width: '100%',
-            // height: '100%',
+            height: '100%',
             objectFit: 'cover',
+            objectPosition: 'center',
             zIndex: 1
           }}
         />
       )}
 
-      {/* 2. 이미지가 없을 때 렌더링되는 시안 1:1 고화질 SVG 동화 풍경 */}
       {!useImgBg && (
         <svg
           viewBox="0 0 400 315"
@@ -183,394 +175,81 @@ export function FairytaleHeroBackground({
               <stop offset="75%" stopColor="#BAE6FD" />
               <stop offset="100%" stopColor="#BBF7D0" />
             </linearGradient>
-            <linearGradient id="cliffGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#F59E0B" />
-              <stop offset="100%" stopColor="#B45309" />
-            </linearGradient>
-            <linearGradient id="hillGreen1" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#4ADE80" />
-              <stop offset="100%" stopColor="#16A34A" />
-            </linearGradient>
-            <linearGradient id="hillGreen2" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#86EFAC" />
-              <stop offset="100%" stopColor="#22C55E" />
-            </linearGradient>
-            <linearGradient id="rockGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#D97706" />
-              <stop offset="60%" stopColor="#92400E" />
-              <stop offset="100%" stopColor="#78350F" />
-            </linearGradient>
           </defs>
-
-          {/* 푸른 하늘 */}
           <rect width="400" height="315" fill="url(#skyGradFull)" />
-
-          {/* 뭉게구름 */}
-          <ellipse cx="60" cy="90" rx="38" ry="16" fill="#FFFFFF" opacity="0.85" />
-          <ellipse cx="85" cy="85" rx="26" ry="18" fill="#FFFFFF" opacity="0.9" />
-          <ellipse cx="330" cy="110" rx="42" ry="18" fill="#FFFFFF" opacity="0.85" />
-          <ellipse cx="360" cy="100" rx="28" ry="16" fill="#FFFFFF" opacity="0.9" />
-
-          {/* 우측 뒤편: 절벽 언덕 & 성채 (Castle on Cliff) */}
-          <g transform="translate(265, 100)">
-            {/* 절벽 바위산 */}
-            <path d="M15 65 L40 15 L95 25 L120 75 L120 150 L5 150 Z" fill="#D97706" opacity="0.9" />
-            <path d="M25 65 L45 20 L85 28 L105 75 L105 150 L20 150 Z" fill="#B45309" opacity="0.7" />
-
-            {/* 성 본관 & 탑 (시안 반영) */}
-            <rect x="35" y="15" width="45" height="32" rx="3" fill="#FEF08A" stroke="#78350F" strokeWidth="1.5" />
-            <rect x="25" y="0" width="18" height="46" rx="2" fill="#BAE6FD" stroke="#1E293B" strokeWidth="1.5" />
-            <rect x="72" y="0" width="18" height="46" rx="2" fill="#BAE6FD" stroke="#1E293B" strokeWidth="1.5" />
-
-            {/* 푸른 원뿔 지붕 */}
-            <polygon points="34,-16 20,0 48,0" fill="#2563EB" stroke="#1E293B" strokeWidth="1.5" />
-            <polygon points="81,-16 67,0 95,0" fill="#2563EB" stroke="#1E293B" strokeWidth="1.5" />
-            {/* 중앙 작은 첨탑 */}
-            <rect x="52" y="5" width="12" height="15" fill="#93C5FD" stroke="#1E293B" strokeWidth="1.2" />
-            <polygon points="58,-5 49,5 67,5" fill="#3B82F6" stroke="#1E293B" strokeWidth="1.2" />
-
-            {/* 절벽 위 나무 수풀 */}
-            <circle cx="20" cy="65" r="14" fill="#22C55E" />
-            <circle cx="100" cy="70" r="16" fill="#16A34A" />
-          </g>
-
-          {/* 좌측 먼 언덕 & 나무들 */}
-          <path d="M-20 220 Q60 165 180 215 L180 315 L-20 315 Z" fill="url(#hillGreen1)" opacity="0.75" />
-          <circle cx="25" cy="190" r="22" fill="#22C55E" />
-          <circle cx="50" cy="180" r="26" fill="#16A34A" />
-          <circle cx="78" cy="195" r="20" fill="#15803D" />
-
-          {/* 우측 앞 언덕 수풀 */}
-          <path d="M220 235 Q310 180 420 210 L420 315 L220 315 Z" fill="url(#hillGreen2)" />
-          <circle cx="330" cy="225" r="24" fill="#22C55E" />
-          <circle cx="365" cy="215" r="28" fill="#16A34A" />
-          <circle cx="395" cy="230" r="22" fill="#15803D" />
-
-          {/* 전면 넓은 푸른 잔디 언덕 베이스 */}
-          <path d="M-10 270 Q140 230 260 250 T410 260 L410 315 L-10 315 Z" fill="#4ADE80" />
-
-          {/* 중앙 나무 그루터기 / 바위 단상 (2번 캐릭터가 앉는 위치) */}
-          <g transform="translate(145, 230)">
-            {/* 바위 베이스 */}
-            <path d="M10 50 L20 18 L100 18 L110 50 Z" fill="url(#rockGrad)" stroke="#451A03" strokeWidth="2.5" />
-            {/* 바위 상단 착석 평면 */}
-            <ellipse cx="60" cy="18" rx="44" ry="14" fill="#B45309" stroke="#451A03" strokeWidth="2" />
-            <ellipse cx="60" cy="16" rx="36" ry="10" fill="#FDE68A" opacity="0.6" />
-            {/* 바위 질감 선 */}
-            <line x1="38" y1="26" x2="32" y2="48" stroke="#78350F" strokeWidth="2" />
-            <line x1="82" y1="26" x2="88" y2="48" stroke="#78350F" strokeWidth="2" />
-          </g>
-
-          {/* 아기자기한 들꽃 */}
-          <circle cx="45" cy="285" r="3" fill="#F43F5E" />
-          <circle cx="70" cy="295" r="2.5" fill="#F59E0B" />
-          <circle cx="330" cy="285" r="3.5" fill="#EC4899" />
-          <circle cx="360" cy="292" r="2.5" fill="#FEF08A" />
         </svg>
       )}
 
-      {/* 3. 상단 프로필 & 상태 (하늘 위에 자연스럽게 오버레이) */}
       <div style={{
         position: 'relative',
-        zIndex: 10,
+        zIndex: 20,
         display: 'flex',
-        alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '16px 18px 0'
+        alignItems: 'flex-start',
+        padding: '16px 16px 0 16px'
       }}>
-        {/* 좌측: 동그란 흰색 아바타 + Lv.12 + EXP 게이지 */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <div style={{
-            width: '42px',
-            height: '42px',
-            borderRadius: '50%',
-            background: '#FFFFFF',
-            boxShadow: '0 4px 10px rgba(0, 0, 0, 0.12)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            overflow: 'hidden',
-            border: '2px solid #FFFFFF'
+            width: '50px', height: '50px', borderRadius: '50%', background: '#FFFFFF',
+            border: '2px solid rgba(255,255,255,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            boxShadow: '0 4px 12px rgba(15, 23, 42, 0.15)', overflow: 'hidden'
           }}>
-            <SobimonMascot size={36} emotion="happy" />
+            <SobimonMascot size={46} emotion="joy" />
           </div>
-
           <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{
-                fontSize: '14px',
-                fontWeight: 900,
-                color: '#FFFFFF',
-                textShadow: '0 1px 4px rgba(15, 23, 42, 0.45)'
-              }}>
-                Lv.{user?.level || 12}
-              </span>
+            <span style={{ fontSize: '14px', fontWeight: 900, color: '#FFFFFF', textShadow: '0 1px 4px rgba(15, 23, 42, 0.45)' }}>
+              Lv.{user?.level || 12}
+            </span>
+            <div style={{ width: '110px', height: '8px', background: 'rgba(255,255,255,.45)', borderRadius: 999, overflow: 'hidden' }}>
+              <div style={{ width: `${Math.round(((user?.exp || 820) / (user?.maxExp || 1000)) * 100)}%`, height: '100%', background: 'linear-gradient(90deg,#38BDF8,#2563EB)' }} />
             </div>
-
-            {/* EXP 반투명 프로그레스 바 (시안 반영) */}
-            <div style={{
-              width: '110px',
-              height: '8px',
-              background: 'rgba(255, 255, 255, 0.45)',
-              backdropFilter: 'blur(4px)',
-              borderRadius: '9999px',
-              overflow: 'hidden',
-              boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.1)'
-            }}>
-              <div style={{
-                width: `${Math.round(((user?.exp || 820) / (user?.maxExp || 1000)) * 100)}%`,
-                height: '100%',
-                background: 'linear-gradient(90deg, #38BDF8, #2563EB)',
-                borderRadius: '9999px',
-                transition: 'width 0.3s ease'
-              }} />
-            </div>
-
-            {/* 820 / 1000 EXP 텍스트 */}
-            <span style={{
-              fontSize: '10px',
-              color: '#FFFFFF',
-              fontWeight: 800,
-              textShadow: '0 1px 3px rgba(15, 23, 42, 0.5)'
-            }}>
+            <span style={{ fontSize: '10px', color: '#FFFFFF', fontWeight: 800, textShadow: '0 1px 3px rgba(15,23,42,.5)' }}>
               {user?.exp || 820} / {user?.maxExp || 1000} EXP
             </span>
           </div>
         </div>
 
-        {/* 우측: 코인 배지 (⭐/🪙 3,250) + 알림 벨 (🔔 빨간 닷) */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            background: 'rgba(255, 255, 255, 0.92)',
-            backdropFilter: 'blur(8px)',
-            padding: '5px 12px',
-            borderRadius: '9999px',
-            boxShadow: '0 4px 12px rgba(15, 23, 42, 0.1)',
-            border: '1px solid rgba(255, 255, 255, 0.8)'
-          }}>
-            <div style={{
-              width: '18px',
-              height: '18px',
-              borderRadius: '50%',
-              background: '#F59E0B',
-              color: '#FFF',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '11px',
-              fontWeight: 900
-            }}>
-              ⭐
-            </div>
-            <span style={{ fontSize: '13px', fontWeight: 900, color: '#1E293B' }}>
-              {(user?.coins || 3250).toLocaleString()}
-            </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(255,255,255,.92)', padding: '5px 12px', borderRadius: 999, boxShadow: '0 4px 12px rgba(15,23,42,.1)' }}>
+            <div style={{ width: 18, height: 18, borderRadius: '50%', background: '#F59E0B', color: '#fff', display: 'grid', placeItems: 'center', fontSize: 11, fontWeight: 900 }}>⭐</div>
+            <span style={{ fontSize: 13, fontWeight: 900, color: '#1E293B' }}>{(user?.coins || 3250).toLocaleString()}</span>
           </div>
-
-          {/* 알림 벨 버튼 */}
-          <div style={{
-            position: 'relative',
-            width: '36px',
-            height: '36px',
-            borderRadius: '50%',
-            background: 'rgba(255, 255, 255, 0.92)',
-            backdropFilter: 'blur(8px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 4px 12px rgba(15, 23, 42, 0.1)',
-            border: '1px solid rgba(255, 255, 255, 0.8)',
-            cursor: 'pointer'
-          }}>
-            <span style={{ fontSize: '16px' }}>🔔</span>
-            {/* 시안의 우측 상단 빨간 점 (알림 인디케이터) */}
-            <div style={{
-              position: 'absolute',
-              top: '7px',
-              right: '8px',
-              width: '6px',
-              height: '6px',
-              borderRadius: '50%',
-              background: '#EF4444',
-              border: '1px solid #FFFFFF'
-            }} />
+          <div style={{ position: 'relative', width: 36, height: 36, borderRadius: '50%', background: 'rgba(255,255,255,.92)', display: 'grid', placeItems: 'center', boxShadow: '0 4px 12px rgba(15,23,42,.1)' }}>
+            <span style={{ fontSize: 16 }}>🔔</span>
+            <div style={{ position: 'absolute', top: 7, right: 8, width: 6, height: 6, borderRadius: '50%', background: '#EF4444', border: '1px solid #fff' }} />
           </div>
         </div>
       </div>
 
-      {/* 4 & 5. 중앙 마스코트와 말풍선 스테이지 (반응형 중앙 정렬) */}
       <div className="hero-stage-center">
-        {/* 말풍선 */}
         <div className="hero-speech-bubble">
-          <div className="hero-speech-bubble-text">
-            {speech || '이번 달도 잘하고 있어요!'}
-          </div>
+          <div className="hero-speech-bubble-text">{speech || '이번 달도 잘하고 있어요!'}</div>
           <div className="hero-speech-tail" />
         </div>
-
-        {/* 백곰 캐릭터 */}
-        <div
-          className="hero-mascot-wrap"
-          onClick={onMascotClick}
-        >
+        <div className="hero-mascot-wrap" onClick={onMascotClick}>
           <SobimonMascot size={160} emotion="joy" />
         </div>
       </div>
-
     </div>
   );
 }
 
-/**
- * 카페몬 (public/images/sobimon/monster-cafe.png 매칭)
- */
 export function CafeMonsterIllustration({ size = 56 }) {
-  const fallback = (
-    <svg width={size} height={size} viewBox="0 0 64 64" fill="none">
-      <ellipse cx="32" cy="58" rx="20" ry="4" fill="#CBD5E1" opacity="0.6" />
-      <ellipse cx="32" cy="52" rx="18" ry="4" fill="#F1F5F9" stroke="#334155" strokeWidth="2" />
-      <path d="M16 36 L18 50 C18 53, 46 53, 46 50 L48 36 Z" fill="#F8FAFC" stroke="#334155" strokeWidth="2" />
-      <path d="M47 38 C53 38, 53 47, 46 47" stroke="#334155" strokeWidth="2.5" fill="none" />
-      <ellipse cx="32" cy="37" rx="14" ry="4" fill="#854D0E" />
-      <ellipse cx="32" cy="32" rx="14" ry="12" fill="#FEF3C7" stroke="#334155" strokeWidth="2" />
-      <path d="M26 23 Q32 14 38 23" fill="#D97706" stroke="#334155" strokeWidth="1.5" />
-      <path d="M30 18 Q32 11 35 17" fill="#78350F" />
-      <ellipse cx="19" cy="30" rx="4" ry="7" fill="#B45309" stroke="#334155" strokeWidth="1.5" />
-      <ellipse cx="45" cy="30" rx="4" ry="7" fill="#B45309" stroke="#334155" strokeWidth="1.5" />
-      <circle cx="28" cy="33" r="2" fill="#1E293B" />
-      <circle cx="36" cy="33" r="2" fill="#1E293B" />
-      <ellipse cx="24" cy="36" rx="2.5" ry="1.5" fill="#F87171" />
-      <ellipse cx="40" cy="36" rx="2.5" ry="1.5" fill="#F87171" />
-      <circle cx="32" cy="35" r="1.5" fill="#78350F" />
-      <path d="M30 37 Q32 40 34 37" stroke="#78350F" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-    </svg>
-  );
-
-  return (
-    <SobimonImg
-      name="monster-cafe"
-      width={size}
-      height={size}
-      alt="카페몬"
-      fallback={fallback}
-    />
-  );
+  const fallback = <svg width={size} height={size} viewBox="0 0 64 64" />;
+  return <SobimonImg name="monster-cafe" width={size} height={size} alt="카페몬" fallback={fallback} />;
 }
 
-/**
- * 식비몬 (public/images/sobimon/monster-food.png 매칭)
- */
 export function FoodMonsterIllustration({ size = 56 }) {
-  const fallback = (
-    <svg width={size} height={size} viewBox="0 0 64 64" fill="none">
-      <ellipse cx="32" cy="56" rx="18" ry="4" fill="#CBD5E1" opacity="0.6" />
-      <ellipse cx="32" cy="36" rx="18" ry="18" fill="#F97316" stroke="#334155" strokeWidth="2" />
-      <ellipse cx="32" cy="40" rx="11" ry="11" fill="#FFEDD5" />
-      <ellipse cx="20" cy="22" rx="4" ry="6" fill="#EA580C" stroke="#334155" strokeWidth="1.5" />
-      <ellipse cx="44" cy="22" rx="4" ry="6" fill="#EA580C" stroke="#334155" strokeWidth="1.5" />
-      <circle cx="27" cy="33" r="3" fill="#1E293B" />
-      <circle cx="26" cy="32" r="1" fill="#FFFFFF" />
-      <circle cx="37" cy="33" r="3" fill="#1E293B" />
-      <circle cx="36" cy="32" r="1" fill="#FFFFFF" />
-      <path d="M29 39 Q32 45 35 39 Z" fill="#EF4444" stroke="#334155" strokeWidth="1" />
-    </svg>
-  );
-
-  return (
-    <SobimonImg
-      name="monster-food"
-      width={size}
-      height={size}
-      alt="식비몬"
-      fallback={fallback}
-    />
-  );
+  const fallback = <svg width={size} height={size} viewBox="0 0 64 64" />;
+  return <SobimonImg name="monster-food" width={size} height={size} alt="식비몬" fallback={fallback} />;
 }
 
-/**
- * 쇼핑몬 (public/images/sobimon/monster-shop.png 매칭)
- */
 export function ShopMonsterIllustration({ size = 56 }) {
-  const fallback = (
-    <svg width={size} height={size} viewBox="0 0 64 64" fill="none">
-      <ellipse cx="32" cy="56" rx="18" ry="4" fill="#CBD5E1" opacity="0.6" />
-      <ellipse cx="32" cy="36" rx="18" ry="16" fill="#EC4899" stroke="#334155" strokeWidth="2" />
-      <polygon points="18,25 24,14 30,22" fill="#DB2777" stroke="#334155" strokeWidth="1.5" />
-      <polygon points="46,25 40,14 34,22" fill="#DB2777" stroke="#334155" strokeWidth="1.5" />
-      <circle cx="32" cy="22" r="3" fill="#FBBF24" stroke="#334155" strokeWidth="1" />
-      <polygon points="32,22 24,19 26,25" fill="#F59E0B" />
-      <polygon points="32,22 40,19 38,25" fill="#F59E0B" />
-      <circle cx="26" cy="34" r="2.5" fill="#1E293B" />
-      <circle cx="38" cy="34" r="2.5" fill="#1E293B" />
-      <path d="M30 38 Q32 41 34 38" stroke="#1E293B" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-    </svg>
-  );
-
-  return (
-    <SobimonImg
-      name="monster-shop"
-      width={size}
-      height={size}
-      alt="쇼핑몬"
-      fallback={fallback}
-    />
-  );
+  const fallback = <svg width={size} height={size} viewBox="0 0 64 64" />;
+  return <SobimonImg name="monster-shop" width={size} height={size} alt="쇼핑몬" fallback={fallback} />;
 }
 
-/**
- * 절약몬 (public/images/sobimon/monster-saver.png 매칭)
- */
 export function SaverMonsterIllustration({ size = 56 }) {
-  const fallback = (
-    <svg width={size} height={size} viewBox="0 0 64 64" fill="none">
-      <ellipse cx="32" cy="56" rx="18" ry="4" fill="#CBD5E1" opacity="0.6" />
-      <circle cx="24" cy="24" r="8" fill="#10B981" stroke="#334155" strokeWidth="1.5" />
-      <circle cx="40" cy="24" r="8" fill="#10B981" stroke="#334155" strokeWidth="1.5" />
-      <circle cx="32" cy="18" r="8" fill="#34D399" stroke="#334155" strokeWidth="1.5" />
-      <ellipse cx="32" cy="38" rx="16" ry="16" fill="#059669" stroke="#334155" strokeWidth="2" />
-      <polygon points="32,32 39,37 36,46 32,49 28,46 25,37" fill="#FEF08A" stroke="#334155" strokeWidth="1" />
-      <circle cx="27" cy="36" r="2" fill="#FFFFFF" />
-      <circle cx="37" cy="36" r="2" fill="#FFFFFF" />
-    </svg>
-  );
-
-  return (
-    <SobimonImg
-      name="monster-saver"
-      width={size}
-      height={size}
-      alt="절약몬"
-      fallback={fallback}
-    />
-  );
-}
-
-/**
- * 황금 보물상자 (public/images/sobimon/treasure-box.png 매칭)
- */
-export function TreasureBoxIllustration({ size = 64 }) {
-  const fallback = (
-    <svg width={size} height={size} viewBox="0 0 64 64" fill="none">
-      <ellipse cx="32" cy="58" rx="22" ry="4" fill="#CBD5E1" opacity="0.6" />
-      <rect x="12" y="32" width="40" height="24" rx="4" fill="#D97706" stroke="#334155" strokeWidth="2.5" />
-      <path d="M10 24 C10 18, 54 18, 54 24 L52 32 L12 32 Z" fill="#F59E0B" stroke="#334155" strokeWidth="2.5" />
-      <polygon points="20,30 32,16 44,30" fill="#FEF08A" opacity="0.8" />
-      <rect x="28" y="30" width="8" height="10" rx="2" fill="#FDE047" stroke="#334155" strokeWidth="1.5" />
-      <circle cx="32" cy="35" r="1.5" fill="#78350F" />
-      <path d="M48 14 L50 20 L56 22 L50 24 L48 30 L46 24 L40 22 L46 20 Z" fill="#FDE047" />
-    </svg>
-  );
-
-  return (
-    <SobimonImg
-      name="treasure-box"
-      width={size}
-      height={size}
-      alt="황금 보물상자"
-      fallback={fallback}
-    />
-  );
+  const fallback = <svg width={size} height={size} viewBox="0 0 64 64" />;
+  return <SobimonImg name="monster-saver" width={size} height={size} alt="절약몬" fallback={fallback} />;
 }
