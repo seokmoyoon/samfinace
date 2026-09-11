@@ -43,7 +43,7 @@ export default function HomeTab({
   }
 
   const discoveredCount = sobimons.filter((m) => m?.discovered).length;
-  const visibleMonsterCount = Math.min(3, discoveredCount);
+  const discoveredMonsters = sobimons.filter((m) => m?.discovered).slice(0, 3);
   const cafeMission = quests.find((q) => q?.category?.includes('카페') || q?.title?.includes('카페')) || quests[0] || null;
   const missionTarget = Number(cafeMission?.target || 0);
   const missionCurrent = Number(cafeMission?.current || 0);
@@ -131,45 +131,6 @@ export default function HomeTab({
               </span>
             </div>
           </div>
-
-          <div className="home-scenery-deco">
-            <img
-              src="/images/sobimon/bottom-bridge.png"
-              alt="돌다리 풍경"
-              onError={(e) => e.currentTarget.style.display = 'none'}
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover'
-              }}
-            />
-            <svg
-              viewBox="0 0 400 80"
-              preserveAspectRatio="none"
-              style={{ width: '100%', height: '100%' }}
-            >
-              <defs>
-                <linearGradient id="grassGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#86EFAC" />
-                  <stop offset="100%" stopColor="#4ADE80" />
-                </linearGradient>
-                <linearGradient id="riverGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#7DD3FC" />
-                  <stop offset="100%" stopColor="#38BDF8" />
-                </linearGradient>
-              </defs>
-              <rect width="400" height="80" fill="url(#grassGrad)" rx="16" />
-              <path d="M0 60 Q100 30 200 50 T400 35 L400 80 L0 80 Z" fill="url(#riverGrad)" opacity="0.8" />
-              <path d="M140 70 Q200 40 260 70 L250 80 Q200 52 150 80 Z" fill="#E2E8F0" stroke="#94A3B8" strokeWidth="2" />
-              <circle cx="60" cy="30" r="3" fill="#F43F5E" />
-              <circle cx="85" cy="42" r="2.5" fill="#F59E0B" />
-              <circle cx="320" cy="25" r="3" fill="#EC4899" />
-              <circle cx="350" cy="38" r="2.5" fill="#FEF08A" />
-            </svg>
-          </div>
         </div>
 
         <div className="home-grid-right">
@@ -198,24 +159,21 @@ export default function HomeTab({
               <ChevronRight size={16} color="#94A3B8" />
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', minHeight: '46px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 {monsterSlots.map((slot, index) => (
-                  <div
-                    key={slot.key}
-                    style={{
-                      width: '46px',
-                      height: '46px',
-                      borderRadius: '14px',
-                      background: index < visibleMonsterCount ? slot.bg : '#F8FAFC',
-                      border: `1px solid ${index < visibleMonsterCount ? slot.border : '#E2E8F0'}`,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      boxShadow: index < visibleMonsterCount ? `0 2px 6px ${slot.shadow}` : 'none',
-                      opacity: index < visibleMonsterCount ? 1 : 0.32
-                    }}
-                  >
+                  <div key={slot.key} style={{
+                    width: '46px',
+                    height: '46px',
+                    borderRadius: '14px',
+                    background: index < discoveredMonsters.length ? slot.bg : '#F8FAFC',
+                    border: `1px solid ${index < discoveredMonsters.length ? slot.border : '#E2E8F0'}`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: index < discoveredMonsters.length ? `0 2px 6px ${slot.shadow}` : 'none',
+                    opacity: index < discoveredMonsters.length ? 1 : 0.35
+                  }}>
                     {slot.node}
                   </div>
                 ))}
@@ -234,8 +192,7 @@ export default function HomeTab({
                   borderRadius: '10px',
                   fontSize: '12px',
                   fontWeight: 800,
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease'
+                  cursor: 'pointer'
                 }}
               >
                 도감 보기
@@ -267,78 +224,79 @@ export default function HomeTab({
               </button>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', minHeight: '92px' }}>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: '13px', fontWeight: 800, color: '#1E293B', marginBottom: '8px' }}>
-                  {cafeMission ? cafeMission.title : '진행 중인 미션이 없어요'}
+            {cafeMission ? (
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', minHeight: '86px' }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: '13px', fontWeight: 800, color: '#1E293B', marginBottom: '8px' }}>
+                    {cafeMission.title}
+                  </div>
+
+                  <div style={{
+                    width: '100%',
+                    height: '7px',
+                    background: '#F1F5F9',
+                    borderRadius: '9999px',
+                    overflow: 'hidden',
+                    marginBottom: '6px'
+                  }}>
+                    <div style={{
+                      width: `${missionPercent}%`,
+                      height: '100%',
+                      background: 'linear-gradient(90deg, #F59E0B, #FBBF24)',
+                      borderRadius: '9999px'
+                    }} />
+                  </div>
+
+                  <div style={{ fontSize: '11px', color: '#64748B', fontWeight: 700, marginBottom: '8px' }}>
+                    ₩ {missionCurrent.toLocaleString()} / {missionTarget.toLocaleString()}
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '3px',
+                      background: '#FEF3C7',
+                      color: '#B45309',
+                      fontSize: '10px',
+                      fontWeight: 800,
+                      padding: '2px 7px',
+                      borderRadius: '9999px'
+                    }}>
+                      ⭐ +{Number(cafeMission.rewardExp || 0)} EXP
+                    </span>
+                    <span style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '3px',
+                      background: '#FEF3C7',
+                      color: '#B45309',
+                      fontSize: '10px',
+                      fontWeight: 800,
+                      padding: '2px 7px',
+                      borderRadius: '9999px'
+                    }}>
+                      🪙 +{Number(cafeMission.rewardCoin || 0)} COIN
+                    </span>
+                  </div>
                 </div>
 
                 <div style={{
-                  width: '100%',
-                  height: '7px',
-                  background: '#F1F5F9',
-                  borderRadius: '9999px',
-                  overflow: 'hidden',
-                  marginBottom: '6px'
+                  width: '64px',
+                  height: '64px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0
                 }}>
-                  <div style={{
-                    width: `${missionPercent}%`,
-                    height: '100%',
-                    background: 'linear-gradient(90deg, #F59E0B, #FBBF24)',
-                    borderRadius: '9999px'
-                  }} />
-                </div>
-
-                <div style={{ fontSize: '11px', color: '#64748B', fontWeight: 700, marginBottom: '8px' }}>
-                  {cafeMission ? `₩ ${missionCurrent.toLocaleString()} / ${missionTarget.toLocaleString()}` : '미션을 추가하면 진행 상황이 표시돼요.'}
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minHeight: '19px' }}>
-                  {cafeMission && (
-                    <>
-                      <span style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '3px',
-                        background: '#FEF3C7',
-                        color: '#B45309',
-                        fontSize: '10px',
-                        fontWeight: 800,
-                        padding: '2px 7px',
-                        borderRadius: '9999px'
-                      }}>
-                        ⭐ +{Number(cafeMission.rewardExp || 0)} EXP
-                      </span>
-                      <span style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '3px',
-                        background: '#FEF3C7',
-                        color: '#B45309',
-                        fontSize: '10px',
-                        fontWeight: 800,
-                        padding: '2px 7px',
-                        borderRadius: '9999px'
-                      }}>
-                        🪙 +{Number(cafeMission.rewardCoin || 0)} COIN
-                      </span>
-                    </>
-                  )}
+                  <CafeMonsterIllustration size={60} />
                 </div>
               </div>
-
-              <div style={{
-                width: '64px',
-                height: '64px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-                opacity: cafeMission ? 1 : 0.3
-              }}>
-                <CafeMonsterIllustration size={60} />
+            ) : (
+              <div style={{ minHeight: '86px', display: 'flex', alignItems: 'center', color: '#94A3B8', fontSize: '12px', fontWeight: 700 }}>
+                아직 진행 중인 미션이 없어요.
               </div>
-            </div>
+            )}
           </div>
 
           <button
