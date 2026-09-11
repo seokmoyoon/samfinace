@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import {
   CalendarDays,
   Download,
-  Plus,
   PieChart,
   Sparkles
 } from 'lucide-react';
@@ -35,18 +34,12 @@ export default function SpendingTab({
 
   return (
     <div className="spending-screen spending-refresh" style={{ paddingBottom: '16px' }}>
-      <section className="spending-hero">
+      <section className="spending-hero spending-hero-clean">
         <div>
-          <div className="spending-eyebrow">
-            <Sparkles size={13} /> 이번 달 소비
-          </div>
+          <div className="spending-eyebrow"><Sparkles size={13} /> 소비 리포트</div>
           <strong className="spending-total">₩ {totalExpense.toLocaleString()}</strong>
-          <p>기록은 가볍게, 분석은 소비몬이 정리해드려요.</p>
+          <p>이번 달 소비를 보고, 필요한 내역만 바로 확인하세요.</p>
         </div>
-        <button className="spending-add-button" onClick={() => onOpenQuickAdd && onOpenQuickAdd()}>
-          <Plus size={18} strokeWidth={2.7} />
-          <span>소비 기록</span>
-        </button>
       </section>
 
       <div className="spending-segment" role="tablist" aria-label="소비 메뉴">
