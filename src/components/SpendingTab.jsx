@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   CalendarDays,
-  CloudDownload,
+  Download,
   Plus,
   PieChart,
   Sparkles
@@ -30,7 +30,7 @@ export default function SpendingTab({
   const tabs = [
     { id: 'report', label: '분석', icon: PieChart },
     { id: 'calendar', label: '내역', icon: CalendarDays },
-    { id: 'smart', label: '가져오기', icon: CloudDownload }
+    { id: 'smart', label: '가져오기', icon: Download }
   ];
 
   return (
