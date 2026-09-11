@@ -1,18 +1,15 @@
 import React, { useMemo, useState } from 'react';
 import {
-  ArrowDownRight,
   ArrowUpRight,
-  BarChart3,
-  CalendarRange,
   ChevronRight,
   CreditCard,
   Crown,
   FileSpreadsheet,
-  MonitorSmartphone,
+  Layers,
+  PieChart,
   Plus,
-  ReceiptText,
-  Sparkles,
-  WalletCards
+  Smartphone,
+  Sparkles
 } from 'lucide-react';
 import { INITIAL_ACCOUNTS } from '../../data/mockData';
 import SobimonHoloCardModal from '../common/SobimonHoloCardModal';
@@ -66,15 +63,15 @@ export default function GymModePC({
         </div>
 
         <nav className="sobimon-pc-nav" aria-label="PC 재무 메뉴">
-          <button className="active"><BarChart3 size={17} /> 대시보드</button>
-          <button><ReceiptText size={17} /> 거래내역</button>
-          <button><CalendarRange size={17} /> 월·연간 분석</button>
-          <button><WalletCards size={17} /> 예산 관리</button>
+          <button className="active"><PieChart size={17} /> 대시보드</button>
+          <button><FileSpreadsheet size={17} /> 거래내역</button>
+          <button><Layers size={17} /> 월·연간 분석</button>
+          <button><CreditCard size={17} /> 예산 관리</button>
           <button><FileSpreadsheet size={17} /> 세금·사업비 <span className="soon">준비중</span></button>
         </nav>
 
         <div className="sobimon-pc-sidebar-bottom">
-          <button onClick={onSwitchToPhoneView}><MonitorSmartphone size={17} /> 모바일 소비몬으로</button>
+          <button onClick={onSwitchToPhoneView}><Smartphone size={17} /> 모바일 소비몬으로</button>
           <button className="admin-link" onClick={onOpenAdminHQ}><Crown size={16} /> 운영 스튜디오</button>
         </div>
       </aside>
@@ -93,12 +90,12 @@ export default function GymModePC({
 
         <section className="pc-kpi-grid">
           <article className="pc-kpi-card featured">
-            <div className="pc-kpi-label"><ArrowDownRight size={16} /> 이번 달 지출</div>
+            <div className="pc-kpi-label"><CreditCard size={16} /> 이번 달 지출</div>
             <strong>{formatWon(stats.expense)}</strong>
             <span>예산의 {budgetRate}% 사용</span>
           </article>
           <article className="pc-kpi-card">
-            <div className="pc-kpi-label"><WalletCards size={16} /> 남은 예산</div>
+            <div className="pc-kpi-label"><CreditCard size={16} /> 남은 예산</div>
             <strong>{formatWon(remaining)}</strong>
             <span>월 예산 {formatWon(monthlyBudget)}</span>
           </article>
@@ -108,7 +105,7 @@ export default function GymModePC({
             <span>{transactions.filter((tx) => tx.type === 'income').length}건 기록</span>
           </article>
           <article className="pc-kpi-card">
-            <div className="pc-kpi-label"><ReceiptText size={16} /> 전체 거래</div>
+            <div className="pc-kpi-label"><FileSpreadsheet size={16} /> 전체 거래</div>
             <strong>{transactions.length.toLocaleString()}건</strong>
             <span>모바일과 동일한 데이터</span>
           </article>
