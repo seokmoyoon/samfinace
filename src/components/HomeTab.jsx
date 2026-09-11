@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { ChevronRight, Plus, Sparkles } from 'lucide-react';
-import AnimatedAISobimon from './common/AnimatedAISobimon';
+import { SobimonMascot } from './common/SobimonIllustrations';
 import { aiService } from '../services/aiService';
 
 export default function HomeTab({
@@ -13,8 +13,6 @@ export default function HomeTab({
   onOpenQuickAdd
 }) {
   const [aiInsight, setAiInsight] = useState(null);
-  const [isAiThinking, setIsAiThinking] = useState(true);
-  const [characterNudge, setCharacterNudge] = useState('');
 
   const summary = useMemo(() => aiService.buildSummary(transactions, budget), [transactions, budget]);
   const monthlyBudget = Number(budget?.monthlyBudget || 0);
@@ -24,32 +22,14 @@ export default function HomeTab({
 
   useEffect(() => {
     let mounted = true;
-    setIsAiThinking(true);
-
     aiService.getCharacterInsight({ transactions, budget, user }).then((result) => {
-      if (mounted) {
-        setAiInsight(result);
-        setIsAiThinking(false);
-      }
+      if (mounted) setAiInsight(result);
     });
-
     return () => { mounted = false; };
   }, [transactions, budget, user?.level, user?.title]);
 
   const missionTitle = aiInsight?.missionTitle || activeMission?.title || '오늘 소비 1건 기록하기';
   const missionReason = aiInsight?.missionReason || '작은 기록 하나가 이번 달 소비 패턴을 바꿔요.';
-
-  const handleCharacterInteract = () => {
-    const nudges = [
-      '오늘 소비도 내가 같이 볼게!',
-      '기록이 쌓일수록 내가 더 똑똑해져.',
-      summary.topCategoryAmount > 0
-        ? `${summary.topCategory} 소비가 지금 제일 눈에 띄어.`
-        : '첫 기록을 남기면 바로 분석해볼게.'
-    ];
-    setCharacterNudge(nudges[Math.floor(Math.random() * nudges.length)]);
-    window.setTimeout(() => setCharacterNudge(''), 2600);
-  };
 
   return (
     <div className="home-screen-sobimon home-v2">
@@ -61,24 +41,21 @@ export default function HomeTab({
         <div className="home-v2-level">Lv.{user?.level || 1}</div>
       </header>
 
-      <section className={`ai-character-hero mood-${aiInsight?.mood || 'happy'}`}>
+      <section className="ai-character-hero">
         <div className="ai-character-copy">
           <div className="ai-character-label"><Sparkles size={14} /> AI 소비몬</div>
-          <h2>{isAiThinking ? '소비 패턴을 읽는 중이에요' : (aiInsight?.headline || '오늘의 소비를 같이 볼게요')}</h2>
-          <p>{characterNudge || aiInsight?.message || '기록이 쌓이면 소비몬이 오늘의 소비를 설명해드려요.'}</p>
+          <h2>{aiInsight?.headline || '소비 패턴을 읽는 중이에요'}</h2>
+          <p>{aiInsight?.message || '기록이 쌓이면 소비몬이 오늘의 소비를 설명해드려요.'}</p>
           <div className="ai-character-status">
-            <span>{isAiThinking ? 'AI 분석 중' : (aiInsight?.source === 'remote' ? 'Gemini AI 연결됨' : '스마트 분석 모드')}</span>
+            <span>{aiInsight?.source === 'remote' ? 'AI 연결됨' : '스마트 분석 모드'}</span>
             <span>·</span>
             <span>{summary.transactionCount}건 분석</span>
           </div>
         </div>
-        <div className="ai-character-art">
-          <AnimatedAISobimon
-            mood={aiInsight?.mood || 'happy'}
-            thinking={isAiThinking}
-            onInteract={handleCharacterInteract}
-          />
-          <span className="ai-character-tap-hint">톡 눌러보세요</span>
+        <div className="ai-character-art" aria-hidden="true">
+          <div className="ai-orbit ai-orbit-one" />
+          <div className="ai-orbit ai-orbit-two" />
+          <SobimonMascot size={126} emotion="happy" />
         </div>
       </section>
 
