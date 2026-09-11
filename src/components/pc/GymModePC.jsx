@@ -1,21 +1,23 @@
-import React, { useState } from 'react';
-import { 
-  Trophy, 
-  Smartphone, 
-  Crown, 
-  FileSpreadsheet, 
-  CreditCard, 
-  Layers, 
-  Plus, 
-  ArrowUpRight, 
-  ShieldCheck, 
+import React, { useMemo, useState } from 'react';
+import {
+  ArrowDownRight,
+  ArrowUpRight,
+  BarChart3,
+  CalendarRange,
+  ChevronRight,
+  CreditCard,
+  Crown,
+  FileSpreadsheet,
+  MonitorSmartphone,
+  Plus,
+  ReceiptText,
   Sparkles,
-  PieChart
+  WalletCards
 } from 'lucide-react';
 import { INITIAL_ACCOUNTS } from '../../data/mockData';
-import LevelBadge from '../common/LevelBadge';
-import CoinBadge from '../common/CoinBadge';
 import SobimonHoloCardModal from '../common/SobimonHoloCardModal';
+
+const formatWon = (value = 0) => `${Number(value || 0).toLocaleString()}원`;
 
 export default function GymModePC({
   user,
@@ -29,294 +31,186 @@ export default function GymModePC({
 }) {
   const [selectedMonster, setSelectedMonster] = useState(null);
 
-  // 카테고리별 지출 집계
-  const spendingByCategory = transactions.reduce((acc, tx) => {
-    if (tx.type === 'income') return acc;
-    const cat = tx.category || '기타';
-    acc[cat] = (acc[cat] || 0) + Number(tx.amount || 0);
-    return acc;
-  }, {});
+  const stats = useMemo(() => {
+    const expense = transactions
+      .filter((tx) => tx.type !== 'income')
+      .reduce((sum, tx) => sum + Number(tx.amount || 0), 0);
+    const income = transactions
+      .filter((tx) => tx.type === 'income')
+      .reduce((sum, tx) => sum + Number(tx.amount || 0), 0);
+    const byCategory = transactions.reduce((acc, tx) => {
+      if (tx.type === 'income') return acc;
+      const key = tx.category || '기타';
+      acc[key] = (acc[key] || 0) + Number(tx.amount || 0);
+      return acc;
+    }, {});
+    const topCategories = Object.entries(byCategory)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5);
+    return { expense, income, byCategory, topCategories };
+  }, [transactions]);
 
-  const totalSpent = Object.values(spendingByCategory).reduce((a, b) => a + b, 0);
+  const monthlyBudget = Number(budget?.monthlyBudget || 0);
+  const remaining = Math.max(0, monthlyBudget - stats.expense);
+  const budgetRate = monthlyBudget > 0 ? Math.min(100, Math.round((stats.expense / monthlyBudget) * 100)) : 0;
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: '#0B0F19',
-      color: '#F8FAFC',
-      display: 'flex',
-      flexDirection: 'column'
-    }}>
-      {/* ===================== [체육관 상단 컨트롤 바] ===================== */}
-      <header style={{
-        background: '#111827',
-        borderBottom: '1px solid #1F2937',
-        padding: '14px 28px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{
-            width: '36px',
-            height: '36px',
-            borderRadius: '10px',
-            background: 'linear-gradient(135deg, #F59E0B, #D97706)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}>
-            <Trophy size={20} color="#FFFFFF" />
-          </div>
+    <div className="sobimon-pc-shell">
+      <aside className="sobimon-pc-sidebar">
+        <div className="sobimon-pc-brand">
+          <div className="sobimon-pc-logo">S</div>
           <div>
-            <h1 style={{ fontSize: '17px', fontWeight: 900, margin: 0, color: '#FFFFFF', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span>SOBIMON 체육관 (Gym Professional Mode)</span>
-              <span style={{ fontSize: '10px', background: '#374151', padding: '2px 8px', borderRadius: '4px', color: '#9CA3AF' }}>PC 대화면</span>
-            </h1>
+            <strong>SOBIMON PC</strong>
+            <span>Finance Workspace</span>
           </div>
         </div>
 
-        {/* 우측 유저 프로필 & 모드 전환 버튼 */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          {/* 유저 요약 */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginRight: '8px' }}>
-            <span style={{ fontSize: '13px', fontWeight: 800, color: '#F3F4F6' }}>{user.name}</span>
-            <LevelBadge level={user.level} size="sm" />
-            <CoinBadge coins={user.coins} />
-          </div>
+        <nav className="sobimon-pc-nav" aria-label="PC 재무 메뉴">
+          <button className="active"><BarChart3 size={17} /> 대시보드</button>
+          <button><ReceiptText size={17} /> 거래내역</button>
+          <button><CalendarRange size={17} /> 월·연간 분석</button>
+          <button><WalletCards size={17} /> 예산 관리</button>
+          <button><FileSpreadsheet size={17} /> 세금·사업비 <span className="soon">준비중</span></button>
+        </nav>
 
-          {/* 체육관장(Admin) 집무실 입장 버튼 (관장 계정 또는 테스트 지원) */}
-          <button
-            onClick={onOpenAdminHQ}
-            style={{
-              background: 'linear-gradient(135deg, #F59E0B, #B45309)',
-              color: '#FFFFFF',
-              border: 'none',
-              borderRadius: '9999px',
-              padding: '8px 16px',
-              fontSize: '12px',
-              fontWeight: 900,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              boxShadow: '0 0 16px rgba(245, 158, 11, 0.4)'
-            }}
-          >
-            <Crown size={15} />
-            <span>체육관장 GM 스튜디오 🏛️</span>
-          </button>
-
-          {/* 스마트폰 뷰로 전환 */}
-          <button
-            onClick={onSwitchToPhoneView}
-            style={{
-              background: '#1F2937',
-              border: '1px solid #374151',
-              color: '#E5E7EB',
-              borderRadius: '9999px',
-              padding: '8px 14px',
-              fontSize: '12px',
-              fontWeight: 700,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px'
-            }}
-          >
-            <Smartphone size={14} />
-            <span>모바일 폰 뷰 전환</span>
-          </button>
+        <div className="sobimon-pc-sidebar-bottom">
+          <button onClick={onSwitchToPhoneView}><MonitorSmartphone size={17} /> 모바일 소비몬으로</button>
+          <button className="admin-link" onClick={onOpenAdminHQ}><Crown size={16} /> 운영 스튜디오</button>
         </div>
-      </header>
+      </aside>
 
-      {/* ===================== [체육관 3단 데스크톱 레이아웃] ===================== */}
-      <div style={{
-        flex: 1,
-        display: 'grid',
-        gridTemplateColumns: '280px 1fr 340px',
-        gap: '20px',
-        padding: '24px 28px',
-        maxWidth: '1600px',
-        margin: '0 auto',
-        width: '100%',
-        boxSizing: 'border-box'
-      }}>
-        
-        {/* [1열 - 좌측]: 자산 덱 & 계좌 인벤토리 */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <div style={{
-            background: '#111827',
-            border: '1px solid #1F2937',
-            borderRadius: '20px',
-            padding: '20px'
-          }}>
-            <h3 style={{ fontSize: '14px', fontWeight: 800, color: '#9CA3AF', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <CreditCard size={16} color="#38BDF8" /> <span>자산 덱 & 결제수단</span>
-            </h3>
-            
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {INITIAL_ACCOUNTS.map(acc => (
-                <div key={acc.id} style={{
-                  background: '#1F2937',
-                  borderRadius: '12px',
-                  padding: '12px 14px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  borderLeft: `4px solid ${acc.color}`
-                }}>
-                  <div>
-                    <div style={{ fontSize: '12px', fontWeight: 700, color: '#F3F4F6' }}>{acc.name}</div>
-                    <div style={{ fontSize: '10px', color: '#9CA3AF' }}>{acc.type === 'credit' ? '신용카드' : '체크/입출금'}</div>
-                  </div>
-                  <div style={{ fontSize: '13px', fontWeight: 900, color: acc.balance < 0 ? '#F87171' : '#34D399' }}>
-                    {acc.balance.toLocaleString()}원
-                  </div>
-                </div>
-              ))}
-            </div>
+      <main className="sobimon-pc-main">
+        <header className="sobimon-pc-header">
+          <div>
+            <p>내 돈을 한눈에 정리하는 공간</p>
+            <h1>{user?.name || '사용자'}님의 재무 대시보드</h1>
           </div>
-
-          {/* 월간 예산 상태 카드 */}
-          <div style={{
-            background: 'linear-gradient(135deg, #1E1B4B 0%, #111827 100%)',
-            border: '1px solid #312E81',
-            borderRadius: '20px',
-            padding: '20px'
-          }}>
-            <div style={{ fontSize: '12px', color: '#A5B4FC', fontWeight: 800, marginBottom: '6px' }}>
-              한 달 생활비 목표 예산 (HP)
-            </div>
-            <div style={{ fontSize: '24px', fontWeight: 900, color: '#FFFFFF', marginBottom: '8px' }}>
-              {(budget?.monthlyBudget || 1200000).toLocaleString()}원
-            </div>
-            <div style={{ fontSize: '11px', color: '#9CA3AF' }}>
-              현재 총 소비: <span style={{ color: '#F87171', fontWeight: 800 }}>{totalSpent.toLocaleString()}원</span>
-            </div>
+          <div className="sobimon-pc-header-actions">
+            <span className="sync-state">● {currentUser ? '클라우드 연결됨' : '로컬 모드'}</span>
+            <button className="pc-primary-action" onClick={onOpenQuickAdd}><Plus size={17} /> 거래 추가</button>
           </div>
-        </div>
+        </header>
 
-        {/* [2열 - 중앙]: 엑셀 정산 연구소 & 거래내역 테이블 */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <div style={{
-            background: '#111827',
-            border: '1px solid #1F2937',
-            borderRadius: '20px',
-            padding: '22px'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-              <h3 style={{ fontSize: '16px', fontWeight: 900, color: '#F9FAFB', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <FileSpreadsheet size={18} color="#10B981" />
-                <span>엑셀 정산 연구소 (거래내역 명세서)</span>
-              </h3>
-              <button
-                onClick={onOpenQuickAdd}
-                style={{
-                  background: '#2563EB',
-                  color: '#FFFFFF',
-                  border: 'none',
-                  borderRadius: '8px',
-                  padding: '6px 12px',
-                  fontSize: '11px',
-                  fontWeight: 800,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px'
-                }}
-              >
-                <Plus size={14} />
-                <span>지출 수기 등록</span>
-              </button>
+        <section className="pc-kpi-grid">
+          <article className="pc-kpi-card featured">
+            <div className="pc-kpi-label"><ArrowDownRight size={16} /> 이번 달 지출</div>
+            <strong>{formatWon(stats.expense)}</strong>
+            <span>예산의 {budgetRate}% 사용</span>
+          </article>
+          <article className="pc-kpi-card">
+            <div className="pc-kpi-label"><WalletCards size={16} /> 남은 예산</div>
+            <strong>{formatWon(remaining)}</strong>
+            <span>월 예산 {formatWon(monthlyBudget)}</span>
+          </article>
+          <article className="pc-kpi-card">
+            <div className="pc-kpi-label"><ArrowUpRight size={16} /> 이번 달 수입</div>
+            <strong>{formatWon(stats.income)}</strong>
+            <span>{transactions.filter((tx) => tx.type === 'income').length}건 기록</span>
+          </article>
+          <article className="pc-kpi-card">
+            <div className="pc-kpi-label"><ReceiptText size={16} /> 전체 거래</div>
+            <strong>{transactions.length.toLocaleString()}건</strong>
+            <span>모바일과 동일한 데이터</span>
+          </article>
+        </section>
+
+        <section className="pc-content-grid">
+          <div className="pc-panel pc-transactions-panel">
+            <div className="pc-panel-head">
+              <div>
+                <span className="pc-section-kicker">LEDGER</span>
+                <h2>최근 거래내역</h2>
+              </div>
+              <button>전체 보기 <ChevronRight size={15} /></button>
             </div>
 
-            {/* 거래내역 대형 테이블 */}
-            <div style={{ maxHeight: '520px', overflowY: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '12px' }}>
+            <div className="pc-table-wrap">
+              <table className="pc-ledger-table">
                 <thead>
-                  <tr style={{ background: '#1F2937', color: '#9CA3AF' }}>
-                    <th style={{ padding: '10px 14px' }}>날짜</th>
-                    <th style={{ padding: '10px 14px' }}>카테고리</th>
-                    <th style={{ padding: '10px 14px' }}>상호명 / 메모</th>
-                    <th style={{ padding: '10px 14px' }}>결제수단</th>
-                    <th style={{ padding: '10px 14px', textAlign: 'right' }}>금액</th>
+                  <tr>
+                    <th>날짜</th>
+                    <th>카테고리</th>
+                    <th>내용</th>
+                    <th>결제수단</th>
+                    <th>금액</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {transactions.slice(0, 15).map((tx, idx) => (
-                    <tr key={idx} style={{ borderBottom: '1px solid #1F2937' }}>
-                      <td style={{ padding: '10px 14px', color: '#9CA3AF' }}>{tx.date}</td>
-                      <td style={{ padding: '10px 14px' }}>
-                        <span style={{
-                          background: '#374151',
-                          padding: '2px 8px',
-                          borderRadius: '4px',
-                          fontSize: '11px',
-                          color: '#F3F4F6'
-                        }}>
-                          {tx.category}
-                        </span>
-                      </td>
-                      <td style={{ padding: '10px 14px', fontWeight: 700, color: '#F9FAFB' }}>{tx.title}</td>
-                      <td style={{ padding: '10px 14px', color: '#6B7280' }}>{tx.paymentMethod}</td>
-                      <td style={{
-                        padding: '10px 14px',
-                        textAlign: 'right',
-                        fontWeight: 900,
-                        color: tx.type === 'income' ? '#34D399' : '#F87171'
-                      }}>
-                        {tx.type === 'income' ? '+' : '-'}{Number(tx.amount).toLocaleString()}원
+                  {transactions.slice(0, 12).map((tx, index) => (
+                    <tr key={tx.id || `${tx.date}-${index}`}>
+                      <td>{tx.date || '-'}</td>
+                      <td><span className="pc-category-chip">{tx.category || '기타'}</span></td>
+                      <td><strong>{tx.title || tx.merchant || '거래'}</strong></td>
+                      <td>{tx.paymentMethod || '-'}</td>
+                      <td className={tx.type === 'income' ? 'income' : 'expense'}>
+                        {tx.type === 'income' ? '+' : '-'}{formatWon(tx.amount)}
                       </td>
                     </tr>
                   ))}
+                  {transactions.length === 0 && (
+                    <tr><td colSpan="5" className="pc-empty">모바일에서 소비를 기록하면 여기에 자동으로 모입니다.</td></tr>
+                  )}
                 </tbody>
               </table>
             </div>
           </div>
-        </div>
 
-        {/* [3열 - 우측]: 소비몬 홀로그램 도감 덱 */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <div style={{
-            background: '#111827',
-            border: '1px solid #1F2937',
-            borderRadius: '20px',
-            padding: '20px'
-          }}>
-            <h3 style={{ fontSize: '14px', fontWeight: 800, color: '#9CA3AF', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Sparkles size={16} color="#F59E0B" /> <span>소비몬 카드 덱 ({sobimons.length}종)</span>
-            </h3>
+          <div className="pc-side-stack">
+            <div className="pc-panel">
+              <div className="pc-panel-head compact">
+                <div>
+                  <span className="pc-section-kicker">SPENDING</span>
+                  <h2>카테고리 지출</h2>
+                </div>
+              </div>
+              <div className="pc-category-list">
+                {stats.topCategories.map(([name, amount]) => {
+                  const rate = stats.expense > 0 ? Math.round((amount / stats.expense) * 100) : 0;
+                  return (
+                    <div className="pc-category-row" key={name}>
+                      <div><strong>{name}</strong><span>{rate}%</span></div>
+                      <div className="pc-category-track"><span style={{ width: `${rate}%` }} /></div>
+                      <em>{formatWon(amount)}</em>
+                    </div>
+                  );
+                })}
+                {stats.topCategories.length === 0 && <div className="pc-empty-card">분석할 지출 데이터가 아직 없습니다.</div>}
+              </div>
+            </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-              {sobimons.slice(0, 6).map(m => (
-                <div
-                  key={m.id}
-                  onClick={() => setSelectedMonster(m)}
-                  style={{
-                    background: '#1F2937',
-                    border: '1px solid #374151',
-                    borderRadius: '12px',
-                    padding: '12px',
-                    cursor: 'pointer',
-                    textAlign: 'center',
-                    transition: 'transform 0.15s ease'
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
-                  onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
-                >
-                  <div style={{ fontSize: '24px', marginBottom: '4px' }}>{m.badge}</div>
-                  <div style={{ fontSize: '12px', fontWeight: 800, color: '#F9FAFB' }}>{m.name}</div>
-                  <div style={{ fontSize: '10px', color: '#9CA3AF' }}>Lv.{m.level}</div>
+            <div className="pc-panel pc-sobimon-insight">
+              <div className="pc-panel-head compact">
+                <div>
+                  <span className="pc-section-kicker">SOBIMON INSIGHT</span>
+                  <h2>내 소비몬</h2>
+                </div>
+                <Sparkles size={18} />
+              </div>
+              <p>소비몬은 재미를 담당하고, PC에서는 데이터가 중심이 됩니다.</p>
+              <div className="pc-monster-strip">
+                {sobimons.filter((m) => m.discovered !== false).slice(0, 4).map((monster) => (
+                  <button key={monster.id} onClick={() => setSelectedMonster(monster)}>
+                    <span>{monster.badge || '👾'}</span>
+                    <strong>{monster.name}</strong>
+                    <small>Lv.{monster.level || 1}</small>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="pc-panel pc-account-panel">
+              <div className="pc-panel-head compact"><h2>결제수단</h2><CreditCard size={18} /></div>
+              {INITIAL_ACCOUNTS.slice(0, 3).map((account) => (
+                <div className="pc-account-row" key={account.id}>
+                  <div><span className="pc-account-dot" style={{ background: account.color }} /><strong>{account.name}</strong></div>
+                  <span>{formatWon(account.balance)}</span>
                 </div>
               ))}
             </div>
           </div>
-        </div>
+        </section>
+      </main>
 
-      </div>
-
-      {/* 카드 모달 */}
       {selectedMonster && (
         <SobimonHoloCardModal
           isOpen={Boolean(selectedMonster)}
