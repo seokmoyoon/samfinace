@@ -1,84 +1,73 @@
-import React, { useState } from 'react';
-import { 
-  ChevronRight, 
-  Plus, 
-  Bell, 
-  Award,
-  Sparkles,
-  TrendingDown
-} from 'lucide-react';
+import React from 'react';
+import { ChevronRight, Plus } from 'lucide-react';
 
-import { 
-  FairytaleHeroBackground, 
-  SobimonMascot, 
-  CafeMonsterIllustration, 
-  FoodMonsterIllustration, 
-  ShopMonsterIllustration,
-  SaverMonsterIllustration
+import {
+  FairytaleHeroBackground,
+  SobimonMascot,
+  CafeMonsterIllustration,
+  FoodMonsterIllustration,
+  ShopMonsterIllustration
 } from './common/SobimonIllustrations';
 
-export default function HomeTab({ 
-  user, 
-  budget, 
-  transactions, 
-  quests = [], 
+const getCurrentMonthKey = () => new Date().toLocaleDateString('sv-SE').slice(0, 7);
+
+export default function HomeTab({
+  user,
+  budget,
+  transactions = [],
+  quests = [],
   sobimons = [],
   onNavigateTab,
-  onOpenQuickAdd,
-  onClaimReward,
-  onOpenGymArena
+  onOpenQuickAdd
 }) {
-  // 이번 달 소비 총액 계산 (수입 제외)
-  const totalSpent = transactions
-    .filter(t => t.type !== 'income')
-    .reduce((acc, cur) => acc + cur.amount, 0);
+  const currentMonthKey = getCurrentMonthKey();
+  const monthlyExpenses = transactions.filter((t) =>
+    t?.type !== 'income' && String(t?.date || '').startsWith(currentMonthKey)
+  );
 
-  // 시안 기준 기본값 매핑 (데이터가 비어있거나 초기일 때 시안 값 지원)
-  const displaySpent = totalSpent > 0 ? totalSpent : 1284000;
-  const targetBudget = budget?.monthlyBudget > 0 ? budget.monthlyBudget : 1800000;
-  const spentPercent = Math.min(100, Math.round((displaySpent / targetBudget) * 100));
-  const remainingBudget = Math.max(0, targetBudget - displaySpent);
+  const displaySpent = monthlyExpenses.reduce((sum, tx) => sum + Number(tx?.amount || 0), 0);
+  const targetBudget = Number(budget?.monthlyBudget || 0);
+  const hasBudget = targetBudget > 0;
+  const spentPercent = hasBudget
+    ? Math.min(100, Math.round((displaySpent / targetBudget) * 100))
+    : 0;
+  const remainingBudget = hasBudget ? Math.max(0, targetBudget - displaySpent) : 0;
 
-  // 캐릭터 동적 말풍선 대사 생성 (소비 상태에 스마트 반응)
-  let speechText = '이번 달도 잘하고 있어요!';
-  if (spentPercent > 80) {
+  let speechText = '첫 소비를 기록해보세요!';
+  if (!hasBudget) {
+    speechText = '이번 달 예산을 설정해보세요!';
+  } else if (displaySpent > 0 && spentPercent > 80) {
     speechText = '예산의 80%를 넘었어요! 절약 모드 가동!';
-  } else if (spentPercent < 50) {
+  } else if (displaySpent > 0) {
     speechText = '이번 달도 잘하고 있어요!';
   }
 
-  // 이번 달 발견한 소비몬들 (최대 3마리)
-  const discoveredMonsters = sobimons.filter(m => m.discovered).slice(0, 3);
+  const discoveredMonsters = sobimons.filter((m) => m?.discovered).slice(0, 3);
+  const discoveredCount = sobimons.filter((m) => m?.discovered).length;
+  const cafeMission = quests.find((q) => q?.category?.includes('카페') || q?.title?.includes('카페')) || quests[0] || null;
+  const missionTarget = Number(cafeMission?.target || 0);
+  const missionCurrent = Number(cafeMission?.current || 0);
+  const missionPercent = cafeMission && missionTarget > 0
+    ? Math.min(100, Math.round((missionCurrent / missionTarget) * 100))
+    : 0;
 
-  // 오늘의 대표 미션 (카페 소비 또는 첫 번째 일일 미션)
-  const cafeMission = quests.find(q => q.category?.includes('카페') || q.title?.includes('카페')) || quests[0] || {
-    id: 'm_cafe_demo',
-    title: '카페 소비 10,000원 이하',
-    current: 7000,
-    target: 10000,
-    rewardExp: 50,
-    rewardCoin: 10,
-    status: 'progress'
-  };
-
-  const missionPercent = Math.min(100, Math.round((cafeMission.current / cafeMission.target) * 100));
+  const monsterSlots = [
+    { key: 'food', bg: '#ECFDF5', border: '#A7F3D0', shadow: 'rgba(16, 185, 129, 0.1)', node: <FoodMonsterIllustration size={38} /> },
+    { key: 'cafe', bg: '#EFF6FF', border: '#BFDBFE', shadow: 'rgba(59, 130, 246, 0.1)', node: <CafeMonsterIllustration size={38} /> },
+    { key: 'shop', bg: '#FFF1F2', border: '#FECDD3', shadow: 'rgba(244, 63, 94, 0.1)', node: <ShopMonsterIllustration size={38} /> }
+  ];
 
   return (
     <div className="home-screen-sobimon" style={{ paddingBottom: '16px' }}>
-      
-      {/* 1. 첨부 이미지와 동일한 1번 전체 배경 (프로필 + 성 + 2번 캐릭터 + 말풍선 통합) */}
-      <FairytaleHeroBackground 
+      <FairytaleHeroBackground
         user={user}
         speech={speechText}
         onMascotClick={() => {}}
       />
 
-      {/* 2~7. 메인 대시보드 카드 영역 (모바일/PC폰목업: 1열 스택 / 아이패드 태블릿: 2열 대시보드) */}
       <div className="home-dashboard-grid">
-        {/* 좌측 그리드: 이번 달 소비 카드 + 풍경 데코 */}
         <div className="home-grid-left">
-          {/* 2. 이번 달 소비 카드 (시안 메인 금융 카드 - 1번 배경과 자연스럽게 오버랩) */}
-          <div 
+          <div
             className="sobimon-card home-spending-card"
             onClick={() => onNavigateTab && onNavigateTab('spending')}
             style={{ cursor: 'pointer', position: 'relative', zIndex: 15 }}
@@ -97,13 +86,13 @@ export default function HomeTab({
               </div>
               <div style={{
                 fontSize: '11px',
-                color: '#64748B',
+                color: hasBudget ? '#64748B' : '#2563EB',
                 fontWeight: 700,
                 background: '#F1F5F9',
                 padding: '3px 8px',
                 borderRadius: '9999px'
               }}>
-                예산 {targetBudget.toLocaleString()}
+                {hasBudget ? `예산 ${targetBudget.toLocaleString()}` : '예산 설정 필요'}
               </div>
             </div>
 
@@ -124,7 +113,7 @@ export default function HomeTab({
                 }} />
               </div>
               <span style={{ fontSize: '12px', fontWeight: 800, color: '#0284C7', minWidth: '32px', textAlign: 'right' }}>
-                {spentPercent}%
+                {hasBudget ? `${spentPercent}%` : '-'}
               </span>
             </div>
 
@@ -137,7 +126,9 @@ export default function HomeTab({
               fontSize: '12px'
             }}>
               <span style={{ color: '#64748B', fontWeight: 600 }}>남은 소비 가능 금액</span>
-              <span style={{ color: '#0F172A', fontWeight: 900 }}>₩ {remainingBudget.toLocaleString()}</span>
+              <span style={{ color: '#0F172A', fontWeight: 900 }}>
+                {hasBudget ? `₩ ${remainingBudget.toLocaleString()}` : '-'}
+              </span>
             </div>
           </div>
 
@@ -182,7 +173,7 @@ export default function HomeTab({
         </div>
 
         <div className="home-grid-right">
-          <div 
+          <div
             className="sobimon-card home-monsters-card"
             onClick={() => onNavigateTab && onNavigateTab('dex')}
             style={{ cursor: 'pointer' }}
@@ -190,83 +181,40 @@ export default function HomeTab({
             <div className="sobimon-card-header">
               <div className="sobimon-card-title">
                 <div style={{
-                  width: '24px',
-                  height: '24px',
-                  borderRadius: '50%',
-                  background: '#EFF6FF',
-                  border: '1.5px solid #3B82F6',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  overflow: 'hidden'
+                  width: '24px', height: '24px', borderRadius: '50%', background: '#EFF6FF',
+                  border: '1.5px solid #3B82F6', display: 'flex', alignItems: 'center',
+                  justifyContent: 'center', overflow: 'hidden'
                 }}>
                   <SobimonMascot size={22} emotion="joy" />
                 </div>
-                <span>이번 달에 발견한 소비몬 <strong style={{ color: '#2563EB' }}>3마리</strong></span>
+                <span>발견한 소비몬 <strong style={{ color: '#2563EB' }}>{discoveredCount}마리</strong></span>
               </div>
               <ChevronRight size={16} color="#94A3B8" />
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <div style={{
-                  width: '46px',
-                  height: '46px',
-                  borderRadius: '14px',
-                  background: '#ECFDF5',
-                  border: '1px solid #A7F3D0',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  boxShadow: '0 2px 6px rgba(16, 185, 129, 0.1)'
-                }}>
-                  <FoodMonsterIllustration size={38} />
-                </div>
-
-                <div style={{
-                  width: '46px',
-                  height: '46px',
-                  borderRadius: '14px',
-                  background: '#EFF6FF',
-                  border: '1px solid #BFDBFE',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  boxShadow: '0 2px 6px rgba(59, 130, 246, 0.1)'
-                }}>
-                  <CafeMonsterIllustration size={38} />
-                </div>
-
-                <div style={{
-                  width: '46px',
-                  height: '46px',
-                  borderRadius: '14px',
-                  background: '#FFF1F2',
-                  border: '1px solid #FECDD3',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  boxShadow: '0 2px 6px rgba(244, 63, 94, 0.1)'
-                }}>
-                  <ShopMonsterIllustration size={38} />
-                </div>
+                {discoveredMonsters.length > 0 ? monsterSlots.slice(0, discoveredMonsters.length).map((slot) => (
+                  <div key={slot.key} style={{
+                    width: '46px', height: '46px', borderRadius: '14px', background: slot.bg,
+                    border: `1px solid ${slot.border}`, display: 'flex', alignItems: 'center',
+                    justifyContent: 'center', boxShadow: `0 2px 6px ${slot.shadow}`
+                  }}>
+                    {slot.node}
+                  </div>
+                )) : (
+                  <span style={{ fontSize: '12px', color: '#94A3B8', fontWeight: 700 }}>아직 발견한 소비몬이 없어요.</span>
+                )}
               </div>
 
-              <button 
+              <button
                 onClick={(e) => {
                   e.stopPropagation();
                   onNavigateTab && onNavigateTab('dex');
                 }}
                 style={{
-                  padding: '8px 14px',
-                  background: '#EFF6FF',
-                  color: '#2563EB',
-                  border: '1px solid #BFDBFE',
-                  borderRadius: '10px',
-                  fontSize: '12px',
-                  fontWeight: 800,
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease'
+                  padding: '8px 14px', background: '#EFF6FF', color: '#2563EB', border: '1px solid #BFDBFE',
+                  borderRadius: '10px', fontSize: '12px', fontWeight: 800, cursor: 'pointer'
                 }}
               >
                 도감 보기
@@ -280,103 +228,65 @@ export default function HomeTab({
                 <span style={{ color: '#F59E0B', fontSize: '15px' }}>🏆</span>
                 <span>오늘의 미션</span>
               </div>
-              <button 
+              <button
                 onClick={() => onNavigateTab && onNavigateTab('missions')}
                 style={{
-                  background: 'transparent',
-                  border: 'none',
-                  fontSize: '11px',
-                  color: '#94A3B8',
-                  fontWeight: 700,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '2px',
-                  cursor: 'pointer'
+                  background: 'transparent', border: 'none', fontSize: '11px', color: '#94A3B8',
+                  fontWeight: 700, display: 'flex', alignItems: 'center', gap: '2px', cursor: 'pointer'
                 }}
               >
                 더보기 <ChevronRight size={14} />
               </button>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: '13px', fontWeight: 800, color: '#1E293B', marginBottom: '8px' }}>
-                  {cafeMission.title}
+            {cafeMission ? (
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: '13px', fontWeight: 800, color: '#1E293B', marginBottom: '8px' }}>
+                    {cafeMission.title}
+                  </div>
+
+                  <div style={{ width: '100%', height: '7px', background: '#F1F5F9', borderRadius: '9999px', overflow: 'hidden', marginBottom: '6px' }}>
+                    <div style={{
+                      width: `${missionPercent}%`, height: '100%', background: 'linear-gradient(90deg, #F59E0B, #FBBF24)',
+                      borderRadius: '9999px'
+                    }} />
+                  </div>
+
+                  <div style={{ fontSize: '11px', color: '#64748B', fontWeight: 700, marginBottom: '8px' }}>
+                    ₩ {missionCurrent.toLocaleString()} / {missionTarget.toLocaleString()}
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ display: 'inline-flex', background: '#FEF3C7', color: '#B45309', fontSize: '10px', fontWeight: 800, padding: '2px 7px', borderRadius: '9999px' }}>
+                      ⭐ +{Number(cafeMission.rewardExp || 0)} EXP
+                    </span>
+                    <span style={{ display: 'inline-flex', background: '#FEF3C7', color: '#B45309', fontSize: '10px', fontWeight: 800, padding: '2px 7px', borderRadius: '9999px' }}>
+                      🪙 +{Number(cafeMission.rewardCoin || 0)} COIN
+                    </span>
+                  </div>
                 </div>
 
-                <div style={{
-                  width: '100%',
-                  height: '7px',
-                  background: '#F1F5F9',
-                  borderRadius: '9999px',
-                  overflow: 'hidden',
-                  marginBottom: '6px'
-                }}>
-                  <div style={{
-                    width: `${missionPercent}%`,
-                    height: '100%',
-                    background: 'linear-gradient(90deg, #F59E0B, #FBBF24)',
-                    borderRadius: '9999px'
-                  }} />
-                </div>
-
-                <div style={{ fontSize: '11px', color: '#64748B', fontWeight: 700, marginBottom: '8px' }}>
-                  ₩ {cafeMission.current?.toLocaleString()} / {cafeMission.target?.toLocaleString()}
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '3px',
-                    background: '#FEF3C7',
-                    color: '#B45309',
-                    fontSize: '10px',
-                    fontWeight: 800,
-                    padding: '2px 7px',
-                    borderRadius: '9999px'
-                  }}>
-                    ⭐ +{cafeMission.rewardExp} EXP
-                  </span>
-                  <span style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '3px',
-                    background: '#FEF3C7',
-                    color: '#B45309',
-                    fontSize: '10px',
-                    fontWeight: 800,
-                    padding: '2px 7px',
-                    borderRadius: '9999px'
-                  }}>
-                    🪙 +{cafeMission.rewardCoin || 10} COIN
-                  </span>
+                <div style={{ width: '64px', height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <CafeMonsterIllustration size={60} />
                 </div>
               </div>
-
-              <div style={{
-                width: '64px',
-                height: '64px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0
-              }}>
-                <CafeMonsterIllustration size={60} />
+            ) : (
+              <div style={{ padding: '10px 0 4px', fontSize: '12px', color: '#94A3B8', fontWeight: 700 }}>
+                아직 진행 중인 미션이 없어요.
               </div>
-            </div>
+            )}
           </div>
 
-          <button 
+          <button
             className="sobimon-main-cta-btn home-cta-btn"
-            onClick={() => onOpenQuickAdd && onOpenQuickAdd('2026-09-07')}
+            onClick={() => onOpenQuickAdd && onOpenQuickAdd()}
           >
             <Plus size={20} strokeWidth={3} />
             <span>소비 기록하기</span>
           </button>
         </div>
       </div>
-
     </div>
   );
 }
