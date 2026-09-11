@@ -1,29 +1,29 @@
 import React, { useState } from 'react';
-import { 
-  ChevronRight, 
-  Plus, 
-  Bell, 
+import {
+  ChevronRight,
+  Plus,
+  Bell,
   Award,
   Sparkles,
   TrendingDown
 } from 'lucide-react';
 
-import { 
-  FairytaleHeroBackground, 
-  SobimonMascot, 
-  CafeMonsterIllustration, 
-  FoodMonsterIllustration, 
+import {
+  FairytaleHeroBackground,
+  SobimonMascot,
+  CafeMonsterIllustration,
+  FoodMonsterIllustration,
   ShopMonsterIllustration,
   SaverMonsterIllustration
 } from './common/SobimonIllustrations';
 import { geminiAiService } from '../services/geminiAiService';
 
 
-export default function HomeTab({ 
-  user, 
-  budget, 
-  transactions, 
-  quests = [], 
+export default function HomeTab({
+  user,
+  budget,
+  transactions,
+  quests = [],
   sobimons = [],
   onNavigateTab,
   onOpenQuickAdd,
@@ -76,9 +76,9 @@ export default function HomeTab({
 
   return (
     <div className="home-screen-sobimon" style={{ paddingBottom: '16px' }}>
-      
+
       {/* 1. 첨부 이미지와 동일한 1번 전체 배경 (프로필 + 성 + 2번 캐릭터 + 말풍선 통합) */}
-      <FairytaleHeroBackground 
+      <FairytaleHeroBackground
         user={user}
         speech={speechText}
         onMascotClick={onOpenAIChat}
@@ -89,7 +89,7 @@ export default function HomeTab({
         {/* 좌측 그리드: 이번 달 소비 카드 + 풍경 데코 */}
         <div className="home-grid-left">
           {/* 2. 이번 달 소비 카드 (시안 메인 금융 카드 - 1번 배경과 자연스럽게 오버랩) */}
-          <div 
+          <div
             className="sobimon-card home-spending-card"
             onClick={() => onNavigateTab && onNavigateTab('spending')}
             style={{ cursor: 'pointer', position: 'relative', zIndex: 15 }}
@@ -200,7 +200,7 @@ export default function HomeTab({
         {/* 우측 그리드: 발견한 소비몬 + 오늘의 미션 + CTA 버튼 */}
         <div className="home-grid-right">
           {/* 4. 이번 달에 발견한 소비몬 카드 */}
-          <div 
+          <div
             className="sobimon-card home-monsters-card"
             onClick={() => onNavigateTab && onNavigateTab('dex')}
             style={{ cursor: 'pointer' }}
@@ -275,7 +275,7 @@ export default function HomeTab({
               </div>
 
               {/* 도감 보기 버튼 */}
-              <button 
+              <button
                 onClick={(e) => {
                   e.stopPropagation();
                   onNavigateTab && onNavigateTab('dex');
@@ -304,7 +304,7 @@ export default function HomeTab({
                 <span style={{ color: '#F59E0B', fontSize: '15px' }}>🏆</span>
                 <span>오늘의 미션</span>
               </div>
-              <button 
+              <button
                 onClick={() => onNavigateTab && onNavigateTab('missions')}
                 style={{
                   background: 'transparent',
@@ -396,7 +396,7 @@ export default function HomeTab({
           </div>
 
           {/* 6. 시안의 메인 CTA: + 소비 기록하기 버튼 */}
-          <button 
+          <button
             className="sobimon-main-cta-btn home-cta-btn"
             onClick={() => onOpenQuickAdd && onOpenQuickAdd('2026-09-07')}
           >

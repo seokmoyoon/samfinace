@@ -88,8 +88,8 @@ export default function SobimonAIChatModal({
   };
 
   return (
-    <div 
-      className="modal-overlay" 
+    <div
+      className="modal-overlay"
       onClick={onClose}
       style={{
         position: 'fixed',
@@ -106,7 +106,7 @@ export default function SobimonAIChatModal({
         padding: '16px'
       }}
     >
-      <div 
+      <div
         className="modal-content"
         onClick={e => e.stopPropagation()}
         style={{
@@ -168,7 +168,7 @@ export default function SobimonAIChatModal({
             </div>
           </div>
 
-          <button 
+          <button
             onClick={onClose}
             style={{
               background: 'rgba(255, 255, 255, 0.2)',
@@ -200,7 +200,7 @@ export default function SobimonAIChatModal({
           {messages.map((m, idx) => {
             const isUser = m.role === 'user';
             return (
-              <div 
+              <div
                 key={idx}
                 style={{
                   display: 'flex',
@@ -230,14 +230,14 @@ export default function SobimonAIChatModal({
                   maxWidth: '78%',
                   padding: '12px 16px',
                   borderRadius: isUser ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
-                  background: isUser 
-                    ? 'linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%)' 
+                  background: isUser
+                    ? 'linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%)'
                     : '#FFFFFF',
                   color: isUser ? '#FFFFFF' : '#1E293B',
                   fontSize: '13.5px',
                   lineHeight: '1.55',
-                  boxShadow: isUser 
-                    ? '0 4px 12px rgba(37, 99, 235, 0.25)' 
+                  boxShadow: isUser
+                    ? '0 4px 12px rgba(37, 99, 235, 0.25)'
                     : '0 2px 8px rgba(15, 23, 42, 0.06)',
                   border: isUser ? 'none' : '1px solid #E2E8F0',
                   whiteSpace: 'pre-wrap',
@@ -322,7 +322,7 @@ export default function SobimonAIChatModal({
           alignItems: 'center',
           gap: '8px'
         }}>
-          <input 
+          <input
             type="text"
             placeholder="소비몬에게 가계부나 절약에 대해 물어보세요..."
             value={inputText}

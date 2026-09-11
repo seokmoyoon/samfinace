@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Home, 
-  CreditCard, 
-  Plus, 
-  BookOpen, 
-  User, 
+import {
+  Home,
+  CreditCard,
+  Plus,
+  BookOpen,
+  User,
   Zap,
   Crown,
   Monitor,
@@ -22,20 +22,20 @@ import GymLeaderDashboard from './components/pc/admin/GymLeaderDashboard';
 import GymModePC from './components/pc/GymModePC';
 import SobimonAIChatModal from './components/common/SobimonAIChatModal';
 
-import { 
-  INITIAL_USER, 
-  INITIAL_BUDGET, 
-  INITIAL_QUESTS, 
-  INITIAL_BADGES, 
-  INITIAL_TRANSACTIONS, 
-  INITIAL_SOBIMONS 
+import {
+  INITIAL_USER,
+  INITIAL_BUDGET,
+  INITIAL_QUESTS,
+  INITIAL_BADGES,
+  INITIAL_TRANSACTIONS,
+  INITIAL_SOBIMONS
 } from './data/mockData';
 
-import { 
-  loadFromStorage, 
-  saveToStorage, 
-  clearAllSobimonStorage, 
-  STORAGE_KEYS 
+import {
+  loadFromStorage,
+  saveToStorage,
+  clearAllSobimonStorage,
+  STORAGE_KEYS
 } from './utils/storage';
 
 import { authService } from './services/authService';
@@ -344,9 +344,9 @@ export default function App() {
   // 1. 체육관장 GM 스튜디오 대시보드 (Admin 전용 모드)
   if (isGymLeaderDashboardOpen) {
     return (
-      <GymLeaderDashboard 
-        currentUser={currentUser} 
-        onBackToGame={() => setIsGymLeaderDashboardOpen(false)} 
+      <GymLeaderDashboard
+        currentUser={currentUser}
+        onBackToGame={() => setIsGymLeaderDashboardOpen(false)}
       />
     );
   }
@@ -398,7 +398,7 @@ export default function App() {
             <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '16px' }}>
               축하합니다! 새로운 소비몬과의 탐험 레벨이 올랐습니다.
             </p>
-            <button 
+            <button
               className="btn-primary"
               onClick={() => setLevelUpModal(null)}
               style={{ padding: '12px', fontSize: '13px' }}
@@ -436,7 +436,7 @@ export default function App() {
         {/* 본문 스크린 (4대 탭) */}
         <div className="screen-content">
           {activeTab === 'home' && (
-            <HomeTab 
+            <HomeTab
               user={user}
               budget={budget}
               transactions={transactions}
@@ -451,7 +451,7 @@ export default function App() {
           )}
 
           {activeTab === 'spending' && (
-            <SpendingTab 
+            <SpendingTab
               transactions={transactions}
               budget={budget}
               currentUser={currentUser}
@@ -464,14 +464,14 @@ export default function App() {
           )}
 
           {activeTab === 'dex' && (
-            <SobimonDexTab 
+            <SobimonDexTab
               user={user}
               sobimons={sobimons}
             />
           )}
 
           {activeTab === 'my' && (
-            <MyTab 
+            <MyTab
               user={user}
               badges={badges}
               currentUser={currentUser}
@@ -488,7 +488,7 @@ export default function App() {
 
         {/* 하단 고정 내비게이션 바: 홈 / 소비 / + (소비입력 FAB) / 도감 / MY */}
         <div className="bottom-nav">
-          <button 
+          <button
             className={`nav-item ${activeTab === 'home' ? 'active' : ''}`}
             onClick={() => setActiveTab('home')}
           >
@@ -498,7 +498,7 @@ export default function App() {
             <span>홈</span>
           </button>
 
-          <button 
+          <button
             className={`nav-item ${activeTab === 'spending' ? 'active' : ''}`}
             onClick={() => setActiveTab('spending')}
           >
@@ -509,7 +509,7 @@ export default function App() {
           </button>
 
           {/* 중앙 + 플로팅 소비입력 버튼 */}
-          <button 
+          <button
             className="nav-item nav-add-fab"
             onClick={() => handleOpenQuickAdd(new Date().toISOString().slice(0, 10))}
             title="소비 내역 빠른 추가"
@@ -520,7 +520,7 @@ export default function App() {
             <span>소비입력</span>
           </button>
 
-          <button 
+          <button
             className={`nav-item ${activeTab === 'dex' ? 'active' : ''}`}
             onClick={() => setActiveTab('dex')}
           >
@@ -530,7 +530,7 @@ export default function App() {
             <span>도감</span>
           </button>
 
-          <button 
+          <button
             className={`nav-item ${activeTab === 'my' ? 'active' : ''}`}
             onClick={() => setActiveTab('my')}
           >
@@ -542,7 +542,7 @@ export default function App() {
         </div>
 
         {/* 직접 수기 추가 모달 */}
-        <QuickAddModal 
+        <QuickAddModal
           isOpen={isQuickAddOpen}
           onClose={() => setIsQuickAddOpen(false)}
           onSave={handleAddTransaction}
@@ -550,7 +550,7 @@ export default function App() {
         />
 
         {/* 캐릭터 AI 재정 코칭 대화 모달 */}
-        <SobimonAIChatModal 
+        <SobimonAIChatModal
           isOpen={isAIChatOpen}
           onClose={() => setIsAIChatOpen(false)}
           user={user}
@@ -559,7 +559,7 @@ export default function App() {
         />
 
         {/* 클라우드 로그인 / 회원가입 모달 */}
-        <AuthModal 
+        <AuthModal
           isOpen={isAuthModalOpen}
           onClose={() => {
             setIsAuthModalOpen(false);
@@ -578,7 +578,7 @@ export default function App() {
         />
 
         {/* 체육관 관장 배틀 아레나 모달 (모바일/태블릿) */}
-        <GymArenaModal 
+        <GymArenaModal
           isOpen={isGymArenaOpen}
           onClose={() => setIsGymArenaOpen(false)}
           budget={budget}
