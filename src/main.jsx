@@ -6,6 +6,7 @@ import './index.css'
 import './mobile-refresh.css'
 import './commercial-refresh.css'
 import './product-v2.css'
+import './home-background-refresh.css'
 
 const root = ReactDOM.createRoot(document.getElementById('root'))
 root.render(
