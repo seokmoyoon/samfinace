@@ -1,0 +1,94 @@
+/* SOBIMON home landscape continuity
+ * Replace public/images/sobimon/bottom-bridge.png with your own bridge artwork.
+ * Recommended artwork: transparent PNG/WebP or a sky-blue landscape whose top edge matches #67CFF5.
+ */
+
+:root {
+  --sobimon-home-sky: #67CFF5;
+  --sobimon-home-sky-soft: #8EDDF8;
+}
+
+.home-screen-sobimon {
+  position: relative;
+  isolation: isolate;
+  background:
+    linear-gradient(
+      180deg,
+      var(--sobimon-home-sky) 0%,
+      var(--sobimon-home-sky-soft) 48%,
+      var(--sobimon-home-sky) 100%
+    );
+  overflow: hidden;
+}
+
+/* Keep the center section on the same sky so the hero and lower landscape feel continuous. */
+.home-dashboard-grid,
+.home-grid-left,
+.home-grid-right {
+  background: transparent !important;
+}
+
+/* Lower bridge artwork slot. */
+.home-scenery-deco {
+  position: relative !important;
+  width: 100%;
+  min-height: 150px !important;
+  height: clamp(150px, 38vw, 210px) !important;
+  margin-top: -2px;
+  overflow: hidden;
+  border-radius: 0 !important;
+  background: var(--sobimon-home-sky) !important;
+}
+
+.home-scenery-deco > img {
+  display: block !important;
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: center top !important;
+  z-index: 2;
+}
+
+/* Existing vector fallback is hidden when the custom bridge image is available. */
+.home-scenery-deco > svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Soft blend at the top of the bridge area prevents a visible horizontal seam. */
+.home-scenery-deco::before {
+  content: '';
+  position: absolute;
+  z-index: 3;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 34px;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    var(--sobimon-home-sky) 0%,
+    rgba(103, 207, 245, 0.72) 28%,
+    rgba(103, 207, 245, 0) 100%
+  );
+}
+
+/* The lower part behind the record button and landscape remains sky blue. */
+.home-screen-sobimon .home-grid-left:last-child,
+.home-screen-sobimon .home-grid-right:last-child {
+  background: transparent !important;
+}
+
+@media (max-width: 430px) {
+  .home-scenery-deco {
+    min-height: 165px !important;
+    height: 165px !important;
+  }
+}
